@@ -1,16 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <group
-        android:scaleX="2.6"
-        android:scaleY="2.6"
-        android:translateX="22.8"
-        android:translateY="22.8">
-        <path
-            android:fillColor="#EBECD0"
-            android:pathData="M5,21 L19,21 L19,18.5 L17.5,18.5 C18,14 17.5,9.5 14.5,6.5 L15,3.5 L12.2,5.2 C11,4.8 9.5,4.9 8.2,5.5 L4.5,9.2 C3.8,9.9 4.1,11.2 5,11.6 L7.8,12.8 C8.6,13.1 9.5,12.7 10,12 L11.2,10.6 C11.4,12.2 10.5,14 8.5,15.5 C7.2,16.5 6.5,17.5 6.5,18.5 L5,18.5 Z" />
-    </group>
-</vector>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:width="66dp"
+        android:height="66dp"
+        android:drawable="@drawable/queen_launcher_icon_1795182713338"
+        android:gravity="center" />
+</layer-list>
