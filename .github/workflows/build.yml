@@ -23,24 +23,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Capacitor 6 & Generate Android Project
+      - name: Setup Capacitor 6 & Sync Android Project
         run: |
           rm -rf android capacitor.config.ts capacitor.config.json package.json package-lock.json
           npm init -y
           npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
           npx cap init "Rookie Chess" "com.rookie.chess" --web-dir www
           npx cap add android
-          if [ -d app/src/main/res/drawable ]; then
-            mkdir -p android/app/src/main/res/drawable
-            cp -f app/src/main/res/drawable/* android/app/src/main/res/drawable/
-          fi
-          for dir in app/src/main/res/mipmap-*; do
-            if [ -d "$dir" ]; then
-              base=$(basename "$dir")
-              mkdir -p "android/app/src/main/res/$base"
-              cp -f "$dir"/* "android/app/src/main/res/$base/"
-            fi
-          done
           npx cap sync android
 
       - name: Increment Android Version Code & Version Name

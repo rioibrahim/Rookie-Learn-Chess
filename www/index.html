@@ -112,8 +112,8 @@ button{
   -webkit-user-select:none;
 }
 button svg,.ico{
-  width:18px;
-  height:18px;
+  width:21px;
+  height:21px;
   flex:0 0 auto;
   display:block;
 }
@@ -135,7 +135,7 @@ button:disabled{opacity:.4;cursor:default}
   padding:0;
   border-radius:12px;
 }
-.icon-btn svg{width:20px;height:20px}
+.icon-btn svg{width:22px;height:22px}
 
 /* Compact Top Header + Dropdown Trigger */
 header#hdr{
@@ -222,8 +222,6 @@ header#hdr{
   inset:0;
   z-index:45;
   background:rgba(0,0,0,.46);
-  backdrop-filter:blur(2px);
-  -webkit-backdrop-filter:blur(2px);
 }
 #menu-pop{
   position:fixed;
@@ -442,8 +440,6 @@ main{
   border-radius:10px;
   overflow:hidden;
   border:1.5px solid var(--bd);
-  box-shadow:var(--shadow);
-  transform:translateZ(0);
 }
 .sq{
   position:relative;
@@ -452,6 +448,7 @@ main{
   min-width:0;
   min-height:0;
   cursor:pointer;
+  touch-action:manipulation;
 }
 .sq.l{background:var(--lt)}
 .sq.d{background:var(--dk)}
@@ -533,14 +530,11 @@ main{
   transition:none!important;
   will-change:transform;
   z-index:25;
-  filter:drop-shadow(0 10px 8px rgba(0,0,0,.48));
 }
 .pp.snap{
   transition:none!important;
 }
 .pp svg,.pkb svg{width:100%;height:100%;display:block}
-.pp.chk{animation:pls 1.3s ease-in-out infinite}
-@keyframes pls{50%{filter:drop-shadow(0 0 7px #ff3b30)}}
 #ov{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
 #pk{position:absolute;inset:0;z-index:30;pointer-events:none;border-radius:10px;overflow:hidden}
 .pkbg{position:absolute;inset:0;background:rgba(0,0,0,.52);pointer-events:auto}
@@ -552,13 +546,13 @@ main{
   padding:2px;
   background:#eeebe3;
   border-radius:10px;
-  box-shadow:0 10px 26px rgba(0,0,0,.55);
+  box-shadow:0 8px 20px rgba(0,0,0,.45);
   pointer-events:auto;
 }
 .pkb{
   width:100%;
   aspect-ratio:1;
-  padding:8%;
+  padding:6%;
   display:grid;
   place-items:center;
   border:0;
@@ -568,26 +562,43 @@ main{
 }
 .pkb:hover,.pkb:active{background:rgba(127,166,80,.42)}
 
+/* Inline Draw Color Strip (Shown When Draw Mode Active) */
+#draw-bar{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:6px 10px;
+  background:var(--pn);
+  border:1px solid var(--bd);
+  border-radius:12px;
+}
+#draw-bar .sw-row{margin-top:0}
+#draw-bar .sw{width:34px;height:34px;min-width:34px;min-height:34px}
+#draw-bar .draw-acts{display:flex;align-items:center;gap:6px}
+#draw-bar .draw-acts button{min-height:36px;padding:0 10px;font-size:12.5px;border-radius:10px}
+
 /* Compact Action Bar Under Board */
 #bctl{
   flex:0 0 auto;
   display:grid;
-  grid-template-columns:repeat(6,minmax(0,1fr));
-  gap:6px;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:4px;
   width:100%;
 }
 #bctl button{
   min-height:46px;
-  padding:4px 4px;
-  border-radius:12px;
+  padding:4px 2px;
+  border-radius:11px;
   flex-direction:column;
-  gap:3px;
-  font-size:11px;
+  gap:2px;
+  font-size:10px;
   font-weight:700;
 }
 #bctl button svg{
-  width:18px;
-  height:18px;
+  width:21px;
+  height:21px;
 }
 
 /* ME VIEW: Player Stats, Learn Lessons & Tactical Puzzles */
@@ -974,6 +985,7 @@ code{
         <svg id="ov" viewBox="0 0 80 80" shape-rendering="geometricPrecision"></svg>
       </div>
     </div>
+    <div id="draw-bar" hidden></div>
     <div id="bctl"></div>
   </section>
   <section id="me-view" hidden></section>
@@ -1036,12 +1048,21 @@ const IC={
   restart:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>`,
   undo:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>`,
   redo:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" aria-hidden="true"><path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg>`,
+  draw:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`,
   flip:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" aria-hidden="true"><path d="M7 16V4m0 0L4 7m3-3l3 3M17 8v12m0 0l-3-3m3 3l3-3"/></svg>`,
   hint:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.8 10.6c.7.6 1.2 1.4 1.3 2.4h5c.1-1 .6-1.8 1.3-2.4A6 6 0 0 0 12 3z"/></svg>`,
   list:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>`,
   close:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`
 };
-const pieceUse=(t,c)=>`<svg viewBox="0 0 45 45" shape-rendering="geometricPrecision" aria-hidden="true"><use href="#sp-${c}${t}"/></svg>`;
+const PIECE_VB={
+  p:"7 7.5 31 31",
+  r:"6 7.5 33 33",
+  b:"4.5 4 36 36",
+  n:"4.5 5.5 35.5 35.5",
+  q:"2.5 3.5 40 40",
+  k:"3.8 4.2 37.4 37.4"
+};
+const pieceUse=(t,c)=>`<svg viewBox="${PIECE_VB[t]||"4 4 37 37"}" shape-rendering="geometricPrecision" aria-hidden="true"><use href="#sp-${c}${t}"/></svg>`;
 
 /* ---------- Web Audio SFX ---------- */
 let AC=null;
@@ -1403,7 +1424,7 @@ function evalBoard(st){
 }
 
 function quiesce(st,alpha,beta,qDepth,ctx){
-  if((++ctx.nodes&255)===0&&performance.now()>ctx.deadline)throw 1;
+  if((++ctx.nodes&63)===0&&performance.now()>ctx.deadline)throw 1;
   const stand=evalBoard(st);
   if(stand>=beta)return beta;
   if(alpha<stand)alpha=stand;
@@ -1423,7 +1444,7 @@ function quiesce(st,alpha,beta,qDepth,ctx){
 }
 
 function search(st,depth,alpha,beta,ctx){
-  if((++ctx.nodes&255)===0&&performance.now()>ctx.deadline)throw 1;
+  if((++ctx.nodes&63)===0&&performance.now()>ctx.deadline)throw 1;
   if(depth<=0)return quiesce(st,alpha,beta,4,ctx);
   const ms=genMoves(st,false);
   ms.sort((a,b)=>(b.cap+(b.pr?800:0))-(a.cap+(a.pr?800:0)));
@@ -1451,7 +1472,7 @@ function sqToStr(sq){return "abcdefgh"[sq&7]+(8-(sq>>3))}
 function pickMove(fen,diff){
   const st=parseFen(fen),side=st.turn;
   const maxD=diff==="hard"?3:2;
-  const budget=diff==="hard"?520:140;
+  const budget=diff==="hard"?150:105;
   const ctx={nodes:0,deadline:performance.now()+budget};
   const raw=genMoves(st,false),legal=[];
   for(let i=0;i<raw.length;i++){
@@ -1521,6 +1542,7 @@ function runFallbackAsync(fen,diff,cb){
   const ms=g.moves({verbose:true});
   if(!ms.length)return cb(null);
   let i=0,best=ms[0],bestSc=-1e9;
+  const endDeadline=performance.now()+150;
   function step(){
     const t0=performance.now();
     while(i<ms.length&&performance.now()-t0<8){
@@ -1530,8 +1552,9 @@ function runFallbackAsync(fen,diff,cb){
       if(diff==="easy")sc+=Math.random()*75;
       g.undo();
       if(sc>bestSc){bestSc=sc;best=m}
+      if(performance.now()>=endDeadline)break;
     }
-    if(i<ms.length)setTimeout(step,0);
+    if(i<ms.length&&performance.now()<endDeadline)setTimeout(step,0);
     else cb(best.from+best.to+(best.promotion||""));
   }
   setTimeout(step,0);
@@ -1566,6 +1589,7 @@ const S={
   busy:false,
   tok:0,
   pp:null,         // promotion prompt {f,t,c}
+  ppAt:0,
   menuOpen:false,
   drawerOpen:false,
   colorModalOpen:false,
@@ -1930,7 +1954,7 @@ function explain(m,g){
 
 /* ---------- Moves, Rules, Undo/Redo, Hint ---------- */
 const needPromo=(f,t)=>S.g.moves({square:f,verbose:true}).some(m=>m.to===t&&m.promotion);
-function askPromo(f,t){S.pp={f,t,c:S.g.get(f).color};S.sel=null;S.legal=[];renderUIOnly()}
+function askPromo(f,t){S.pp={f,t,c:S.g.get(f).color};S.ppAt=performance.now();S.sel=null;S.legal=[];renderUIOnly()}
 
 function clickSq(sq){
   if(S.dm)return drawTap(sq);
@@ -2223,9 +2247,19 @@ function renderActionBar(){
     `<button data-a="restart" aria-label="Restart">${IC.restart}<span>Restart</span></button>`+
     `<button data-a="undo" aria-label="Undo" ${mv.length?"":"disabled"}>${IC.undo}<span>Undo</span></button>`+
     `<button data-a="redo" aria-label="Redo" ${S.redo.length?"":"disabled"}>${IC.redo}<span>Redo</span></button>`+
+    `<button data-a="dm" class="${S.dm?"on":""}" aria-label="Draw mode">${IC.draw}<span>Draw</span></button>`+
     `<button data-a="flip" aria-label="Flip board">${IC.flip}<span>Flip</span></button>`+
     `<button data-a="hint" aria-label="Hint" ${S.over?"disabled":""}>${IC.hint}<span>Hint</span></button>`+
     `<button data-a="drawer" class="${S.drawerOpen?"on":""}" aria-label="Moves list">${IC.list}<span>Moves${mv.length?` (${mv.length})`:""}</span></button>`;
+  const db=$("#draw-bar");
+  if(db){
+    db.hidden=!S.dm;
+    if(S.dm){
+      db.innerHTML=
+        `<div class="sw-row">${["green","red","blue","yellow"].map(k=>`<button data-a="dc" data-c="${k}" class="sw" aria-label="Draw ${k}" style="background:${DC[k]};${S.dc===k?"outline:2.5px solid var(--tx);outline-offset:2px":""}"></button>`).join("")}</div>`+
+        `<div class="draw-acts">${(S.dr.a.length||Object.keys(S.dr.h).length)?`<button data-a="cd">Clear</button>`:""}<button data-a="dm" class="pri">Done</button></div>`;
+    }
+  }
 }
 
 function renderMeView(){
@@ -2411,7 +2445,7 @@ document.addEventListener("click",e=>{
   else if(a==="npz"){S.pi=(S.pi+1)%PZ.length;startPuzzle()}
   else if(a==="ppz"){S.pi=Math.max(0,S.pi-1);startPuzzle()}
   else if(a==="pro"){const p=S.pp;S.pp=null;if(p)doMove(p.f,p.t,d.p)}
-  else if(a==="pcancel"){S.pp=null;renderUIOnly()}
+  else if(a==="pcancel"){if(performance.now()-S.ppAt<250)return;S.pp=null;renderUIOnly()}
   else if(a==="dm"){S.dm=!S.dm;S.ds=null;renderUIOnly()}
   else if(a==="dc"){S.dc=d.c;S.ds=null;renderUIOnly()}
   else if(a==="cd"){S.dr={a:[],h:{}};S.ds=null;ov();renderUIOnly()}
@@ -2461,10 +2495,40 @@ bdEl.addEventListener("pointerdown",e=>{
     bdEl.setPointerCapture?.(e.pointerId);
     return;
   }
+  if(!sideOK())return;
+  if(S.sel&&S.legal.includes(sq)){
+    S.dr={a:[],h:{}};ov();
+    needPromo(S.sel,sq)?askPromo(S.sel,sq):doMove(S.sel,sq);
+    return;
+  }
   const p=S.g.get(sq);
-  const canDrag=!!(p&&p.color===S.g.turn()&&(S.mode!=="bot"||p.color===S.col)&&sideOK());
-  drag={mode:"piece",sq,x:e.clientX,y:e.clientY,moved:false,canDrag,el:canDrag?PE[sq]:null,id:e.pointerId};
-  bdEl.setPointerCapture?.(e.pointerId);
+  const canDrag=!!(p&&p.color===S.g.turn()&&(S.mode!=="bot"||p.color===S.col));
+  if(canDrag){
+    const wasSel=S.sel===sq;
+    if(!wasSel){
+      S.sel=sq;
+      S.legal=S.g.moves({square:sq,verbose:true}).map(m=>m.to);
+      S.hint=null;S.dr={a:[],h:{}};ov();
+      syncGridHighlights();
+      SND.click();
+    }
+    drag={mode:"piece",sq,x:e.clientX,y:e.clientY,moved:false,canDrag:true,wasSel,el:PE[sq],id:e.pointerId};
+    bdEl.setPointerCapture?.(e.pointerId);
+  }else{
+    if(S.sel&&p){
+      S.msg="Illegal move for that piece — tap one of the dot indicators.";
+      S.bad=true;
+      shakeSq(S.sel);
+      SND.err();
+      S.sel=null;S.legal=[];
+      renderUIOnly();
+    }else if(S.sel){
+      S.sel=null;S.legal=[];S.dr={a:[],h:{}};ov();
+      syncGridHighlights();
+    }else if(S.dr.a.length||Object.keys(S.dr.h).length){
+      S.dr={a:[],h:{}};ov();
+    }
+  }
 });
 
 document.addEventListener("pointermove",e=>{
@@ -2477,12 +2541,8 @@ document.addEventListener("pointermove",e=>{
     return;
   }
   if(!drag.canDrag||!drag.el)return;
-  if(!drag.moved&&dist>7){
+  if(!drag.moved&&dist>6){
     drag.moved=true;
-    S.sel=drag.sq;
-    S.legal=S.g.moves({square:drag.sq,verbose:true}).map(m=>m.to);
-    S.hint=null;S.dr={a:[],h:{}};ov();
-    syncGridHighlights();
     drag.el.classList.add("dragging");
   }
   if(drag.moved){
@@ -2528,8 +2588,8 @@ function handlePointerFinish(e,cancelled){
       }
       S.sel=null;S.legal=[];renderUIOnly();
     }
-  }else{
-    clickSq(d.sq);
+  }else if(d.wasSel){
+    S.sel=null;S.legal=[];syncGridHighlights();
   }
 }
 
