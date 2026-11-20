@@ -12,36 +12,56 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Accept Android SDK Licenses
+      - name: Setup Capacitor 6 & Generate Android Project
         run: |
-          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
-          SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
-          if [ -x "$SDKMANAGER" ]; then
-            yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
+          rm -rf android capacitor.config.ts capacitor.config.json package.json package-lock.json
+          npm init -y
+          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
+          npx cap init "Rookie Chess" "com.rookie.chess" --web-dir www
+          npx cap add android
+          if [ -d app/src/main/res/drawable ]; then
+            mkdir -p android/app/src/main/res/drawable
+            cp -f app/src/main/res/drawable/* android/app/src/main/res/drawable/
           fi
+          for dir in app/src/main/res/mipmap-*; do
+            if [ -d "$dir" ]; then
+              base=$(basename "$dir")
+              mkdir -p "android/app/src/main/res/$base"
+              cp -f "$dir"/* "android/app/src/main/res/$base/"
+            fi
+          done
+          npx cap sync android
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '9.3.1'
-
-      - name: Restore Debug Keystore
+      - name: Increment Android Version Code & Version Name
         run: |
-          if [ -f debug.keystore.base64 ]; then
-            base64 -d debug.keystore.base64 > debug.keystore
-          fi
+          RUN_NUM="${GITHUB_RUN_NUMBER:-1}"
+          sed -i -E "s/versionCode [0-9]+/versionCode ${RUN_NUM}/" android/app/build.gradle
+          sed -i -E "s/versionName \"[^\"]*\"/versionName \"1.0.${RUN_NUM}\"/" android/app/build.gradle
+          grep -E "versionCode|versionName" android/app/build.gradle
 
       - name: Build Debug APK
-        run: gradle :app:assembleDebug --no-daemon
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Prepare Versioned APK Artifact
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk "android/app/build/outputs/apk/debug/Rookie-Learn-Chess-v${GITHUB_RUN_NUMBER}.apk"
 
       - name: Upload File APK
         uses: actions/upload-artifact@v4
         with:
-          name: Rookie-Learn-Chess-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: Rookie-Learn-Chess-v${{ github.run_number }}.apk
+          path: android/app/build/outputs/apk/debug/Rookie-Learn-Chess-v${{ github.run_number }}.apk

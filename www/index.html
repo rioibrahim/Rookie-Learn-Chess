@@ -869,6 +869,19 @@ code{
 .color-swatch.r{background:linear-gradient(135deg,#fcfbf7 50%,#1d1c1a 50%)}
 
 .rm *,.rm *::after{animation:none!important;transition:none!important}
+@media (max-height:520px) and (min-width:560px){
+  #play-view{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 230px;
+    grid-template-rows:auto auto minmax(0,1fr);
+    grid-template-areas:"board status" "board banner" "board actions";
+    gap:8px 12px;
+  }
+  #bwrap{grid-area:board}
+  #status-bar{grid-area:status}
+  #banner{grid-area:banner}
+  #bctl{grid-area:actions;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start}
+}
 </style>
 </head>
 <body>
@@ -1880,9 +1893,17 @@ function triggerBotMove(){
     const onMsg=e=>{
       if(e.data.id!==tk)return;
       w.removeEventListener("message",onMsg);
+      w.removeEventListener("error",onErr);
       setTimeout(()=>applyUci(e.data.uci),P.diff==="easy"?120:40);
     };
+    const onErr=()=>{
+      w.removeEventListener("message",onMsg);
+      w.removeEventListener("error",onErr);
+      aiWorker=null;
+      runFallbackAsync(fen,P.diff,applyUci);
+    };
     w.addEventListener("message",onMsg);
+    w.addEventListener("error",onErr,{once:true});
     w.postMessage({id:tk,fen,diff:P.diff});
   }else{
     runFallbackAsync(fen,P.diff,applyUci);
@@ -2046,14 +2067,23 @@ function undo(){
 }
 
 function redo(){
+  if(S.busy)cancelAI();
   const g=S.g,o=S.redo.pop();if(!o)return;
   const m=g.move({from:o.from,to:o.to,promotion:o.promotion||"q"});
   if(!m)return;
-  S.last=[m.from,m.to];
+  let lastM=m,redone=1;
+  if(S.mode==="bot"&&!g.game_over()&&g.turn()!==S.col&&S.redo.length){
+    const o2=S.redo.pop();
+    const m2=g.move({from:o2.from,to:o2.to,promotion:o2.promotion||"q"});
+    if(m2){lastM=m2;redone++}
+  }
+  S.last=[lastM.from,lastM.to];
+  S.ex=explain(lastM,g);
   if(S.mode==="learn"||S.mode==="puz")S.solved=true;
   endCheck();
-  snd(kind(m,g));clrDraw();
-  render({m});
+  snd(kind(lastM,g));clrDraw();
+  render(redone===1?{m:lastM}:null);
+  if(S.mode==="bot"&&!S.over&&g.turn()!==S.col)triggerBotMove();
 }
 
 function hint(){
@@ -2074,8 +2104,10 @@ function hint(){
     };
     if(w){
       const id=++S.tok;
-      const onMsg=e=>{if(e.data.id===id){w.removeEventListener("message",onMsg);showHint(e.data.uci)}};
+      const onMsg=e=>{if(e.data.id===id){w.removeEventListener("message",onMsg);w.removeEventListener("error",onErr);showHint(e.data.uci)}};
+      const onErr=()=>{w.removeEventListener("message",onMsg);aiWorker=null;runFallbackAsync(fen,"hard",showHint)};
       w.addEventListener("message",onMsg);
+      w.addEventListener("error",onErr,{once:true});
       w.postMessage({id,fen,diff:"hard"});
     }else runFallbackAsync(fen,"hard",showHint);
     return;
