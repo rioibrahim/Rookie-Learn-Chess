@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Rookie</string>
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_learn">Learn</string>
+    <string name="nav_puzzles">Puzzles</string>
+    <string name="nav_play_ai">Play AI</string>
+    <string name="nav_sandbox">Sandbox</string>
+    <string name="cd_settings">Board settings</string>
+    <string name="cd_mute_toggle">Toggle sound</string>
+    <string name="cd_flip_board">Flip board</string>
+    <string name="cd_undo_move">Undo move</string>
+    <string name="cd_redo_move">Redo move</string>
+    <string name="cd_hint">Show hint</string>
+    <string name="cd_restart">Restart exercise</string>
+    <string name="cd_draw_mode">Toggle draw mode</string>
+    <string name="cd_clear_drawings">Clear board drawings</string>
+</resources>

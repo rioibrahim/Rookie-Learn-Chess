@@ -1,0 +1,6 @@
+{
+  "name": "Rookie",
+  "description": "Interactive chess learning app with guided piece lessons, tactical puzzles, an offline AI opponent, and a legal-move sandbox.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
