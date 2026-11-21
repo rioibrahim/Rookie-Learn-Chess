@@ -1267,6 +1267,7 @@ code{
 "use strict";
 const $=q=>document.querySelector(q);
 const todayKey=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
+const yesterdayKey=()=>{const d=new Date(),y=new Date(d.getFullYear(),d.getMonth(),d.getDate()-1);return `${y.getFullYear()}-${String(y.getMonth()+1).padStart(2,"0")}-${String(y.getDate()).padStart(2,"0")}`};
 const localDayNumber=()=>{const d=new Date();return Math.floor(new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime()/86400000)};
 function formatMidnightCountdown(){
   const now=new Date();
@@ -1280,11 +1281,11 @@ function formatMidnightCountdown(){
 
 /* ---------- 5 Bot Modes ---------- */
 const BOT_MODES=[
-  {id:"easy",name:"Easy",sub:"Casual beginner"},
-  {id:"medium",name:"Medium",sub:"Balanced club player"},
-  {id:"hard",name:"Hard",sub:"Strong tactical search"},
-  {id:"nightmare",name:"Nightmare",sub:"Aggressive minimax search"},
-  {id:"mittens",name:"Mittens",sub:"Maximum aggression",red:true}
+  {id:"easy",name:{en:"Easy",id:"Mudah"},sub:{en:"Casual beginner",id:"Pemula santai"}},
+  {id:"medium",name:{en:"Medium",id:"Sedang"},sub:{en:"Balanced club player",id:"Pemain klub seimbang"}},
+  {id:"hard",name:{en:"Hard",id:"Sulit"},sub:{en:"Strong tactical search",id:"Analisis taktik kuat"}},
+  {id:"nightmare",name:{en:"Nightmare",id:"Mimpi Buruk"},sub:{en:"Aggressive minimax search",id:"Pencarian minimax agresif"}},
+  {id:"mittens",name:{en:"Mittens",id:"Mittens"},sub:{en:"Maximum aggression",id:"Agresi maksimal"},red:true}
 ];
 const VALID_DIFFS=new Set(BOT_MODES.map(b=>b.id));
 
@@ -1296,6 +1297,7 @@ const def={
   vol:.65,
   mute:false,
   beg:true,
+  lang:"en",
   diff:"easy",
   theme:"auto",
   uiSize:"normal",
@@ -1309,6 +1311,7 @@ P.pz.cat=P.pz.cat||{};P.pz.ok=P.pz.ok||{};P.pz.daily=P.pz.daily||{};
 P.g=Object.assign({},def.g,P.g||{});
 P.fx=Object.assign({},def.fx,P.fx||{});
 if(!VALID_DIFFS.has(P.diff))P.diff="easy";
+if(P.lang!=="en"&&P.lang!=="id")P.lang="en";
 if(!["compact","normal","large"].includes(P.uiSize))P.uiSize="normal";
 {const pb=Number(P.pieceBoost);P.pieceBoost=Number.isFinite(pb)?Math.max(-10,Math.min(35,pb)):20;}
 const save=()=>{try{localStorage.setItem("rookie",JSON.stringify(P))}catch(e){}};
@@ -1325,8 +1328,226 @@ const applyUIScale=()=>{
   r.setAttribute("data-ui",P.uiSize);
   r.style.setProperty("--piece-scale",((100+P.pieceBoost)/100).toFixed(2));
 };
+const applyLanguage=()=>{
+  document.documentElement.lang=P.lang==="id"?"id":"en";
+};
 applyTheme();
 applyUIScale();
+applyLanguage();
+
+/* ---------- Bilingual I18N (English & Indonesian) ---------- */
+const PIECE_NAMES={
+  en:{p:"pawn",n:"knight",b:"bishop",r:"rook",q:"queen",k:"king"},
+  id:{p:"pion",n:"kuda",b:"gajah",r:"benteng",q:"menteri",k:"raja"}
+};
+const PROMO_NAMES={
+  en:{q:"Queen",r:"Rook",b:"Bishop",n:"Knight"},
+  id:{q:"Menteri",r:"Benteng",b:"Gajah",n:"Kuda"}
+};
+const COLOR_NAMES={
+  en:{w:"White",b:"Black",r:"Random"},
+  id:{w:"Putih",b:"Hitam",r:"Acak"}
+};
+const I18N={
+  en:{
+    options:"Options",mute:"Mute sound",unmute:"Unmute sound",
+    menuAria:"Game modes and options",drawerAria:"Move List",navAria:"Primary navigation",
+    play:"Play",me:"Me",
+    modeBasicHdr:"Basic · 2-Player (Auto-Flip)",
+    modeCoachHdr:"Coach Gemini · Live Mentor",
+    modeLearnHdr:"Learn · {title} {step}/{total}",
+    modeDailyHdr:"Daily Lv.{lvl}/3 · {diff}",
+    language:"Language",langEn:"English",langId:"Indonesia",
+    gameMode:"Game Mode",basic2p:"Basic (2P)",botVsAi:"Bot (vs AI)",coachGemini:"Coach Gemini",
+    botMode:"Bot Mode",pieceSize:"Piece Size",scale:"Scale",uiSize:"UI Size",
+    compact:"Compact",normal:"Normal",large:"Large",
+    coachingDetail:"Coaching Detail",beginner:"Beginner",advanced:"Advanced",
+    boardTools:"Board Tools & Sound",drawMode:"Draw Mode",drawModeOn:"Draw Mode ON",
+    highlights:"Highlights",arrows:"Arrows",animations:"Animations",captureFx:"Capture FX",reducedMotion:"Reduced Motion",vol:"Vol",
+    animTheme:"Animation Speed & Theme",slow:"Slow",fast:"Fast",system:"System",dark:"Dark",light:"Light",
+    whiteToMove:"White to move",blackToMove:"Black to move",check:"CHECK",gameOver:"Game Over",
+    coachThinking:"Coach is thinking…",botThinking:"Bot is thinking…",
+    yourTurn:"Your turn",coachTurn:"Coach’s turn",botTurn:"Bot’s turn",
+    solved:"Solved ✓",white:"White",black:"Black",
+    nextStep:"Next step →",learningHub:"Learning Hub",
+    nextPuzzlesIn:"Next puzzles in",nextLevel:"Next Level ({lvl}/3) →",allDailies:"All dailies",
+    newCoachGame:"New Coach Game",newBotMatch:"New Bot Match",playAgain:"Play again?",
+    restart:"Restart",undo:"Undo",redo:"Redo",draw:"Draw",flip:"Flip",hint:"Hint",moves:"Moves",
+    clear:"Clear",done:"Done",
+    playVsBot:"Play vs Bot",pickSideSub:"Select Bot difficulty, then pick your side.",cancel:"Cancel",
+    promotePawn:"Promote Pawn",promoteSub:"Choose which piece your pawn becomes on {sq}.",
+    checkmate:"Checkmate!",checkmateNoBang:"Checkmate",victory:"Victory!",
+    mateSub:"{winner} wins by checkmate.",mateWinSub:"You defeated {bot} as {winner}!",mateLoseSub:"{bot} won by checkmate.",
+    restartGame:"Restart Game",changeBotColor:"Change Bot / Color",viewBoard:"View Board",
+    moveHistoryTitle:"Move History & Coaching",lastMove:"Last Move",
+    noMovesYet:"No moves played yet. Tap or drag a piece to start.",
+    copyFen:"Copy FEN",copyPgn:"Copy PGN",copied:"{label} copied",
+    heroSub:"{dn} of {tot} lesson steps · {sc}/3 Today’s Dailies · Rating {r}",
+    yourStats:"Your Statistics",puzzleRating:"Puzzle Rating",dailyStreak:"Daily Streak",accuracy:"Accuracy",botWdl:"Bot W / D / L",
+    dailyPuzzles:"Daily Puzzles · {day} ({sc}/3)",playLv:"Play Lv.{lvl}",lockedToday:"Locked Today",
+    dailySolvedAll:"All 3 daily puzzles solved! New puzzles unlock in",
+    dailySyncInfo:"Synced to your device date ({day}). Solve Lv.1 → Lv.2 → Lv.3 before midnight.",
+    levelLabel:"Level {lvl} ({diff}) · {cat}",
+    completedToday:"Completed for today",solvePrevFirst:"Solve Level {prev} first to unlock",
+    locked:"Locked",continueBtn:"Continue",doneBadge:"Done ✓",
+    stepsCount:"{n} interactive steps",stepCount:"{n} interactive step",
+    errKingCheck:"Your King is in check! Defend or move the King",
+    errKingPin:"Your King is in check! That piece is pinned — defend or move the King",
+    errIllegal:"Illegal move for that piece — tap one of the dot indicators.",
+    errLessonPiece:"Legal move, but try moving the lesson’s target piece instead.",
+    errLessonGoal:"Legal move, but not the goal of this step — check the prompt or tap Hint.",
+    lessonComplete:" Lesson complete!",
+    puzGreatStart:"Great start! Forced response incoming…",
+    puzFinishCombo:"Finish the combination now!",
+    puzWrongCombo:"{san} isn’t the combination move. Try again or tap Hint.",
+    puzWrongSol:"{san} isn’t the solution. Try again or tap Hint.",
+    puzDefaultMate:"{san} is checkmate!",
+    hintSuggested:"Suggested move: {san} ({piece} to {to}).",
+    hintIdeaCombo:"Look for a forcing move (check or sacrifice) that strips away a defender.",
+    hintIdeaTactic:"Look closely for the decisive tactical blow.",
+    hintIdeaMate:"Start with checks — which check leaves the king zero escape squares?",
+    hintPiece:"Look at the highlighted piece — that’s the one to move.",
+    hintSquares:"The highlighted squares show the exact move.",
+    hintSolution:"Solution: {why}",
+    overMate:"Checkmate — {winner} wins",overStale:"Stalemate — draw",overRep:"Draw by repetition",
+    overInsuff:"Draw — insufficient material",over50:"Draw — 50-move rule",
+    exMove:"{piece} {from}→{to}.",exCap:" Captures {cap}.",exCastle:" Castling: king to safety, rook activated.",
+    exEp:" En passant capture.",exPromo:" Promoted to {promo}.",exMate:" Checkmate!",exChk:" Check!",
+    exCenter:" Claims the centre.",exDev:" Develops a piece.",
+    exNoteStart:" Notation “{san}”: ",exNoteCastle:"castling.",exNotePawnCap:"pawn capture",exNotePawnMove:"pawn move",
+    exNoteCap:", x = capture",exNoteChk:", + = check",exNoteMate:", # = checkmate",
+    coachWelcome:"Hey there! I’m Coach Gemini. Play naturally — I’ll give you a heads-up whenever one of your pieces is in danger.",
+    coachReady:"Coach Gemini is ready to play alongside you. Take your time!",
+    coachArrowHint:"Red arrow shows an enemy threat to your piece",
+    coachTakeBack:"Take back move?",coachContinue:"Continue anyway",
+    coachChecking:"Hold on, checking your last move…",
+    coachCheckWarn:"Check! Your King is under attack right now — protect it or step to a safe square.",
+    coachThreat:"Careful! Your {tgt} is being targeted by your opponent’s {atk}. Double-check before you move.",
+    coachCaptured:"I just captured your {cap}. No worries — look for a solid counterplay!",
+    coachMoved:"My move is in. Take a moment to check your pieces are safe before moving!",
+    coachBlunderCap:"Whoa, careful! That move leaves your {tgt} open to be captured for free by their {atk}.",
+    coachBlunderCheck:"Hold up! That opens up your King’s safety — your opponent can deliver check and seize the initiative.",
+    coachBlunderPos:"Watch out, that move looks risky — your opponent has a strong counterattack waiting.",
+    coachGoodCheck:"Nice! A sharp check that puts real pressure on their King.",
+    coachGoodCap:"Clean trade! Your position stays solid and well defended.",
+    coachGoodBest:"Great move! Your pieces look active and well protected.",
+    coachGoodSolid:"Solid choice — safe and steady for your next plan!",
+    coachMateWin:"Awesome job! You found the checkmate!",
+    coachMateLose:"Checkmate! All good — let’s play another one and get even sharper.",
+    coachDraw:"It’s a draw! That was a well-fought game.",
+    coachUndone:"Move undone! Let’s find a safer option.",
+    coachContinueMsg:"Got it, let’s keep playing from there!",
+    coachHintThreat:"Heads up, your {tgt} is targeted by their {atk}! Take a look at the {piece} I highlighted.",
+    coachHintCastle:"Hint: Time to tuck your King away! Consider castling for better safety.",
+    coachHintCap:"Hint: Check out the {piece} I highlighted — there’s an unguarded target in reach!",
+    coachHintCheck:"Hint: Take a look at the {piece} I highlighted — it can put real pressure on their King!",
+    coachHintActive:"Hint: Check out the {piece} I highlighted — moving it helps activate your position."
+  },
+  id:{
+    options:"Opsi",mute:"Matikan suara",unmute:"Nyalakan suara",
+    menuAria:"Mode permainan dan opsi",drawerAria:"Daftar Langkah",navAria:"Navigasi utama",
+    play:"Main",me:"Saya",
+    modeBasicHdr:"Dasar · 2 Pemain (Auto-Balik)",
+    modeCoachHdr:"Coach Gemini · Mentor Langsung",
+    modeLearnHdr:"Belajar · {title} {step}/{total}",
+    modeDailyHdr:"Harian Lv.{lvl}/3 · {diff}",
+    language:"Bahasa",langEn:"English",langId:"Indonesia",
+    gameMode:"Mode Main",basic2p:"Dasar (2P)",botVsAi:"Bot (vs AI)",coachGemini:"Coach Gemini",
+    botMode:"Level Bot",pieceSize:"Ukuran Bidak",scale:"Skala",uiSize:"Ukuran UI",
+    compact:"Ringkas",normal:"Normal",large:"Besar",
+    coachingDetail:"Detail Pelatih",beginner:"Pemula",advanced:"Lanjutan",
+    boardTools:"Alat Papan & Suara",drawMode:"Mode Gambar",drawModeOn:"Mode Gambar AKTIF",
+    highlights:"Sorotan",arrows:"Panah",animations:"Animasi",captureFx:"Efek Makan",reducedMotion:"Kurangi Gerak",vol:"Vol",
+    animTheme:"Kecepatan & Tema",slow:"Lambat",fast:"Cepat",system:"Sistem",dark:"Gelap",light:"Terang",
+    whiteToMove:"Giliran Putih",blackToMove:"Giliran Hitam",check:"SKAK",gameOver:"Permainan Selesai",
+    coachThinking:"Coach sedang berpikir…",botThinking:"Bot sedang berpikir…",
+    yourTurn:"Giliranmu",coachTurn:"Giliran Coach",botTurn:"Giliran Bot",
+    solved:"Selesai ✓",white:"Putih",black:"Hitam",
+    nextStep:"Langkah berikut →",learningHub:"Pusat Belajar",
+    nextPuzzlesIn:"Teka-teki baru dalam",nextLevel:"Level Berikut ({lvl}/3) →",allDailies:"Semua harian",
+    newCoachGame:"Main Coach Baru",newBotMatch:"Lawan Bot Baru",playAgain:"Main lagi?",
+    restart:"Ulang",undo:"Undo",redo:"Redo",draw:"Gambar",flip:"Balik",hint:"Petunjuk",moves:"Langkah",
+    clear:"Hapus",done:"Selesai",
+    playVsBot:"Lawan Bot",pickSideSub:"Pilih level Bot, lalu pilih warna bidakmu.",cancel:"Batal",
+    promotePawn:"Promosi Pion",promoteSub:"Pilih bidak pengganti pionmu di {sq}.",
+    checkmate:"Skakmat!",checkmateNoBang:"Skakmat",victory:"Menang!",
+    mateSub:"{winner} menang lewat skakmat.",mateWinSub:"Kamu mengalahkan {bot} sebagai {winner}!",mateLoseSub:"{bot} menang lewat skakmat.",
+    restartGame:"Main Lagi",changeBotColor:"Ganti Bot / Warna",viewBoard:"Lihat Papan",
+    moveHistoryTitle:"Riwayat Langkah & Pelatih",lastMove:"Langkah Terakhir",
+    noMovesYet:"Belum ada langkah. Ketuk atau geser bidak untuk mulai.",
+    copyFen:"Salin FEN",copyPgn:"Salin PGN",copied:"{label} disalin",
+    heroSub:"{dn} dari {tot} langkah belajar · {sc}/3 Harian · Rating {r}",
+    yourStats:"Statistik Kamu",puzzleRating:"Rating Teka-teki",dailyStreak:"Streak Harian",accuracy:"Akurasi",botWdl:"Bot M / S / K",
+    dailyPuzzles:"Teka-teki Harian · {day} ({sc}/3)",playLv:"Main Lv.{lvl}",lockedToday:"Selesai Hari Ini",
+    dailySolvedAll:"Semua 3 teka-teki harian selesai! Teka-teki baru terbuka dalam",
+    dailySyncInfo:"Tersinkron dengan tanggal perangkat ({day}). Selesaikan Lv.1 → Lv.2 → Lv.3 sebelum tengah malam.",
+    levelLabel:"Level {lvl} ({diff}) · {cat}",
+    completedToday:"Selesai untuk hari ini",solvePrevFirst:"Selesaikan Level {prev} dulu untuk membuka",
+    locked:"Terkunci",continueBtn:"Lanjut",doneBadge:"Tuntas ✓",
+    stepsCount:"{n} langkah interaktif",stepCount:"{n} langkah interaktif",
+    errKingCheck:"Raja kamu lagi skak! Lindungi atau geser Raja",
+    errKingPin:"Raja kamu lagi skak! Bidak itu ter-pin — lindungi atau geser Raja",
+    errIllegal:"Langkah tidak sah untuk bidak itu — ketuk titik petunjuk langkah.",
+    errLessonPiece:"Langkah sah, tapi coba gerakkan bidak target pelajaran ini.",
+    errLessonGoal:"Langkah sah, tapi belum sesuai tujuan langkah ini — cek arahan atau ketuk Petunjuk.",
+    lessonComplete:" Pelajaran selesai!",
+    puzGreatStart:"Awal yang bagus! Lawan wajib membalas…",
+    puzFinishCombo:"Selesaikan kombinasinya sekarang!",
+    puzWrongCombo:"{san} bukan langkah kombinasinya. Coba lagi atau ketuk Petunjuk.",
+    puzWrongSol:"{san} bukan jawabannya. Coba lagi atau ketuk Petunjuk.",
+    puzDefaultMate:"{san} adalah skakmat!",
+    hintSuggested:"Saran langkah: {san} ({piece} ke {to}).",
+    hintIdeaCombo:"Cari langkah paksa (skak atau pengorbanan) yang menyingkirkan penjaga lawan.",
+    hintIdeaTactic:"Perhatikan baik-baik pukulan taktis yang menentukan.",
+    hintIdeaMate:"Mulai dari langkah skak — skak mana yang menutup semua jalan kabur raja?",
+    hintPiece:"Lihat bidak yang disorot — bidak itu yang perlu digerakkan.",
+    hintSquares:"Kotak yang disorot menunjukkan langkah tepatnya.",
+    hintSolution:"Solusi: {why}",
+    overMate:"Skakmat — {winner} menang",overStale:"Pat (Stalemate) — seri",overRep:"Seri karena pengulangan 3 kali",
+    overInsuff:"Seri — perwira tidak cukup",over50:"Seri — aturan 50 langkah",
+    exMove:"{piece} {from}→{to}.",exCap:" Memakan {cap}.",exCastle:" Rokade: raja aman, benteng aktif.",
+    exEp:" Tangkapan en passant.",exPromo:" Promosi jadi {promo}.",exMate:" Skakmat!",exChk:" Skak!",
+    exCenter:" Menguasai pusat.",exDev:" Mengembangkan perwira.",
+    exNoteStart:" Notasi “{san}”: ",exNoteCastle:"rokade.",exNotePawnCap:"pion makan",exNotePawnMove:"langkah pion",
+    exNoteCap:", x = makan",exNoteChk:", + = skak",exNoteMate:", # = skakmat",
+    coachWelcome:"Halo! Aku Coach Gemini. Main santai aja ya — aku bakal ingetin kalau ada perwiramu yang terancam bahaya.",
+    coachReady:"Coach Gemini siap nemenin kamu main. Santai aja ya!",
+    coachArrowHint:"Panah merah nunjukin ancaman lawan ke perwira kamu",
+    coachTakeBack:"Mau tarik ulang langkah?",coachContinue:"Lanjut saja",
+    coachChecking:"Sebentar ya, lagi ngecek langkah barusan…",
+    coachCheckWarn:"Skak! Raja kamu lagi terancam nih, lindungi atau geser ke tempat aman dulu ya.",
+    coachThreat:"Eh hati-hati, {tgt} kamu lagi diincer {atk} lawan nih! Coba cek dulu sebelum melangkah.",
+    coachCaptured:"Aku barusan makan {cap} kamu nih. Santai, coba cari balasan yang oke ya!",
+    coachMoved:"Giliranku udah jalan. Cek dulu semua perwiramu aman sebelum melangkah ya!",
+    coachBlunderCap:"Waduh, hati-hati! Langkah barusan bikin {tgt} kamu bisa langsung dimakan {atk} lawan secara gratis.",
+    coachBlunderCheck:"Eh, tunggu dulu! Pertahanan raja kamu kebuka nih, lawan bisa langsung skak dan nekan balik.",
+    coachBlunderPos:"Waduh, langkah itu agak berisiko nih—lawan punya serangan balasan yang bikin kamu rugi posisi.",
+    coachGoodCheck:"Mantap! Skak yang cakep, lawan jadi tertekan nih.",
+    coachGoodCap:"Cakep! Pertukaran yang bagus, posisimu tetap aman.",
+    coachGoodBest:"Langkah yang oke banget! Posisimu aktif dan aman.",
+    coachGoodSolid:"Lumayan solid nih, aman buat lanjut ke langkah berikutnya!",
+    coachMateWin:"Keren abis! Kamu berhasil menang skakmat!",
+    coachMateLose:"Skakmat nih! Nggak apa-apa, yuk main lagi biar makin jago.",
+    coachDraw:"Permainan berakhir seri! Pertandingan yang seimbang.",
+    coachUndone:"Langkah udah di-undo! Yuk coba cari langkah yang lebih aman.",
+    coachContinueMsg:"Oke, kita lanjut main dari langkah barusan ya!",
+    coachHintThreat:"Hati-hati, {tgt} kamu lagi diincer {atk} lawan tuh! Coba perhatikan {piece} yang kutandai.",
+    coachHintCastle:"Petunjuk: Saatnya amanin raja! Coba rokade biar raja kamu lebih terlindungi.",
+    coachHintCap:"Petunjuk: Coba perhatikan {piece} yang kutandai—ada perwira lawan yang lagi lengah nih!",
+    coachHintCheck:"Petunjuk: Coba cek {piece} yang kutandai, langkahnya bisa bikin raja lawan tertekan!",
+    coachHintActive:"Petunjuk: Coba lirik {piece} yang kutandai—menggerakkannya bisa bikin posisimu makin aktif."
+  }
+};
+function t(key,vars){
+  const d=I18N[P.lang]||I18N.en;
+  let s=(d[key]!==undefined?d[key]:I18N.en[key])||key;
+  if(vars)for(const k in vars)s=s.replaceAll("{"+k+"}",vars[k]);
+  return s;
+}
+const pcName=k=>(PIECE_NAMES[P.lang]||PIECE_NAMES.en)[k]||k;
+const colName=c=>(COLOR_NAMES[P.lang]||COLOR_NAMES.en)[c]||c;
+const botName=b=>(b&&b.name&&(b.name[P.lang]||b.name.en))||"";
+const botSub=b=>(b&&b.sub&&(b.sub[P.lang]||b.sub.en))||"";
 
 /* ---------- Crisp Inline SVG Assets & Tight ~90% Piece ViewBoxes ---------- */
 const QUEEN_SVG=`<svg viewBox="0 0 48 48" fill="#ffffff" shape-rendering="geometricPrecision" aria-hidden="true"><circle cx="9.5" cy="13.5" r="2.3"/><circle cx="16.8" cy="9.5" r="2.3"/><circle cx="24" cy="7.8" r="2.5"/><circle cx="31.2" cy="9.5" r="2.3"/><circle cx="38.5" cy="13.5" r="2.3"/><path d="M12.2 29.5h23.6l2.6-13.5-7.4 9.9-1.7-13.6-5.3 12.6-5.3-12.6-1.7 13.6-7.4-9.9 2.6 13.5z"/><rect x="11.5" y="31.5" width="25" height="3.7" rx="1.85"/><rect x="9.2" y="37.2" width="29.6" height="5.2" rx="2.4"/></svg>`;
@@ -1465,6 +1686,87 @@ const PZ_L3=[
   {lvl:3,diff:"Hard",c:"Philidor Mate (2 Moves)",fen:"5r1k/6pp/8/6N1/8/1Q6/B7/6K1 w - - 0 1",seq:["b3g8","f8g8","g5f7"],t:"Level 3 (Hard): Classic Smothered Mate combination in 2 moves.",why:"Qg8+! (protected by Ba2) forces Rxg8, trapping the king for Nf7#."}
 ];
 
+const LS_ID=[
+  {mod:"1. Penguasaan Bidak & Aturan Khusus",t:"Pion & Promosi",s:[
+    {tx:"Pion hanya maju ke depan. Dari posisi awal, pion boleh maju satu ATAU dua kotak. Majukan pion e2 dua kotak.",idea:"Hitung dua kotak ke atas di lajur-e dari e2.",why:"1. e4 menguasai pusat dan membuka diagonal untuk gajah dan menteri."},
+    {tx:"Pion maju lurus, tapi memakan satu kotak diagonal ke depan. Makan pion d5.",idea:"Serang secara diagonal dari e4 ke d5.",why:"exd5 menyingkirkan pion pusat Hitam dengan aturan tangkapan diagonal pion."},
+    {tx:"Promosi: Saat pion mencapai baris paling ujung, ia berubah wujud. Dorong a7 ke a8 dan pilih bidak promosinya.",idea:"Majukan pion ke baris ke-8.",why:"Promosi mengubah pion bernilai 1 poin menjadi Menteri, Benteng, Gajah, atau Kuda."}
+  ]},
+  {mod:"1. Penguasaan Bidak & Aturan Khusus",t:"Benteng & Gajah",s:[
+    {tx:"Benteng meluncur sejauh mungkin sepanjang baris dan lajur tanpa halangan. Geser benteng ke ujung lajur-a.",idea:"Gerak lurus ke atas menyusuri lajur-a yang terbuka.",why:"Ra8+ menguasai seluruh lajur dan memberi skak ke raja lawan."},
+    {tx:"Benteng memakan bidak lawan pertama di jalurnya. Makan pion tak terjaga di d5.",idea:"Meluncur lurus ke atas di lajur-d menuju d5.",why:"Rxd5 meraih pion gratis sekaligus menjaga benteng aktif di lajur tengah."},
+    {tx:"Gajah bergerak sepanjang diagonal satu warna kotak. Sapu gajah c1 melintasi diagonal panjang ke h6.",idea:"Ikuti diagonal kotak gelap c1→d2→e3→f4→g5→h6.",why:"Bc1–h6 menguasai enam kotak di sepanjang satu diagonal tanpa hambatan."}
+  ]},
+  {mod:"1. Penguasaan Bidak & Aturan Khusus",t:"Kuda, Menteri & Raja",s:[
+    {tx:"Kuda satu-satunya bidak yang bisa melompati bidak lain membentuk huruf “L”. Lompatkan kuda g1 melewati pion ke f3.",idea:"Dua kotak ke depan, lalu satu kotak ke samping.",why:"Nf3 melompati pion baris ke-2 dan mengontrol e5 serta d4."},
+    {tx:"Menteri menggabungkan gerak Benteng + Gajah. Gerakkan dia secara diagonal dari d4 ke a7.",idea:"Meluncur diagonal ke kiri atas menuju a7.",why:"Qa7 menunjukkan jangkauan diagonal panjang—namun di game nyata jangan terlalu cepat mengeluarkannya."},
+    {tx:"Saat Raja terkena SKAK, kamu wajib menyelamatkannya segera. Makan benteng yang menskak di e2.",idea:"Benteng berada tepat di sebelah dan tidak terjaga.",why:"Kxe2 melenyapkan penyerang. Selalu cek opsi makan, tutup jalur, atau geser Raja."}
+  ]},
+  {mod:"1. Penguasaan Bidak & Aturan Khusus",t:"Rokade & En Passant",s:[
+    {tx:"Rokade adalah langkah sekali per game untuk mengamankan Raja sekaligus mengaktifkan Benteng. Rokade pendek (O-O).",idea:"Geser Raja dua kotak ke arah benteng h1.",why:"O-O mengamankan Raja di pojok sambil membawa Benteng ke tengah."},
+    {tx:"En Passant: Pion Hitam baru saja melompat dua kotak melewati pion e5 kamu. Makan “sambil lalu” dari e5 ke d6.",idea:"Melangkah diagonal ke belakang pion d5 menuju d6.",why:"exd6 (en passant) mencegah pion lawan menyelinap lewat tanpa risiko dimakan."}
+  ]},
+  {mod:"2. Prinsip Pembukaan",t:"Kuasai Pusat Papan",s:[
+    {tx:"Aturan Emas #1: Perebutkan pusat papan (d4, d5, e4, e5). Dorong pion raja ke e4.",idea:"Tempatkan pion di e4 atau d4 pada Langkah 1.",why:"1. e4 menguasai ruang tengah dan membuka jalur gajah serta menteri."},
+    {tx:"Aturan Emas #2: Kembangkan kuda sebelum gajah. Majukan kuda ke arah tengah sambil menyerang e5.",idea:"Gerakkan g1 ke f3 untuk menekan pion e5.",why:"Nf3 mengembangkan perwira ringan dengan tempo karena menyerang pion e5."}
+  ]},
+  {mod:"2. Prinsip Pembukaan",t:"Pengembangan & Keamanan Raja",s:[
+    {tx:"Kembangkan gajah sisi raja ke diagonal aktif yang mengincar titik lemah Hitam di f7.",idea:"Arahkan gajah kotak terang ke c4.",why:"Bc4 mengincar f7 (awalnya hanya dijaga Raja Hitam) dan menyiapkan rokade."},
+    {tx:"Jangan biarkan Raja diam di tengah! Selesaikan pengembangan dengan rokade pendek.",idea:"Gerakkan Raja dari e1 ke g1.",why:"Rokade lebih awal menghubungkan kedua benteng dan melindungi Raja sebelum taktik dimulai."}
+  ]},
+  {mod:"3. Motif Taktik",t:"Serangan Ganda & Garpuan",s:[
+    {tx:"Garpuan (Fork) menyerang dua target berharga sekaligus. Lompatkan kuda untuk Garpuan Raja & Benteng.",idea:"Cari kotak kuda yang menyerang e8 dan a8 sekaligus.",why:"Nc7+ memaksa Raja berpindah, lalu kamu merebut Benteng a8."},
+    {tx:"Menteri unggul dalam garpuan jarak jauh. Geser Menteri untuk memberi skak sambil mengincar benteng di pojok.",idea:"Sejajarkan dengan e8 secara vertikal dan a8 secara diagonal.",why:"Qe4+ menskak Raja di lajur-e sekaligus mengancam benteng a8."}
+  ]},
+  {mod:"3. Motif Taktik",t:"Pin & Skewer",s:[
+    {tx:"Pin Mutlak mengunci bidak karena menggerakkannya akan membuka Raja. Pin Menteri Hitam ke Rajanya.",idea:"Geser Benteng ke lajur-e tempat Gajah melindunginya.",why:"Re1 mengunci Menteri di lajur-e (didukung Bf2), memenangkan Menteri."},
+    {tx:"Skewer memaksa bidak bernilai tinggi bergeser, membuka bidak di belakangnya. Skewer Raja untuk merebut benteng h8.",idea:"Skak Raja e5 di sepanjang diagonal c3–h8.",why:"Bc3+ memaksa Raja menyingkir, lalu Bxh8 memakan benteng di belakangnya."}
+  ]},
+  {mod:"4. Babak Akhir & Strategi",t:"Skakmat Benteng & Menteri",s:[
+    {tx:"Skakmat Baris Belakang: Pion Hitam sendiri mengurung Rajanya. Beri skakmat di baris ke-8.",idea:"Meluncurkan Benteng lurus sampai ke a8.",why:"Ra8# memanfaatkan tidak adanya kotak kabur di baris belakang."},
+    {tx:"Skakmat Menteri + Raja: Rajamu sudah menutup g7 dan h7. Selesaikan skakmat dengan Menteri.",idea:"Skak Raja h8 di baris ke-8 atau diagonal h8.",why:"Dengan Raja memutus jalan kabur, satu skak Menteri langsung menamatkan permainan."}
+  ]},
+  {mod:"4. Babak Akhir & Strategi",t:"Lajur Terbuka & Pos Terdepan",s:[
+    {tx:"Benteng berjaya di lajur terbuka tanpa halangan pion. Kuasai salah satu lajur tengah yang terbuka.",idea:"Geser a1 ke lajur c, d, atau e yang benar-benar kosong.",why:"Menempatkan Benteng di lajur terbuka memudahkan invasi ke baris ke-7 nantinya."},
+    {tx:"Outpost adalah kotak yang tak bisa diserang pion lawan. Tanamkan Kudamu di kotak outpost d5.",idea:"Lompatkan Kuda ke d5 dengan dukungan pion e4.",why:"Nd5 mendominasi papan karena Hitam tak punya pion c atau e lagi untuk mengusirnya."}
+  ]}
+];
+const PZ_ID={
+  "Back-Rank Mate":"Skakmat Baris Belakang","Queen Edge Mate":"Skakmat Tepi Menteri","Smothered Mate":"Skakmat Tercekik",
+  "Arabian Mate":"Skakmat Arab","Scholar’s Mate":"Skakmat Pelajar","Battery Mate":"Skakmat Baterai",
+  "Royal Fork":"Garpuan Raja","Absolute Pin":"Pin Mutlak","Diagonal Skewer":"Skewer Diagonal",
+  "Queen Fork":"Garpuan Menteri","Knight Fork":"Garpuan Kuda","Back-Rank Skewer":"Skewer Baris Belakang",
+  "Queen Decoy (2 Moves)":"Umpan Menteri (2 Langkah)","Corner Sac (2 Moves)":"Korban Pojok (2 Langkah)",
+  "Corner Trap (2 Moves)":"Jebakan Pojok (2 Langkah)","Philidor Mate (2 Moves)":"Skakmat Philidor (2 Langkah)",
+  Easy:"Mudah",Medium:"Sedang",Hard:"Sulit"
+};
+const PZ_STEP_ID={
+  "6k1/5ppp/8/8/8/8/8/R3K3 w - - 0 1":["Level 1 (Mudah): Beri skakmat baris belakang dalam 1 langkah.","Ra8# memberi skakmat di baris belakang yang terkurung."],
+  "7k/8/6K1/8/8/8/8/5Q2 w - - 0 1":["Level 1 (Mudah): Skakmat raja yang terpojok dalam 1 langkah.","Qf8# menutup baris ke-8 sementara rajamu menjaga g7 dan h7."],
+  "6rk/6pp/8/6N1/8/8/8/6K1 w - - 0 1":["Level 1 (Mudah): Serang dengan kudamu untuk skakmat dalam 1 langkah.","Nf7# adalah skakmat tercekik — raja hitam terkepung bidaknya sendiri."],
+  "7k/2R5/5N2/8/8/8/8/6K1 w - - 0 1":["Level 1 (Mudah): Kuda dan benteng bekerja sama untuk skakmat dalam 1 langkah.","Rh7# adalah skakmat Arab klasik dengan dukungan kuda f6."],
+  "4r1k1/8/8/8/8/8/5PPP/6K1 b - - 0 1":["Level 1 (Mudah): Giliran Hitam — skakmat dalam 1 langkah.","Re1# menghantam baris belakang yang tak terjaga."],
+  "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4":["Level 1 (Mudah): Incar titik terlemah Hitam (f7) untuk skakmat 1 langkah.","Qxf7# langsung menang dengan dukungan gajah c4."],
+  "5rk1/5ppp/8/8/8/2Q5/1B6/6K1 w - - 0 1":["Level 1 (Mudah): Baterai Menteri & Gajah — skakmat dalam 1 langkah.","Qxg7# skakmat di diagonal panjang dengan bantuan gajah b2."],
+  "r3k3/8/8/3N4/8/8/8/4K3 w - - 0 1":["Level 2 (Sedang): Garpu Raja dan Benteng lawan dengan satu lompatan.","Nc7+ menggaruk e8 dan a8; setelah raja pindah, Nxa8 merebut benteng."],
+  "4k3/8/4q3/8/8/8/5B2/R5K1 w - - 0 1":["Level 2 (Sedang): Pin Menteri Hitam ke Rajanya di lajur-e.","Re1 mem-pin menteri (dijaga Bf2), menang materi dengan bersih."],
+  "7r/8/8/4k3/8/8/8/4B1K1 w - - 0 1":["Level 2 (Sedang): Skewer Raja untuk merebut Benteng di pojok.","Bc3+ memaksa raja menyingkir dari diagonal sehingga Bxh8 memakan benteng."],
+  "r3k3/8/8/8/1Q6/8/8/4K3 w - - 0 1":["Level 2 (Sedang): Beri skak sekaligus menyerang Benteng di pojok.","Qe4+ menskak raja e8 dan mengancam a8 secara bersamaan."],
+  "4k3/8/8/3q4/4N3/8/8/4K3 w - - 0 1":["Level 2 (Sedang): Lompatkan Kuda untuk menggaruk Raja dan Menteri.","Nf6+ menggaruk raja e8 dan menteri d5."],
+  "4k2q/8/8/8/8/8/R7/4K3 w - - 0 1":["Level 2 (Sedang): Skewer Raja dan Menteri di sepanjang baris ke-8.","Ra8+ memaksa raja bergeser, memenangkan menteri h8."],
+  "3r2k1/5ppp/8/8/8/8/4QPPP/4R1K1 w - - 0 1":["Level 3 (Sulit): Mengorbankan Menteri memaksa skakmat baris belakang dalam 2 langkah.","Qe8+! mengalihkan Rxe8 dari baris belakang sehingga Rxe8# menamatkan game."],
+  "6rk/4Nppp/8/8/8/7Q/3R1PP1/6K1 w - - 0 1":["Level 3 (Sulit): Korbankan Menteri untuk membuka lajur-h (Skakmat 2 Langkah).","Qxh7+! memaksa Kxh7, lalu Rh2# skakmat (Ne7 menjaga g6)."],
+  "6k1/5ppp/8/6N1/8/8/5Q2/6K1 w - - 0 1":["Level 3 (Sulit): Desak Raja ke pojok untuk Skakmat dalam 2 Langkah.","Qf7+ memaksa Kh8, lalu Qf8# menutup baris belakang."],
+  "5r1k/6pp/8/6N1/8/1Q6/B7/6K1 w - - 0 1":["Level 3 (Sulit): Kombinasi Skakmat Tercekik klasik dalam 2 langkah.","Qg8+! (dilindungi Ba2) memaksa Rxg8, mengurung raja untuk Nf7#."]
+};
+const lMod=i=>P.lang==="id"?LS_ID[i].mod:LS[i].mod;
+const lTitle=i=>P.lang==="id"?LS_ID[i].t:LS[i].t;
+const lStep=(li,si)=>P.lang==="id"?Object.assign({},LS[li].s[si],LS_ID[li].s[si]):LS[li].s[si];
+const pDiff=p=>P.lang==="id"?(PZ_ID[p.diff]||p.diff):p.diff;
+const pCat=p=>P.lang==="id"?(PZ_ID[p.c]||p.c):p.c;
+const pText=p=>P.lang==="id"&&PZ_STEP_ID[p.fen]?PZ_STEP_ID[p.fen][0]:p.t;
+const pWhy=p=>P.lang==="id"&&PZ_STEP_ID[p.fen]?PZ_STEP_ID[p.fen][1]:p.why;
+
 if(typeof Chess!=="function"){
   $("#status-bar").innerHTML=`<span class="status-txt" style="color:var(--err)">chess.js failed to load from CDN.</span>`;
   return;
@@ -1486,12 +1788,17 @@ function getTodayPuzzles(){
   ];
 }
 function getDailyState(){
-  const day=todayKey();
+  const day=todayKey(),yest=yesterdayKey();
+  let changed=false;
+  if(P.pz.lastDay&&P.pz.lastDay!==day&&P.pz.lastDay!==yest&&P.pz.st!==0){
+    P.pz.st=0;changed=true;
+  }
   const cur=P.pz.daily[day];
   if(!cur||!Array.isArray(cur.done)||cur.done.length!==3){
     P.pz.daily={[day]:{done:[false,false,false]}};
-    save();
+    changed=true;
   }
+  if(changed)save();
   return P.pz.daily[day];
 }
 function allDoneToday(){return getDailyState().done.every(Boolean)}
@@ -2014,7 +2321,6 @@ function runCoachEvalFallback(fenBefore,fenAfter,cb){
 }
 
 /* ---------- Game State ---------- */
-const N={p:"pawn",n:"knight",b:"bishop",r:"rook",q:"queen",k:"king"};
 const DC={green:"#2e9e44",red:"#d33",blue:"#2f7de1",yellow:"#e6b800"};
 
 const S={
@@ -2027,11 +2333,15 @@ const S={
   legal:[],
   last:null,
   hint:null,
+  hintArrow:null,  // {a,b,c,hint:1}
   hm:"",
+  hmSpec:null,
   h:0,
   msg:"",
+  msgSpec:null,
   bad:false,
   ex:"",
+  exSpec:null,
   redo:[],
   li:0,
   si:0,
@@ -2041,6 +2351,7 @@ const S={
   pzBusy:false,
   tried:false,
   over:"",
+  overSpec:null,
   mateWin:"",      // "w" | "b" | ""
   mateModalOpen:false,
   chkWarn:false,
@@ -2059,17 +2370,38 @@ const S={
   dr:{a:[],h:{}},
   pv:null,
   coachMsg:"",
+  coachKey:"coachReady",
+  coachArgs:null,
   coachTone:"",    // "" | "good" | "warn"
   coachHintUsed:false,
   coachArrows:[],  // [{a,b,c}]
-  coachPending:null,// {punishUci,bestUci,reason}
+  coachPending:null,// {punishUci}
   coachPreFen:"",
-  copied:""
+  copied:"",
+  copiedLabel:""
 };
 
+function setMsg(key,vars){
+  S.msgSpec=key?{key,vars:vars||null}:null;
+  S.msg=key?t(key,vars):"";
+}
+function setCoach(key,args){
+  S.coachKey=key||"";
+  S.coachArgs=args||null;
+  S.coachMsg=key?formatCoachKey(key,args):"";
+}
+function formatCoachKey(key,args){
+  const v=args?Object.assign({},args):{};
+  if(v.tgtType)v.tgt=pcName(v.tgtType);
+  if(v.atkType)v.atk=pcName(v.atkType);
+  if(v.capType)v.cap=pcName(v.capType);
+  if(v.pieceType)v.piece=pcName(v.pieceType);
+  return t(key,v);
+}
+
 let chkWarnTimer=0;
-function triggerCheckPinWarning(text){
-  S.msg=text||"Your King is in check! Defend or move the King";
+function triggerCheckPinWarning(key){
+  setMsg(key||"errKingCheck");
   S.bad=true;
   S.chkWarn=true;
   if(chkWarnTimer)clearTimeout(chkWarnTimer);
@@ -2083,7 +2415,7 @@ function clearCheckWarn(){
   S.chkWarn=false;
 }
 
-const cur=()=>LS[S.li].s[S.si];
+const cur=()=>lStep(S.li,S.si);
 const dur=()=>P.fx.anim&&!P.fx.rm?[300,170,95][P.fx.spd]:0;
 function kind(m,g){return g.in_checkmate()?"mate":g.in_check()?"chk":m.promotion?"promo":(m.piece==="k"&&/[kq]/.test(m.flags))?"castle":m.captured?"cap":"move"}
 function snd(k){SND[k]&&SND[k]()}
@@ -2349,17 +2681,18 @@ function ov(){
       h+=`<circle cx="${x}" cy="${y}" r="4.2" fill="none" stroke="${DC[S.dc]}" stroke-width=".85" stroke-dasharray="1.6 1.2"/>`;
     }
   }
-  if(P.fx.arr||S.mode==="coach"){
+  if(P.fx.arr||S.mode==="coach"||S.hintArrow){
     const L=P.fx.arr?[...D.a]:[];
     if(P.fx.arr&&S.pv&&S.pv[0]!==S.pv[1])L.push({a:S.pv[0],b:S.pv[1],c:S.pv[2],pv:1});
     if(S.mode==="coach"&&S.coachArrows.length)for(const a of S.coachArrows)L.push(a);
+    if(S.hintArrow&&(S.mode==="basic"||S.mode==="bot"))L.push(S.hintArrow);
     for(const r of L){
       const col=DC[r.c]||r.c;
       const[x1,y1]=xySvg(r.a),[x2,y2]=xySvg(r.b),dx=x2-x1,dy=y2-y1,kn=Math.abs(dx*dy)===200;
       const[cx,cy]=kn?(Math.abs(dx)>Math.abs(dy)?[x2,y1]:[x1,y2]):[x1,y1];
       const l=Math.hypot(x2-cx,y2-cy);if(!l)continue;
       const ux=(x2-cx)/l,uy=(y2-cy)/l,bx=x2-ux*3.4,by=y2-uy*3.4;
-      h+=`<g fill="${col}" stroke="${col}" opacity="${r.pv?.55:(r.coach?.82:.86)}"><polyline points="${x1},${y1} ${cx},${cy} ${bx},${by}" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><polygon stroke="none" points="${x2},${y2} ${bx-uy*2.3},${by+ux*2.3} ${bx+uy*2.3},${by-ux*2.3}"/></g>`;
+      h+=`<g fill="${col}" stroke="${col}" opacity="${r.pv?.55:(r.hint?.92:(r.coach?.82:.86))}"><polyline points="${x1},${y1} ${cx},${cy} ${bx},${by}" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><polygon stroke="none" points="${x2},${y2} ${bx-uy*2.3},${by+ux*2.3} ${bx+uy*2.3},${by-ux*2.3}"/></g>`;
     }
   }
   e.innerHTML=h;
@@ -2373,8 +2706,8 @@ function renderDrawBar(){
   db.innerHTML=
     `<div class="sw-row">${["green","red","blue","yellow"].map(k=>`<button data-a="dc" data-c="${k}" class="sw" aria-label="Draw ${k}" style="background:${DC[k]};${S.dc===k?"outline:2.5px solid var(--tx);outline-offset:2px":""}"></button>`).join("")}</div>`+
     `<div class="draw-acts">`+
-      `<button data-a="cd" ${showClr?"":"hidden"}>Clear</button>`+
-      `<button data-a="dm" class="pri">Done</button>`+
+      `<button data-a="cd" ${showClr?"":"hidden"}>${t("clear")}</button>`+
+      `<button data-a="dm" class="pri">${t("done")}</button>`+
     `</div>`;
 }
 function draw(a,b,c){
@@ -2412,10 +2745,10 @@ function loadFen(fen){
   S.pp=null;S.dr={a:[],h:{}};S.ds=null;
   S.g=new Chess(fen);
   S.sel=null;S.legal=[];S.last=null;
-  S.h=0;S.hint=null;S.hm="";
+  S.h=0;S.hint=null;S.hintArrow=null;S.hm="";S.hmSpec=null;
   S.redo=[];S.solved=false;
   S.pzStep=0;S.pzBusy=false;
-  S.bad=false;S.ex="";S.tried=false;S.over="";
+  S.bad=false;S.msgSpec=null;S.ex="";S.exSpec=null;S.tried=false;S.over="";S.overSpec=null;
   S.mateWin="";S.mateModalOpen=false;
   S.coachArrows=[];S.coachPending=null;S.coachPreFen="";
 }
@@ -2439,7 +2772,7 @@ function startCoach(){
   S.menuOpen=false;S.colorModalOpen=false;
   loadFen(new Chess().fen());
   S.msg="";
-  S.coachMsg="Halo! Aku Coach Gemini. Main santai aja ya — aku bakal ingetin kalau ada perwiramu yang terancam bahaya.";
+  setCoach("coachWelcome");
   S.coachTone="";S.coachHintUsed=false;
   render();
 }
@@ -2448,6 +2781,7 @@ function startLesson(li,si){
   if(li!==undefined)S.li=li;
   if(si!==undefined)S.si=si;
   loadFen(cur().fen);
+  S.msgSpec={type:"lessonStep"};
   S.msg=cur().tx;
   render();
 }
@@ -2458,7 +2792,8 @@ function startPuzzle(pi){
   const p=list[S.pi];
   loadFen(p.fen);
   S.flip=S.g.turn()==="b";
-  S.msg=p.t;
+  S.msgSpec={type:"puzPrompt"};
+  S.msg=pText(p);
   render();
 }
 function restartCurrent(){
@@ -2491,8 +2826,18 @@ function runWorkerOp(payload,fallbackFn,cb){
   }else fallbackFn();
 }
 
-const ID_PIECE={p:"pion",n:"kuda",b:"gajah",r:"benteng",q:"menteri",k:"raja"};
 const ID_VAL={p:1,n:3,b:3,r:5,q:9,k:100};
+
+function getBotDelayMs(diff,isCoach){
+  if(isCoach)return 3000;
+  if(diff==="easy"){
+    return Math.random()<0.78?(3400+Math.round(Math.random()*2100)):(1800+Math.round(Math.random()*1100));
+  }
+  if(diff==="medium")return 2600+Math.round(Math.random()*1600);
+  if(diff==="hard")return 1700+Math.round(Math.random()*1300);
+  if(diff==="nightmare")return 1100+Math.round(Math.random()*1100);
+  return 900+Math.round(Math.random()*1000);
+}
 
 function findCoachThreat(){
   const g=S.g;
@@ -2517,7 +2862,7 @@ function triggerBotMove(){
   if(S.busy||(S.mode!=="bot"&&!isCoach)||S.over||S.g.turn()===S.col)return;
   const tk=++S.tok,fen=S.g.fen(),diff=isCoach?"medium":P.diff;
   const startedAt=performance.now();
-  const targetDelay=isCoach?(420+Math.round(Math.random()*280)):(600+Math.round(Math.random()*600));
+  const targetDelay=getBotDelayMs(diff,isCoach);
   S.busy=true;
   renderUIOnly();
 
@@ -2536,26 +2881,26 @@ function triggerBotMove(){
       if(!m){render();return}
       S.last=[m.from,m.to];
       S.bad=false;
-      S.msg="";
-      S.ex=(isCoach?"Coach: ":"Bot: ")+explain(m,S.g);
+      setMsg("");
+      setExplain(m,S.g,isCoach?"Coach: ":"Bot: ");
       if(isCoach){
         const thr=findCoachThreat();
         if(S.g.in_check()){
           S.coachTone="warn";
           S.coachArrows=[];
-          S.coachMsg="Skak! Raja kamu lagi terancam nih, lindungi atau geser ke tempat aman dulu ya.";
+          setCoach("coachCheckWarn");
         }else if(thr){
           S.coachTone="warn";
           S.coachArrows=[{a:thr.from,b:thr.to,c:"#ef4444",coach:1}];
-          S.coachMsg=`Eh hati-hati, ${ID_PIECE[thr.tgt]} kamu lagi diincer ${ID_PIECE[thr.atk]} lawan nih! Coba cek dulu sebelum melangkah.`;
+          setCoach("coachThreat",{tgtType:thr.tgt,atkType:thr.atk});
         }else if(m.captured){
           S.coachTone="";
           S.coachArrows=[];
-          S.coachMsg=`Aku barusan makan ${ID_PIECE[m.captured]} kamu nih. Santai, coba cari balasan yang oke ya!`;
+          setCoach("coachCaptured",{capType:m.captured});
         }else{
           S.coachTone="";
           S.coachArrows=[];
-          S.coachMsg="Giliranku udah jalan. Cek dulu semua perwiramu aman sebelum melangkah ya!";
+          setCoach("coachMoved");
         }
       }
       snd(kind(m,S.g));clrDraw();endCheck();
@@ -2567,65 +2912,75 @@ function triggerBotMove(){
 }
 
 function evaluateCoachMove(fenBefore,m){
-  const tk=++S.tok,fenAfter=S.g.fen();
+  const tk=++S.tok,fenAfter=S.g.fen(),startedAt=performance.now();
   S.busy=true;
   S.coachTone="";
-  S.coachMsg="Sebentar ya, lagi ngecek langkah barusan…";
+  setCoach("coachChecking");
   renderUIOnly();
   const apply=res=>{
     if(tk!==S.tok||S.mode!=="coach"||S.g.fen()!==fenAfter)return;
-    S.busy=false;
-    const loss=res?res.loss:0;
-    if(loss>=120&&!S.over){
-      S.coachTone="warn";
-      const pun=res.punishUci||"";
-      const pf=res.punFrom||(pun?pun.slice(0,2):"");
-      const pt=res.punTo||(pun?pun.slice(2,4):"");
-      S.coachArrows=(pf&&pt)?[{a:pf,b:pt,c:"#ef4444",coach:1}]:[];
-      if(res.tgtType&&res.atkType){
-        S.coachMsg=`Waduh, hati-hati! Langkah barusan bikin ${ID_PIECE[res.tgtType]} kamu bisa langsung dimakan ${ID_PIECE[res.atkType]} lawan secara gratis.`;
-      }else if(res.isCheck){
-        S.coachMsg="Eh, tunggu dulu! Pertahanan raja kamu kebuka nih, lawan bisa langsung skak dan nekan balik.";
+    const wait=Math.max(0,3000-(performance.now()-startedAt));
+    S.aiTimer=setTimeout(()=>{
+      S.aiTimer=0;
+      if(tk!==S.tok||S.mode!=="coach"||S.g.fen()!==fenAfter)return;
+      S.busy=false;
+      const loss=res?res.loss:0;
+      if(loss>=120&&!S.over){
+        S.coachTone="warn";
+        const pun=res.punishUci||"";
+        const pf=res.punFrom||(pun?pun.slice(0,2):"");
+        const pt=res.punTo||(pun?pun.slice(2,4):"");
+        S.coachArrows=(pf&&pt)?[{a:pf,b:pt,c:"#ef4444",coach:1}]:[];
+        if(res.tgtType&&res.atkType){
+          setCoach("coachBlunderCap",{tgtType:res.tgtType,atkType:res.atkType});
+        }else if(res.isCheck){
+          setCoach("coachBlunderCheck");
+        }else{
+          setCoach("coachBlunderPos");
+        }
+        S.coachPending={punishUci:pun};
+        renderUIOnly();
       }else{
-        S.coachMsg="Waduh, langkah itu agak berisiko nih—lawan punya serangan balasan yang bikin kamu rugi posisi.";
+        S.coachTone="good";
+        S.coachArrows=[];
+        if(S.g.in_check()){
+          setCoach("coachGoodCheck");
+        }else if(m.captured){
+          setCoach("coachGoodCap");
+        }else if(loss<35){
+          setCoach("coachGoodBest");
+        }else{
+          setCoach("coachGoodSolid");
+        }
+        renderUIOnly();
+        if(!S.over)triggerBotMove();
       }
-      S.coachPending={punishUci:pun};
-      renderUIOnly();
-    }else{
-      S.coachTone="good";
-      S.coachArrows=[];
-      if(S.g.in_check()){
-        S.coachMsg="Mantap! Skak yang cakep, lawan jadi tertekan nih.";
-      }else if(m.captured){
-        S.coachMsg="Cakep! Pertukaran yang bagus, posisimu tetap aman.";
-      }else if(loss<35){
-        S.coachMsg="Langkah yang oke banget! Posisimu aktif dan aman.";
-      }else{
-        S.coachMsg="Lumayan solid nih, aman buat lanjut ke langkah berikutnya!";
-      }
-      renderUIOnly();
-      if(!S.over)triggerBotMove();
-    }
+    },wait);
   };
   runWorkerOp({id:tk,op:"coachEval",fenBefore,fenAfter},()=>runCoachEvalFallback(fenBefore,fenAfter,apply),d=>apply(d.res));
 }
 
 /* ---------- Fast Coaching Explanations ---------- */
-function explain(m,g){
-  let t=`${N[m.piece]} ${m.from}→${m.to}.`;
-  if(m.captured)t+=` Captures ${N[m.captured]}.`;
-  if(/[kq]/.test(m.flags)&&m.piece==="k")t+=" Castling: king to safety, rook activated.";
-  if(m.flags.includes("e"))t+=" En passant capture.";
-  if(m.promotion)t+=` Promoted to ${N[m.promotion]}.`;
-  if(g.in_checkmate())t+=" Checkmate!";
-  else if(g.in_check())t+=" Check!";
-  if("de".includes(m.to[0])&&"45".includes(m.to[1]))t+=" Claims the centre.";
-  if("nb".includes(m.piece)&&m.from[1]===(m.color==="w"?"1":"8"))t+=" Develops a piece.";
+function buildExplainText(m,inMate,inChk,prefix){
+  let s=t("exMove",{piece:pcName(m.piece),from:m.from,to:m.to});
+  if(m.captured)s+=t("exCap",{cap:pcName(m.captured)});
+  if(/[kq]/.test(m.flags)&&m.piece==="k")s+=t("exCastle");
+  if(m.flags.includes("e"))s+=t("exEp");
+  if(m.promotion)s+=t("exPromo",{promo:pcName(m.promotion)});
+  if(inMate)s+=t("exMate");
+  else if(inChk)s+=t("exChk");
+  if("de".includes(m.to[0])&&"45".includes(m.to[1]))s+=t("exCenter");
+  if("nb".includes(m.piece)&&m.from[1]===(m.color==="w"?"1":"8"))s+=t("exDev");
   if(P.beg){
-    const s=m.san;
-    t+=` Notation “${s}”: `+(s[0]==="O"?"castling.":(/[NBRQK]/.test(s[0])?N[m.piece][0].toUpperCase()+N[m.piece].slice(1):(s.includes("x")?"pawn capture":"pawn move"))+(s.includes("x")?", x = capture":"")+(s.includes("+")?", + = check":"")+(s.includes("#")?", # = checkmate":"")+".");
+    const san=m.san,pn=pcName(m.piece);
+    s+=t("exNoteStart",{san})+(san[0]==="O"?t("exNoteCastle"):(/[NBRQK]/.test(san[0])?pn[0].toUpperCase()+pn.slice(1):(san.includes("x")?t("exNotePawnCap"):t("exNotePawnMove")))+(san.includes("x")?t("exNoteCap"):"")+(san.includes("+")?t("exNoteChk"):"")+(san.includes("#")?t("exNoteMate"):"")+".");
   }
-  return t;
+  return (prefix||"")+s;
+}
+function setExplain(m,g,prefix){
+  if(!m){S.exSpec=null;S.ex="";return}
+  S.exSpec={m,inMate:g.in_checkmate(),inChk:g.in_check(),prefix:prefix||""};
+  S.ex=buildExplainText(m,S.exSpec.inMate,S.exSpec.inChk,S.exSpec.prefix);
 }
 
 /* ---------- Moves, Promotion Modal, Check/Pin Validation, Undo/Redo ---------- */
@@ -2642,14 +2997,12 @@ function reportInvalidAttempt(fromSq,targetSq){
   const g=S.g;
   const pseudo=isPseudoLegalMove(g,fromSq,targetSq);
   if(g.in_check()||pseudo){
-    triggerCheckPinWarning(g.in_check()
-      ?"Your King is in check! Defend or move the King"
-      :"Your King is in check! That piece is pinned — defend or move the King");
+    triggerCheckPinWarning(g.in_check()?"errKingCheck":"errKingPin");
     SND.err();
     return true;
   }
   if(targetSq&&g.get(targetSq)){
-    S.msg="Illegal move for that piece — tap one of the dot indicators.";
+    setMsg("errIllegal");
     S.bad=true;
     SND.err();
     return true;
@@ -2668,24 +3021,26 @@ function doMove(f,t,pr,fromDrag){
   if(!m)return;
   clearCheckWarn();
   S.coachTok++;S.coachArrows=[];S.coachPending=null;
-  S.sel=null;S.legal=[];S.redo=[];S.hint=null;S.hm="";S.last=[f,t];
-  S.ex=explain(m,g);
+  S.sel=null;S.legal=[];S.redo=[];S.hint=null;S.hintArrow=null;S.hm="";S.hmSpec=null;S.last=[f,t];
+  setExplain(m,g,"");
   const sk=kind(m,g),L=g.history().length;
   S.bad=false;
-  if(S.mode==="bot"||S.mode==="coach")S.msg="";
+  if(S.mode==="bot"||S.mode==="coach")setMsg("");
   let animObj={m,instant:!!fromDrag};
 
   if(S.mode==="learn"){
     const s=cur();
     const matched=(m.from===s.best.slice(0,2)&&s.acc.includes(m.to))||(s.accMate&&g.in_checkmate());
     if(matched){
-      S.solved=true;S.msg=s.why+" ✓";
+      S.solved=true;
       P.done[S.li+"-"+S.si]=1;save();
-      if(S.si===LS[S.li].s.length-1&&LS[S.li].s.every((_,i)=>P.done[S.li+"-"+i]))S.msg+=" Lesson complete!";
+      const allDone=S.si===LS[S.li].s.length-1&&LS[S.li].s.every((_,i)=>P.done[S.li+"-"+i]);
+      S.msgSpec={type:"lessonSolved",allDone};
+      S.msg=s.why+" ✓"+(allDone?t("lessonComplete"):"");
       SND.ok();
     }else{
-      g.undo();S.last=null;S.ex="";S.bad=true;animObj=null;
-      S.msg=m.from!==s.best.slice(0,2)?"Legal move, but try moving the lesson’s target piece instead.":"Legal move, but not the goal of this step — check the prompt or tap Hint.";
+      g.undo();S.last=null;setExplain(null);S.bad=true;animObj=null;
+      setMsg(m.from!==s.best.slice(0,2)?"errLessonPiece":"errLessonGoal");
       SND.err();
     }
   }else if(S.mode==="puz"){
@@ -2695,7 +3050,7 @@ function doMove(f,t,pr,fromDrag){
       if(f+t===exp){
         if(S.pzStep===0){
           S.pzStep=1;S.pzBusy=true;
-          S.msg="Great start! Forced response incoming…";
+          setMsg("puzGreatStart");
           snd(sk);clrDraw();render(animObj);
           const tk=S.tok;
           setTimeout(()=>{
@@ -2705,34 +3060,36 @@ function doMove(f,t,pr,fromDrag){
             S.pzBusy=false;
             if(om){
               S.last=[om.from,om.to];
-              S.msg="Finish the combination now!";
+              setMsg("puzFinishCombo");
               snd(kind(om,S.g));
               render({m:om});
             }else renderUIOnly();
           },360);
           return;
         }else{
-          S.msg=p.why+" ✓";
+          S.msgSpec={type:"puzSolved",san:m.san};
+          S.msg=pWhy(p)+" ✓";
           S.solved=true;
           recordPz(true);
           SND.ok();
         }
       }else{
-        g.undo();S.last=null;S.ex="";S.bad=true;animObj=null;
-        S.msg=`${m.san} isn’t the combination move. Try again or tap Hint.`;
+        g.undo();S.last=null;setExplain(null);S.bad=true;animObj=null;
+        setMsg("puzWrongCombo",{san:m.san});
         SND.err();
         recordPz(false);
       }
     }else{
       const ok=p.sol?(f+t===p.sol):m.san.endsWith("#");
       if(ok){
-        S.msg=(p.why||`${m.san} is checkmate!`) +" ✓";
+        S.msgSpec={type:"puzSolved",san:m.san};
+        S.msg=(pWhy(p)||t("puzDefaultMate",{san:m.san}))+" ✓";
         S.solved=true;
         recordPz(true);
         SND.ok();
       }else{
-        g.undo();S.last=null;S.ex="";S.bad=true;animObj=null;
-        S.msg=`${m.san} isn’t the solution. Try again or tap Hint.`;
+        g.undo();S.last=null;setExplain(null);S.bad=true;animObj=null;
+        setMsg("puzWrongSol",{san:m.san});
         SND.err();
         recordPz(false);
       }
@@ -2768,55 +3125,56 @@ function shakeSq(sq){
 function recordPz(ok){
   const pzList=getTodayPuzzles(),p=pzList[S.pi],z=P.pz,ds=getDailyState(),day=todayKey();
   if(ok){
-    if(!ds.done[S.pi]){
-      ds.done[S.pi]=true;
-    }
+    if(!ds.done[S.pi])ds.done[S.pi]=true;
     if(allDoneToday()&&z.lastDay!==day){
+      const prevDay=z.lastDay;
       z.lastDay=day;
+      z.st=(prevDay===yesterdayKey())?(z.st||0)+1:1;
     }
     if(!S.tried){
       z.a++;z.cat[p.c]=z.cat[p.c]||{a:0,s:0};z.cat[p.c].a++;
       z.s++;z.cat[p.c].s++;
-      z.st++;z.r+=12;
+      z.r+=12;
     }
     S.tried=true;save();
     return;
   }
   if(S.tried)return;
   z.a++;z.cat[p.c]=z.cat[p.c]||{a:0,s:0};z.cat[p.c].a++;
-  z.st=0;z.r=Math.max(400,z.r-8);
+  z.r=Math.max(400,z.r-8);
   S.tried=true;save();
 }
 
 function endCheck(){
-  const g=S.g;let r="",res=null;
+  const g=S.g;let key="",vars=null,res=null;
   if(g.in_checkmate()){
     const wn=g.turn()==="w"?"b":"w";
-    r="Checkmate — "+(wn==="w"?"White":"Black")+" wins";
+    key="overMate";vars={wn};
     res=wn===S.col?"w":"l";
     S.mateWin=wn;
     if(S.mode==="basic"||S.mode==="bot"||S.mode==="coach")S.mateModalOpen=true;
   }
-  else if(g.in_stalemate()){r="Stalemate — draw";res="d"}
-  else if(g.in_threefold_repetition()){r="Draw by repetition";res="d"}
-  else if(g.insufficient_material()){r="Draw — insufficient material";res="d"}
-  else if(g.in_draw()){r="Draw — 50-move rule";res="d"}
-  if(r){
-    S.over=r;
+  else if(g.in_stalemate()){key="overStale";res="d"}
+  else if(g.in_threefold_repetition()){key="overRep";res="d"}
+  else if(g.insufficient_material()){key="overInsuff";res="d"}
+  else if(g.in_draw()){key="over50";res="d"}
+  if(key){
+    S.overSpec={key,vars};
+    S.over=t(key,vars&&vars.wn?{winner:t(vars.wn==="w"?"white":"black")}:undefined);
     if(S.mode==="bot"&&res){P.g[res]++;save()}
     if(S.mode==="coach"){
       S.coachArrows=[];
       if(g.in_checkmate()){
         const wn=g.turn()==="w"?"b":"w";
         S.coachTone=wn===S.col?"good":"warn";
-        S.coachMsg=wn===S.col?"Keren abis! Kamu berhasil menang skakmat!":"Skakmat nih! Nggak apa-apa, yuk main lagi biar makin jago.";
+        setCoach(wn===S.col?"coachMateWin":"coachMateLose");
       }else{
         S.coachTone="";
-        S.coachMsg="Permainan berakhir seri! Pertandingan yang seimbang.";
+        setCoach("coachDraw");
       }
     }
   }
-  return !!r;
+  return !!key;
 }
 
 function undo(){
@@ -2828,22 +3186,22 @@ function undo(){
   if(!g.history().length)return;
   let n=((S.mode==="bot"||S.mode==="coach")&&g.turn()===S.col&&g.history().length>=2)?2:1;
   if(S.mode==="puz"&&S.pzStep===1&&g.history().length>=2){n=2;S.pzStep=0}
-  S.over="";
+  S.over="";S.overSpec=null;
   let lastAnim=null,undone=0;
   while(n--&&g.history().length){
     const m=g.undo();S.redo.push(m);
     lastAnim={m,rev:true};undone++;
   }
   if(S.mode==="basic")S.flip=g.turn()==="b";
-  S.solved=false;S.sel=null;S.legal=[];S.hint=null;S.hm="";S.bad=false;
-  if(S.mode==="learn")S.msg=cur().tx;
-  else if(S.mode==="puz")S.msg=getTodayPuzzles()[S.pi].t;
-  else if(S.mode==="coach"){S.msg="";S.coachMsg="Langkah udah di-undo! Yuk coba cari langkah yang lebih aman."}
-  else S.msg="";
+  S.solved=false;S.sel=null;S.legal=[];S.hint=null;S.hintArrow=null;S.hm="";S.hmSpec=null;S.bad=false;
+  if(S.mode==="learn"){S.msgSpec={type:"lessonStep"};S.msg=cur().tx;}
+  else if(S.mode==="puz"){S.msgSpec={type:"puzPrompt"};S.msg=pText(getTodayPuzzles()[S.pi]);}
+  else if(S.mode==="coach"){setMsg("");setCoach("coachUndone");}
+  else setMsg("");
   clrDraw();
   const h=g.history({verbose:true}).pop();
   S.last=h?[h.from,h.to]:null;
-  S.ex=h?explain(h,g):"";
+  setExplain(h,g,"");
   SND.click();
   render(undone===1?lastAnim:null);
 }
@@ -2861,9 +3219,9 @@ function redo(){
     if(m2){lastM=m2;redone++}
   }
   if(S.mode==="basic")S.flip=g.turn()==="b";
-  S.coachPending=null;S.coachArrows=[];
+  S.coachPending=null;S.coachArrows=[];S.hintArrow=null;S.hm="";S.hmSpec=null;
   S.last=[lastM.from,lastM.to];
-  S.ex=explain(lastM,g);
+  setExplain(lastM,g,"");
   if(S.mode==="learn"||S.mode==="puz")S.solved=true;
   endCheck();
   snd(kind(lastM,g));clrDraw();
@@ -2885,15 +3243,15 @@ function coachHint(){
     S.coachHintUsed=true;
     S.coachTone=thr?"warn":"";
     if(thr){
-      S.coachMsg=`Hati-hati, ${ID_PIECE[thr.tgt]} kamu lagi diincer ${ID_PIECE[thr.atk]} lawan tuh! Coba perhatikan ${ID_PIECE[o.piece]} yang kutandai.`;
+      setCoach("coachHintThreat",{tgtType:thr.tgt,atkType:thr.atk,pieceType:o.piece});
     }else if(o.san==="O-O"||o.san==="O-O-O"){
-      S.coachMsg="Petunjuk: Saatnya amanin raja! Coba rokade biar raja kamu lebih terlindungi.";
+      setCoach("coachHintCastle");
     }else if(o.captured){
-      S.coachMsg=`Petunjuk: Coba perhatikan ${ID_PIECE[o.piece]} yang kutandai—ada perwira lawan yang lagi lengah nih!`;
+      setCoach("coachHintCap",{pieceType:o.piece});
     }else if(o.san.includes("+")){
-      S.coachMsg=`Petunjuk: Coba cek ${ID_PIECE[o.piece]} yang kutandai, langkahnya bisa bikin raja lawan tertekan!`;
+      setCoach("coachHintCheck",{pieceType:o.piece});
     }else{
-      S.coachMsg=`Petunjuk: Coba lirik ${ID_PIECE[o.piece]} yang kutandai—menggerakkannya bisa bikin posisimu makin aktif.`;
+      setCoach("coachHintActive",{pieceType:o.piece});
     }
     renderUIOnly();
   };
@@ -2911,8 +3269,10 @@ function hint(){
       const ms=S.g.moves({verbose:true});
       const o=ms.find(m=>(m.from+m.to+(m.promotion||""))===uci);
       if(!o)return;
-      S.hint=[o.from,o.to];
-      S.hm=`Suggested move: ${o.san} (${N[o.piece]} to ${o.to}).`;
+      S.hint=null;
+      S.hintArrow={a:o.from,b:o.to,c:"#4b9bff",hint:1};
+      S.hmSpec={type:"std",san:o.san,piece:o.piece,to:o.to};
+      S.hm=t("hintSuggested",{san:o.san,piece:pcName(o.piece),to:o.to});
       S.h=3;
       renderUIOnly();
     };
@@ -2920,30 +3280,58 @@ function hint(){
     runWorkerOp({id,fen,diff:"hard"},()=>runFallbackAsync(fen,"hard",showHint),d=>showHint(d.uci));
     return;
   }
-  let b,idea,why;
-  if(S.mode==="learn"){const s=cur();b=[s.best.slice(0,2),s.best.slice(2)];idea=s.idea;why=s.why}
+  let b,ideaKey,ideaText,whyText;
+  if(S.mode==="learn"){const s=cur();b=[s.best.slice(0,2),s.best.slice(2)];ideaText=s.idea;whyText=s.why}
   else{
     const p=getTodayPuzzles()[S.pi];
     if(p.seq){
       const mv=p.seq[S.pzStep*2];
       b=[mv.slice(0,2),mv.slice(2)];
-      idea="Look for a forcing move (check or sacrifice) that strips away a defender.";
-      why=p.why;
+      ideaKey="hintIdeaCombo";
+      whyText=pWhy(p);
     }else if(p.sol){
       b=[p.sol.slice(0,2),p.sol.slice(2)];
-      idea="Look closely for the decisive tactical blow.";
-      why=p.why;
+      ideaKey="hintIdeaTactic";
+      whyText=pWhy(p);
     }else{
       const m=mateMove(p.fen);
       b=[m.from,m.to];
-      idea="Start with checks — which check leaves the king zero escape squares?";
-      why=p.why||`${m.san} is checkmate.`;
+      ideaKey="hintIdeaMate";
+      whyText=pWhy(p)||t("puzDefaultMate",{san:m.san});
     }
   }
   S.h=Math.min(4,S.h+1);
-  S.hm=["",idea,"Look at the highlighted piece — that’s the one to move.","The highlighted squares show the exact move.","Solution: "+why][S.h];
+  S.hmSpec={type:"lp",h:S.h,ideaKey};
+  const idea=ideaKey?t(ideaKey):ideaText;
+  S.hm=["",idea,t("hintPiece"),t("hintSquares"),t("hintSolution",{why:whyText})][S.h];
   S.hint=S.h===2?[b[0]]:S.h>=3?b:null;
   renderUIOnly();
+}
+
+function refreshTranslatedState(){
+  if(S.coachKey)setCoach(S.coachKey,S.coachArgs);
+  if(S.exSpec)S.ex=buildExplainText(S.exSpec.m,S.exSpec.inMate,S.exSpec.inChk,S.exSpec.prefix);
+  if(S.overSpec)S.over=t(S.overSpec.key,S.overSpec.vars&&S.overSpec.vars.wn?{winner:t(S.overSpec.vars.wn==="w"?"white":"black")}:undefined);
+  if(S.msgSpec){
+    if(S.msgSpec.type==="lessonStep")S.msg=cur().tx;
+    else if(S.msgSpec.type==="lessonSolved")S.msg=cur().why+" ✓"+(S.msgSpec.allDone?t("lessonComplete"):"");
+    else if(S.msgSpec.type==="puzPrompt")S.msg=pText(getTodayPuzzles()[S.pi]);
+    else if(S.msgSpec.type==="puzSolved"){const p=getTodayPuzzles()[S.pi];S.msg=(pWhy(p)||t("puzDefaultMate",{san:S.msgSpec.san}))+" ✓";}
+    else if(S.msgSpec.key)S.msg=t(S.msgSpec.key,S.msgSpec.vars);
+  }
+  if(S.hmSpec){
+    if(S.hmSpec.type==="std")S.hm=t("hintSuggested",{san:S.hmSpec.san,piece:pcName(S.hmSpec.piece),to:S.hmSpec.to});
+    else if(S.hmSpec.type==="lp"){
+      const p=S.mode==="puz"?getTodayPuzzles()[S.pi]:null;
+      const whyText=S.mode==="learn"?cur().why:(pWhy(p)||"");
+      const idea=S.hmSpec.ideaKey?t(S.hmSpec.ideaKey):cur().idea;
+      S.hm=["",idea,t("hintPiece"),t("hintSquares"),t("hintSolution",{why:whyText})][S.hmSpec.h];
+    }
+  }
+  if(S.copiedLabel)S.copied=t("copied",{label:S.copiedLabel});
+  $("#menu-pop").setAttribute("aria-label",t("menuAria"));
+  $("#drawer").setAttribute("aria-label",t("drawerAria"));
+  $("#botbar").setAttribute("aria-label",t("navAria"));
 }
 
 /* ---------- View Rendering (Separated from Piece Layer) ---------- */
@@ -2951,13 +3339,13 @@ function currentBotMeta(){return BOT_MODES.find(b=>b.id===P.diff)||BOT_MODES[0]}
 function modeLabel(){
   if(S.mode==="bot"){
     const bm=currentBotMeta();
-    const badge=bm.red?`<span class="mittens-pill" style="padding:1px 6px;font-size:10px">Mittens</span>`:bm.name;
-    return `Bot · ${badge} (${S.col==="w"?"White":"Black"})`;
+    const badge=bm.red?`<span class="mittens-pill" style="padding:1px 6px;font-size:10px">Mittens</span>`:botName(bm);
+    return `Bot · ${badge} (${colName(S.col)})`;
   }
-  if(S.mode==="coach")return "Coach Gemini · Live Mentor";
-  if(S.mode==="learn")return `Learn · ${LS[S.li].t} ${S.si+1}/${LS[S.li].s.length}`;
-  if(S.mode==="puz"){const list=getTodayPuzzles();return `Daily Lv.${S.pi+1}/3 · ${list[S.pi].diff}`}
-  return "Basic · 2-Player (Auto-Flip)";
+  if(S.mode==="coach")return t("modeCoachHdr");
+  if(S.mode==="learn")return t("modeLearnHdr",{title:lTitle(S.li),step:S.si+1,total:LS[S.li].s.length});
+  if(S.mode==="puz"){const list=getTodayPuzzles();return t("modeDailyHdr",{lvl:S.pi+1,diff:pDiff(list[S.pi])})}
+  return t("modeBasicHdr");
 }
 
 function renderBotModeButtons(){
@@ -2966,8 +3354,8 @@ function renderBotModeButtons(){
       const act=P.diff===b.id;
       const cls=`diff-item${b.red?" mittens-btn":""}${act?" on":""}`;
       return `<button data-a="diff" data-v="${b.id}" class="${cls}">`+
-        `<span class="d-name">${b.red?`<span class="mittens-dot"></span>`:""}<span>${b.name}</span></span>`+
-        `<span class="d-sub">${b.sub}</span>`+
+        `<span class="d-name">${b.red?`<span class="mittens-dot"></span>`:""}<span>${botName(b)}</span></span>`+
+        `<span class="d-sub">${botSub(b)}</span>`+
       `</button>`;
     }).join("")+
   `</div>`;
@@ -2980,8 +3368,8 @@ function renderHeaderAndMenu(){
       `<div class="brand-meta"><span class="brand-title">Rookie: Learn Chess</span><span class="brand-sub">${modeLabel()}</span></div>`+
     `</div>`+
     `<div class="hdr-actions">`+
-      `<button data-a="mute" class="icon-btn ${P.mute?"":"on"}" aria-label="${P.mute?"Unmute sound":"Mute sound"}">${P.mute?IC.volOff:IC.volOn}</button>`+
-      `<button data-a="toggle-menu" class="menu-btn" aria-expanded="${S.menuOpen}"><span>Options</span>${IC.chev}</button>`+
+      `<button data-a="mute" class="icon-btn ${P.mute?"":"on"}" aria-label="${P.mute?t("unmute"):t("mute")}">${P.mute?IC.volOff:IC.volOn}</button>`+
+      `<button data-a="toggle-menu" class="menu-btn" aria-expanded="${S.menuOpen}"><span>${t("options")}</span>${IC.chev}</button>`+
     `</div>`;
 
   const bg=$("#menu-backdrop"),pop=$("#menu-pop");
@@ -2990,33 +3378,37 @@ function renderHeaderAndMenu(){
   if(S.menuOpen){
     const f=P.fx,B=(k,l)=>`<button data-a="set" data-k="${k}" class="${f[k]?"on":""}">${l}</button>`;
     pop.innerHTML=
-      `<div class="menu-sec"><div class="menu-lbl">Game Mode</div><div class="seg-3">`+
-        `<button data-a="mode-basic" class="${S.mode==="basic"?"on":""}">Basic (2P)</button>`+
-        `<button data-a="mode-bot" class="${S.mode==="bot"?"on":""}">Bot (vs AI)</button>`+
-        `<button data-a="mode-coach" class="${S.mode==="coach"?"on":""}">Coach Gemini</button>`+
+      `<div class="menu-sec"><div class="menu-lbl">${t("language")}</div><div class="seg">`+
+        `<button data-a="lang" data-v="en" class="${P.lang==="en"?"on":""}">${t("langEn")}</button>`+
+        `<button data-a="lang" data-v="id" class="${P.lang==="id"?"on":""}">${t("langId")}</button>`+
       `</div></div>`+
-      `<div class="menu-sec"><div class="menu-lbl">Bot Mode</div>${renderBotModeButtons()}</div>`+
-      `<div class="menu-sec"><div class="menu-lbl">Piece Size</div>`+
+      `<div class="menu-sec"><div class="menu-lbl">${t("gameMode")}</div><div class="seg-3">`+
+        `<button data-a="mode-basic" class="${S.mode==="basic"?"on":""}">${t("basic2p")}</button>`+
+        `<button data-a="mode-bot" class="${S.mode==="bot"?"on":""}">${t("botVsAi")}</button>`+
+        `<button data-a="mode-coach" class="${S.mode==="coach"?"on":""}">${t("coachGemini")}</button>`+
+      `</div></div>`+
+      `<div class="menu-sec"><div class="menu-lbl">${t("botMode")}</div>${renderBotModeButtons()}</div>`+
+      `<div class="menu-sec"><div class="menu-lbl">${t("pieceSize")}</div>`+
         `<div class="seg-4">${[[0,"0%"],[10,"+10%"],[20,"+20%"],[30,"+30%"]].map(([v,n])=>`<button data-a="psz" data-v="${v}" class="${P.pieceBoost===v?"on":""}">${n}</button>`).join("")}</div>`+
-        `<div class="vol-wrap"><span class="mu">Scale</span><input type="range" min="-10" max="35" step="5" value="${P.pieceBoost}" data-a="psz" aria-label="Piece size scale"><span id="pszv" class="vol-val">${P.pieceBoost>0?"+"+P.pieceBoost:P.pieceBoost}%</span></div>`+
+        `<div class="vol-wrap"><span class="mu">${t("scale")}</span><input type="range" min="-10" max="35" step="5" value="${P.pieceBoost}" data-a="psz" aria-label="${t("pieceSize")}"><span id="pszv" class="vol-val">${P.pieceBoost>0?"+"+P.pieceBoost:P.pieceBoost}%</span></div>`+
       `</div>`+
-      `<div class="menu-sec"><div class="menu-lbl">UI Size</div>`+
-        `<div class="seg-3">${[["compact","Compact"],["normal","Normal"],["large","Large"]].map(([v,n])=>`<button data-a="uisz" data-v="${v}" class="${P.uiSize===v?"on":""}">${n}</button>`).join("")}</div>`+
+      `<div class="menu-sec"><div class="menu-lbl">${t("uiSize")}</div>`+
+        `<div class="seg-3">${[["compact",t("compact")],["normal",t("normal")],["large",t("large")]].map(([v,n])=>`<button data-a="uisz" data-v="${v}" class="${P.uiSize===v?"on":""}">${n}</button>`).join("")}</div>`+
       `</div>`+
-      `<div class="menu-sec"><div class="menu-lbl">Coaching Detail</div><div class="seg">`+
-        `<button data-a="beg" data-v="1" class="${P.beg?"on":""}">Beginner</button>`+
-        `<button data-a="beg" data-v="0" class="${!P.beg?"on":""}">Advanced</button>`+
+      `<div class="menu-sec"><div class="menu-lbl">${t("coachingDetail")}</div><div class="seg">`+
+        `<button data-a="beg" data-v="1" class="${P.beg?"on":""}">${t("beginner")}</button>`+
+        `<button data-a="beg" data-v="0" class="${!P.beg?"on":""}">${t("advanced")}</button>`+
       `</div></div>`+
-      `<div class="menu-sec"><div class="menu-lbl">Board Tools &amp; Sound</div>`+
+      `<div class="menu-sec"><div class="menu-lbl">${t("boardTools")}</div>`+
         `<div class="menu-grid">`+
-          `<button data-a="dm" class="${S.dm?"on":""}">Draw Mode${S.dm?" ON":""}</button>`+
-          B("hl","Highlights")+B("arr","Arrows")+B("anim","Animations")+B("cap","Capture FX")+B("rm","Reduced Motion")+
+          `<button data-a="dm" class="${S.dm?"on":""}">${S.dm?t("drawModeOn"):t("drawMode")}</button>`+
+          B("hl",t("highlights"))+B("arr",t("arrows"))+B("anim",t("animations"))+B("cap",t("captureFx"))+B("rm",t("reducedMotion"))+
         `</div>`+
-        `<div class="vol-wrap"><span class="mu">Vol</span><input type="range" min="0" max="1" step=".05" value="${P.vol}" data-a="vol" aria-label="Sound volume"><span id="volv" class="vol-val">${Math.round(P.vol*100)}%</span></div>`+
+        `<div class="vol-wrap"><span class="mu">${t("vol")}</span><input type="range" min="0" max="1" step=".05" value="${P.vol}" data-a="vol" aria-label="${t("vol")}"><span id="volv" class="vol-val">${Math.round(P.vol*100)}%</span></div>`+
       `</div>`+
-      `<div class="menu-sec"><div class="menu-lbl">Animation Speed &amp; Theme</div>`+
-        `<div class="seg-3" style="margin-bottom:8px">${["Slow","Normal","Fast"].map((n,i)=>`<button data-a="set" data-k="spd" data-v="${i}" class="${f.spd===i?"on":""}">${n}</button>`).join("")}</div>`+
-        `<div class="seg-3">${[["auto","System"],["dark","Dark"],["light","Light"]].map(([v,n])=>`<button data-a="theme" data-v="${v}" class="${P.theme===v?"on":""}">${n}</button>`).join("")}</div>`+
+      `<div class="menu-sec"><div class="menu-lbl">${t("animTheme")}</div>`+
+        `<div class="seg-3" style="margin-bottom:8px">${[t("slow"),t("normal"),t("fast")].map((n,i)=>`<button data-a="set" data-k="spd" data-v="${i}" class="${f.spd===i?"on":""}">${n}</button>`).join("")}</div>`+
+        `<div class="seg-3">${[["auto",t("system")],["dark",t("dark")],["light",t("light")]].map(([v,n])=>`<button data-a="theme" data-v="${v}" class="${P.theme===v?"on":""}">${n}</button>`).join("")}</div>`+
       `</div>`;
   }
 }
@@ -3033,44 +3425,44 @@ function renderCoachBox(){
   box.innerHTML=
     `<div class="coach-lead">`+
       `<span class="coach-ava" aria-hidden="true">G</span>`+
-      `<div class="coach-txt">${S.coachMsg||"Coach Gemini siap nemenin kamu main. Santai aja ya!"}`+
-      `${S.coachArrows.length?`<small>Panah merah nunjukin ancaman lawan ke perwira kamu</small>`:""}</div>`+
+      `<div class="coach-txt">${S.coachMsg||t("coachReady")}`+
+      `${S.coachArrows.length?`<small>${t("coachArrowHint")}</small>`:""}</div>`+
     `</div>`+
-    `${showHintBtn?`<button data-a="coach-hint">Petunjuk</button>`:""}`;
+    `${showHintBtn?`<button data-a="coach-hint">${t("hint")}</button>`:""}`;
 
   pr.hidden=!S.coachPending;
   if(S.coachPending){
     pr.innerHTML=
-      `<span>Mau tarik ulang langkah?</span>`+
+      `<span>${t("coachTakeBack")}</span>`+
       `<div class="cp-acts">`+
         `<button data-a="coach-undo" class="pri">Undo</button>`+
-        `<button data-a="coach-cont">Continue anyway</button>`+
+        `<button data-a="coach-cont">${t("coachContinue")}</button>`+
       `</div>`;
   }
 }
 
 function renderStatusAndBanner(){
   const g=S.g,turnW=g.turn()==="w";
-  let stText=turnW?"White to move":"Black to move";
-  let stSub=g.in_check()?"CHECK":"";
+  let stText=turnW?t("whiteToMove"):t("blackToMove");
+  let stSub=g.in_check()?t("check"):"";
   const bm=currentBotMeta();
-  if(S.over){stText=S.over;stSub="Game Over"}
+  if(S.over){stText=S.over;stSub=t("gameOver")}
   else if(S.mode==="bot"||S.mode==="coach"){
-    const lbl=S.mode==="coach"?"Coach Gemini":(P.diff==="mittens"?`<span class="mittens-pill">Mittens</span>`:bm.name);
+    const lbl=S.mode==="coach"?t("coachGemini"):(P.diff==="mittens"?`<span class="mittens-pill">Mittens</span>`:botName(bm));
     if(S.busy){
-      stText=S.mode==="coach"?"Coach is thinking…":"Bot is thinking…";
+      stText=S.mode==="coach"?t("coachThinking"):t("botThinking");
       stSub=lbl;
     }else{
-      stText=g.turn()===S.col?"Your turn":(S.mode==="coach"?"Coach’s turn":"Bot’s turn");
-      stSub=g.in_check()?"CHECK":lbl;
+      stText=g.turn()===S.col?t("yourTurn"):(S.mode==="coach"?t("coachTurn"):t("botTurn"));
+      stSub=g.in_check()?t("check"):lbl;
     }
   }else if(S.mode==="learn"){
-    stText=`${LS[S.li].t} · Step ${S.si+1}/${LS[S.li].s.length}`;
-    stSub=S.solved?"Solved ✓":"";
+    stText=`${lTitle(S.li)} · ${S.si+1}/${LS[S.li].s.length}`;
+    stSub=S.solved?t("solved"):"";
   }else if(S.mode==="puz"){
     const p=getTodayPuzzles()[S.pi];
-    stText=`Daily Lv.${S.pi+1} (${p.diff}) · ${p.c}`;
-    stSub=S.solved?"Solved ✓":(turnW?"White":"Black");
+    stText=`${t("levelLabel",{lvl:S.pi+1,diff:pDiff(p),cat:pCat(p)})}`;
+    stSub=S.solved?t("solved"):(turnW?t("white"):t("black"));
   }
   $("#status-bar").innerHTML=
     `<div class="status-main"><span class="turn-dot ${turnW?"w":"b"} ${S.busy?"thinking":""}"></span><span class="status-txt">${stText}</span></div>`+
@@ -3080,26 +3472,26 @@ function renderStatusAndBanner(){
 
   const ban=$("#banner");
   const showLearnPuz=S.mode==="learn"||S.mode==="puz";
-  const text=S.hm&&S.h?S.hm:(S.over&&(S.mode==="bot"||S.mode==="coach")&&!S.msg?`${S.over}. Play again?`:S.msg);
+  const text=S.hm&&S.h?S.hm:(S.over&&(S.mode==="bot"||S.mode==="coach")&&!S.msg?`${S.over}. ${t("playAgain")}`:S.msg);
   if(!showLearnPuz&&!text){ban.hidden=true;return}
   ban.hidden=false;
   ban.className=(S.hm&&S.h)?"hint":(S.bad?"bad":"");
   let acts="";
   if(S.mode==="learn"){
-    acts+=`<button data-a="next" class="${S.solved?"pri":""}" ${S.solved?"":"disabled"}>Next step →</button>`+
-          `<button data-a="go-me">Learning Hub</button>`;
+    acts+=`<button data-a="next" class="${S.solved?"pri":""}" ${S.solved?"":"disabled"}>${t("nextStep")}</button>`+
+          `<button data-a="go-me">${t("learningHub")}</button>`;
   }else if(S.mode==="puz"){
     const doneAll=allDoneToday();
     const nxt=S.pi+1;
     const canNext=nxt<3&&(S.solved||isPuzzleUnlocked(nxt));
     if(doneAll){
-      acts+=`<span class="mu" style="font-weight:700;align-self:center">Next puzzles in <b id="banner-cd" style="color:var(--ac)">${formatMidnightCountdown()}</b></span>`;
+      acts+=`<span class="mu" style="font-weight:700;align-self:center">${t("nextPuzzlesIn")} <b id="banner-cd" style="color:var(--ac)">${formatMidnightCountdown()}</b></span>`;
     }else if(nxt<3){
-      acts+=`<button data-a="npz" class="${S.solved?"pri":""}" ${canNext?"":"disabled"}>Next Level (${nxt+1}/3) →</button>`;
+      acts+=`<button data-a="npz" class="${S.solved?"pri":""}" ${canNext?"":"disabled"}>${t("nextLevel",{lvl:nxt+1})}</button>`;
     }
-    acts+=`<button data-a="go-me">All dailies</button>`;
+    acts+=`<button data-a="go-me">${t("allDailies")}</button>`;
   }else if(S.over&&(S.mode==="bot"||S.mode==="coach")){
-    acts+=`<button data-a="restart" class="pri">${S.mode==="coach"?"New Coach Game":"New Bot Match"}</button>`;
+    acts+=`<button data-a="restart" class="pri">${S.mode==="coach"?t("newCoachGame"):t("newBotMatch")}</button>`;
   }
   ban.innerHTML=`<div class="banner-top"><span>${text}</span></div>${acts?`<div class="banner-actions">${acts}</div>`:""}`;
 }
@@ -3107,13 +3499,13 @@ function renderStatusAndBanner(){
 function renderActionBar(){
   const mv=S.g.history();
   $("#bctl").innerHTML=
-    `<button data-a="restart" aria-label="Restart">${IC.restart}<span>Restart</span></button>`+
-    `<button data-a="undo" aria-label="Undo" ${mv.length?"":"disabled"}>${IC.undo}<span>Undo</span></button>`+
-    `<button data-a="redo" aria-label="Redo" ${S.redo.length?"":"disabled"}>${IC.redo}<span>Redo</span></button>`+
-    `<button data-a="dm" class="${S.dm?"on":""}" aria-label="Draw mode">${IC.draw}<span>Draw</span></button>`+
-    `<button data-a="flip" aria-label="Flip board">${IC.flip}<span>Flip</span></button>`+
-    `<button data-a="hint" aria-label="Hint" ${S.over?"disabled":""}>${IC.hint}<span>Hint</span></button>`+
-    `<button data-a="drawer" class="${S.drawerOpen?"on":""}" aria-label="Moves list">${IC.list}<span>Moves${mv.length?` (${mv.length})`:""}</span></button>`;
+    `<button data-a="restart" aria-label="${t("restart")}">${IC.restart}<span>${t("restart")}</span></button>`+
+    `<button data-a="undo" aria-label="${t("undo")}" ${mv.length?"":"disabled"}>${IC.undo}<span>${t("undo")}</span></button>`+
+    `<button data-a="redo" aria-label="${t("redo")}" ${S.redo.length?"":"disabled"}>${IC.redo}<span>${t("redo")}</span></button>`+
+    `<button data-a="dm" class="${S.dm?"on":""}" aria-label="${t("draw")}">${IC.draw}<span>${t("draw")}</span></button>`+
+    `<button data-a="flip" aria-label="${t("flip")}">${IC.flip}<span>${t("flip")}</span></button>`+
+    `<button data-a="hint" aria-label="${t("hint")}" ${S.over?"disabled":""}>${IC.hint}<span>${t("hint")}</span></button>`+
+    `<button data-a="drawer" class="${S.drawerOpen?"on":""}" aria-label="${t("moves")}">${IC.list}<span>${t("moves")}${mv.length?` (${mv.length})`:""}</span></button>`;
   renderDrawBar();
 }
 
@@ -3125,12 +3517,13 @@ function renderMeView(){
   const solvedCount=ds.done.filter(Boolean).length;
   const doneAll=allDoneToday();
   const nextIdx=ds.done.findIndex(x=>!x);
+  const day=todayKey();
 
-  // Group Learning Hub lessons by module
   const mods=[];
   LS.forEach((l,i)=>{
-    let m=mods.find(x=>x.name===l.mod);
-    if(!m){m={name:l.mod,items:[]};mods.push(m)}
+    const mName=lMod(i);
+    let m=mods.find(x=>x.name===mName);
+    if(!m){m={name:mName,items:[]};mods.push(m)}
     m.items.push({l,i});
   });
 
@@ -3140,48 +3533,48 @@ function renderMeView(){
         <div class="me-emblem">${IC.queenLogo}</div>
         <div class="me-hero-info">
           <div class="me-hero-title">Rookie: Learn Chess</div>
-          <div class="mu">${dn} of ${tot} lesson steps · ${solvedCount}/3 Today’s Dailies · Rating ${z.r}</div>
+          <div class="mu">${t("heroSub",{dn,tot,sc:solvedCount,r:z.r})}</div>
           <div class="bar"><i style="width:${tot?dn/tot*100:0}%"></i></div>
         </div>
       </div>
     </div>
 
     <div class="card">
-      <h3><span>Your Statistics</span></h3>
+      <h3><span>${t("yourStats")}</span></h3>
       <div class="stats-grid">
-        <div class="stat"><b>${z.r}</b>Puzzle Rating</div>
-        <div class="stat"><b>${z.st}</b>Daily Streak</div>
-        <div class="stat"><b>${z.a?Math.round(z.s/z.a*100):0}%</b>Accuracy</div>
-        <div class="stat"><b>${P.g.w}/${P.g.d}/${P.g.l}</b>Bot W / D / L</div>
+        <div class="stat"><b>${z.r}</b>${t("puzzleRating")}</div>
+        <div class="stat"><b>${z.st}</b>${t("dailyStreak")}</div>
+        <div class="stat"><b>${z.a?Math.round(z.s/z.a*100):0}%</b>${t("accuracy")}</div>
+        <div class="stat"><b>${P.g.w}/${P.g.d}/${P.g.l}</b>${t("botWdl")}</div>
       </div>
     </div>
 
     <div class="card">
-      <h3><span>Daily Puzzles · ${todayKey()} (${solvedCount}/3)</span>${!doneAll&&nextIdx>=0?`<button data-a="puzzle" data-i="${nextIdx}" class="pri" style="min-height:36px;padding:0 12px;font-size:12.5px">Play Lv.${nextIdx+1}</button>`:`<span class="badge done">Locked Today</span>`}</h3>
+      <h3><span>${t("dailyPuzzles",{day,sc:solvedCount})}</span>${!doneAll&&nextIdx>=0?`<button data-a="puzzle" data-i="${nextIdx}" class="pri" style="min-height:36px;padding:0 12px;font-size:12.5px">${t("playLv",{lvl:nextIdx+1})}</button>`:`<span class="badge done">${t("lockedToday")}</span>`}</h3>
       ${doneAll
-        ?`<div class="cd-box"><span>All 3 daily puzzles solved! New puzzles unlock in</span><span id="daily-cd" class="cd-time">${formatMidnightCountdown()}</span></div>`
-        :`<div class="mu" style="margin-bottom:10px">Synced to your device date (${todayKey()}). Solve Lv.1 → Lv.2 → Lv.3 before midnight.</div>`}
+        ?`<div class="cd-box"><span>${t("dailySolvedAll")}</span><span id="daily-cd" class="cd-time">${formatMidnightCountdown()}</span></div>`
+        :`<div class="mu" style="margin-bottom:10px">${t("dailySyncInfo",{day})}</div>`}
       <div class="item-list">
         ${pzList.map((p,i)=>{
           const solved=!!ds.done[i];
           const open=isPuzzleUnlocked(i);
           return `<button class="list-btn" data-a="puzzle" data-i="${i}" ${open?"":"disabled"}>`+
-            `<span class="l-left"><span class="l-title">Level ${i+1} (${p.diff}) · ${p.c}</span><span class="l-sub">${solved?"Completed for today":(open?p.t:`Solve Level ${i} first to unlock`)}</span></span>`+
-            `<span class="badge ${solved?"done":(open?"today":"")}">${solved?"Solved ✓":(open?"Play":"Locked")}</span>`+
+            `<span class="l-left"><span class="l-title">${t("levelLabel",{lvl:i+1,diff:pDiff(p),cat:pCat(p)})}</span><span class="l-sub">${solved?t("completedToday"):(open?pText(p):t("solvePrevFirst",{prev:i}))}</span></span>`+
+            `<span class="badge ${solved?"done":(open?"today":"")}">${solved?t("solved"):(open?t("play"):t("locked"))}</span>`+
           `</button>`;
         }).join("")}
       </div>
     </div>
 
     <div class="card">
-      <h3><span>Learning Hub (${dn}/${tot})</span>${nxL>=0?`<button data-a="lesson" data-i="${nxL}" class="pri" style="min-height:36px;padding:0 12px;font-size:12.5px">Continue</button>`:""}</h3>
+      <h3><span>${t("learningHub")} (${dn}/${tot})</span>${nxL>=0?`<button data-a="lesson" data-i="${nxL}" class="pri" style="min-height:36px;padding:0 12px;font-size:12.5px">${t("continueBtn")}</button>`:""}</h3>
       ${mods.map(m=>
         `<div class="mod-hdr">${m.name}</div><div class="item-list">`+
         m.items.map(({l,i})=>{
           const comp=l.s.filter((_,j)=>P.done[i+"-"+j]).length,all=comp===l.s.length;
           return `<button class="list-btn" data-a="lesson" data-i="${i}">`+
-            `<span class="l-left"><span class="l-title">${i+1}. ${l.t}</span><span class="l-sub">${l.s.length} interactive step${l.s.length>1?"s":""}</span></span>`+
-            `<span class="badge ${all?"done":""}">${all?"Done ✓":`${comp}/${l.s.length}`}</span>`+
+            `<span class="l-left"><span class="l-title">${i+1}. ${lTitle(i)}</span><span class="l-sub">${t(l.s.length>1?"stepsCount":"stepCount",{n:l.s.length})}</span></span>`+
+            `<span class="badge ${all?"done":""}">${all?t("doneBadge"):`${comp}/${l.s.length}`}</span>`+
           `</button>`;
         }).join("")+
         `</div>`
@@ -3201,11 +3594,11 @@ function renderDrawer(){
     rows+=`<div class="m-num">${i/2+1}.</div><div class="m-san">${mv[i]}</div><div class="m-san">${mv[i+1]||""}</div>`;
   }
   dr.innerHTML=
-    `<div class="drawer-hdr"><h3>Move History &amp; Coaching</h3><button data-a="close-drawer" class="icon-btn" aria-label="Close drawer">${IC.close}</button></div>`+
+    `<div class="drawer-hdr"><h3>${t("moveHistoryTitle")}</h3><button data-a="close-drawer" class="icon-btn" aria-label="${t("cancel")}">${IC.close}</button></div>`+
     `<div class="drawer-body">`+
-      `${S.ex?`<div class="card" style="padding:12px"><div class="mu" style="font-weight:700;margin-bottom:4px">Last Move</div><div>${S.ex}</div></div>`:""}`+
-      `${mv.length?`<div class="moves-grid">${rows}</div>`:`<div class="mu">No moves played yet. Tap or drag a piece to start.</div>`}`+
-      `<div style="display:flex;gap:8px;flex-wrap:wrap"><button data-a="cpfen">Copy FEN</button><button data-a="cppgn" ${mv.length?"":"disabled"}>Copy PGN</button>${S.copied?`<span class="mu" style="align-self:center;color:var(--ac);font-weight:700">${S.copied}</span>`:""}</div>`+
+      `${S.ex?`<div class="card" style="padding:12px"><div class="mu" style="font-weight:700;margin-bottom:4px">${t("lastMove")}</div><div>${S.ex}</div></div>`:""}`+
+      `${mv.length?`<div class="moves-grid">${rows}</div>`:`<div class="mu">${t("noMovesYet")}</div>`}`+
+      `<div style="display:flex;gap:8px;flex-wrap:wrap"><button data-a="cpfen">${t("copyFen")}</button><button data-a="cppgn" ${mv.length?"":"disabled"}>${t("copyPgn")}</button>${S.copied?`<span class="mu" style="align-self:center;color:var(--ac);font-weight:700">${S.copied}</span>`:""}</div>`+
       `<code>${S.g.fen()}</code>`+
     `</div>`;
 }
@@ -3216,55 +3609,56 @@ function renderColorModal(){
   if(!S.colorModalOpen)return;
   $("#color-modal").innerHTML=
     `<div class="modal-emblem">${IC.queenLogo}</div>`+
-    `<h3>Play vs Bot</h3>`+
-    `<div class="mu">Select Bot difficulty, then pick your side.</div>`+
+    `<h3>${t("playVsBot")}</h3>`+
+    `<div class="mu">${t("pickSideSub")}</div>`+
     renderBotModeButtons()+
     `<div class="color-choices">`+
-      `<button data-a="bot-col" data-c="w" class="color-opt"><span class="color-swatch w"></span><span>White</span></button>`+
-      `<button data-a="bot-col" data-c="r" class="color-opt"><span class="color-swatch r"></span><span>Random</span></button>`+
-      `<button data-a="bot-col" data-c="b" class="color-opt"><span class="color-swatch b"></span><span>Black</span></button>`+
+      `<button data-a="bot-col" data-c="w" class="color-opt"><span class="color-swatch w"></span><span>${colName("w")}</span></button>`+
+      `<button data-a="bot-col" data-c="r" class="color-opt"><span class="color-swatch r"></span><span>${colName("r")}</span></button>`+
+      `<button data-a="bot-col" data-c="b" class="color-opt"><span class="color-swatch b"></span><span>${colName("b")}</span></button>`+
     `</div>`+
-    `<button data-a="close-color" style="width:100%">Cancel</button>`;
+    `<button data-a="close-color" style="width:100%">${t("cancel")}</button>`;
 }
 
 function renderPromoModal(){
   const bg=$("#promo-bg");
   bg.hidden=!S.pp;
   if(!S.pp)return;
-  const c=S.pp.c;
-  const opts=[["q","Queen"],["r","Rook"],["b","Bishop"],["n","Knight"]];
+  const c=S.pp.c,pn=PROMO_NAMES[P.lang]||PROMO_NAMES.en;
+  const opts=[["q",pn.q],["r",pn.r],["b",pn.b],["n",pn.n]];
   $("#promo-modal").innerHTML=
-    `<h3>Promote Pawn</h3>`+
-    `<div class="mu">Choose which piece your pawn becomes on ${S.pp.t.toUpperCase()}.</div>`+
+    `<h3>${t("promotePawn")}</h3>`+
+    `<div class="mu">${t("promoteSub",{sq:S.pp.t.toUpperCase()})}</div>`+
     `<div class="promo-grid">`+
-      opts.map(([k,lbl])=>`<button data-a="pro" data-p="${k}" class="promo-opt" aria-label="Promote to ${lbl}">${pieceUse(k,c)}<span>${lbl}</span></button>`).join("")+
+      opts.map(([k,lbl])=>`<button data-a="pro" data-p="${k}" class="promo-opt" aria-label="${lbl}">${pieceUse(k,c)}<span>${lbl}</span></button>`).join("")+
     `</div>`+
-    `<button data-a="pcancel" style="width:100%">Cancel</button>`;
+    `<button data-a="pcancel" style="width:100%">${t("cancel")}</button>`;
 }
 
 function renderMateModal(){
   const bg=$("#mate-bg");
   bg.hidden=!S.mateModalOpen;
   if(!S.mateModalOpen)return;
-  const wn=S.mateWin==="w"?"White":"Black";
-  let headline="Checkmate!";
-  let sub=`${wn} wins by checkmate.`;
+  const wn=colName(S.mateWin);
+  let headline=t("checkmate");
+  let sub=t("mateSub",{winner:wn});
   if(S.mode==="bot"){
+    const bn=botName(currentBotMeta());
     if(S.mateWin===S.col){
-      headline="Victory!";
-      sub=`You defeated ${currentBotMeta().name} as ${wn}!`;
+      headline=t("victory");
+      sub=t("mateWinSub",{bot:bn,winner:wn});
     }else{
-      headline="Checkmate";
-      sub=`${currentBotMeta().name} won by checkmate.`;
+      headline=t("checkmateNoBang");
+      sub=t("mateLoseSub",{bot:bn});
     }
   }
   $("#mate-modal").innerHTML=
     `<div class="modal-emblem mate-glow">${IC.queenLogo}</div>`+
     `<h3>${headline}</h3>`+
     `<div class="mu">${sub}</div>`+
-    `<button data-a="mate-restart" class="pri" style="width:100%">Restart Game</button>`+
-    `${S.mode==="bot"?`<button data-a="mode-bot" style="width:100%">Change Bot / Color</button>`:""}`+
-    `<button data-a="close-mate" style="width:100%">View Board</button>`;
+    `<button data-a="mate-restart" class="pri" style="width:100%">${t("restartGame")}</button>`+
+    `${S.mode==="bot"?`<button data-a="mode-bot" style="width:100%">${t("changeBotColor")}</button>`:""}`+
+    `<button data-a="close-mate" style="width:100%">${t("viewBoard")}</button>`;
 }
 
 function renderUIOnly(){
@@ -3283,8 +3677,8 @@ function renderUIOnly(){
     renderMeView();
   }
   $("#botbar").innerHTML=
-    `<button data-a="tab" data-v="play" class="${isPlay?"on":""}">${IC.play}<span>Play</span></button>`+
-    `<button data-a="tab" data-v="me" class="${!isPlay?"on":""}">${IC.me}<span>Me</span></button>`;
+    `<button data-a="tab" data-v="play" class="${isPlay?"on":""}">${IC.play}<span>${t("play")}</span></button>`+
+    `<button data-a="tab" data-v="me" class="${!isPlay?"on":""}">${IC.me}<span>${t("me")}</span></button>`;
   renderDrawer();
   renderColorModal();
   renderPromoModal();
@@ -3319,9 +3713,10 @@ function sqAtClient(x,y){
 function copyText(txt,label){
   try{
     if(navigator.clipboard?.writeText)navigator.clipboard.writeText(txt);
-    else{const t=document.createElement("textarea");t.value=txt;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove()}
-    S.copied=label+" copied";renderUIOnly();
-    setTimeout(()=>{if(S.copied===label+" copied"){S.copied="";renderUIOnly()}},1500);
+    else{const el=document.createElement("textarea");el.value=txt;document.body.appendChild(el);el.select();document.execCommand("copy");el.remove()}
+    S.copiedLabel=label;
+    S.copied=t("copied",{label});renderUIOnly();
+    setTimeout(()=>{if(S.copiedLabel===label){S.copied="";S.copiedLabel="";renderUIOnly()}},1500);
   }catch(e){}
 }
 
@@ -3342,7 +3737,7 @@ document.addEventListener("click",e=>{
   else if(a==="coach-undo")undo();
   else if(a==="coach-cont"){
     S.coachPending=null;S.coachArrows=[];S.coachTone="";
-    S.coachMsg="Oke, kita lanjut main dari langkah barusan ya!";
+    setCoach("coachContinueMsg");
     renderUIOnly();
     triggerBotMove();
   }
@@ -3353,6 +3748,11 @@ document.addEventListener("click",e=>{
     else startBasic();
   }
   else if(a==="close-mate"){S.mateModalOpen=false;renderUIOnly()}
+  else if(a==="lang"){
+    if(d.v==="en"||d.v==="id"){
+      P.lang=d.v;save();applyLanguage();refreshTranslatedState();renderUIOnly();
+    }
+  }
   else if(a==="diff"){P.diff=d.v;save();renderUIOnly()}
   else if(a==="uisz"){
     P.uiSize=d.v;
@@ -3363,7 +3763,7 @@ document.addEventListener("click",e=>{
     P.pieceBoost=+d.v;
     save();applyUIScale();renderUIOnly();
   }
-  else if(a==="beg"){P.beg=d.v==="1";save();renderUIOnly()}
+  else if(a==="beg"){P.beg=d.v==="1";save();refreshTranslatedState();renderUIOnly()}
   else if(a==="mute"){P.mute=!P.mute;save();renderUIOnly()}
   else if(a==="flip"){S.flip=!S.flip;render()}
   else if(a==="undo")undo();
