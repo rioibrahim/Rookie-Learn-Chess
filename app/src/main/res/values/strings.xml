@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Rookie</string>
+    <string name="app_name">Rookie: Learn Chess</string>
     <string name="nav_dashboard">Dashboard</string>
     <string name="nav_learn">Learn</string>
     <string name="nav_puzzles">Puzzles</string>

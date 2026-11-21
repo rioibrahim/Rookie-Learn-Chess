@@ -1132,6 +1132,195 @@ code{
 }
 
 .rm *,.rm *::after{animation:none!important;transition:none!important}
+
+/* Profile Name Edit Button */
+.me-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.name-edit-btn{
+  min-height:28px;
+  padding:0 9px;
+  border-radius:999px;
+  font-size:11.5px;
+  font-weight:700;
+  background:var(--pn2);
+}
+
+/* 2-Player Orientation Modal */
+.p2-choices{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.p2-opt{
+  min-height:112px;
+  padding:14px 10px;
+  flex-direction:column;
+  gap:8px;
+  border-radius:16px;
+  background:var(--pn2);
+  white-space:normal;
+  text-align:center;
+}
+.p2-ico{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  background:var(--ac-soft);
+  color:var(--ac);
+  border:1px solid var(--ac-ring);
+  display:grid;
+  place-items:center;
+}
+.p2-ico svg{width:24px;height:24px}
+.p2-title{font-size:14px;font-weight:800}
+.p2-sub{font-size:11.5px;color:var(--mu);font-weight:500;line-height:1.25}
+
+/* Sandbox Pre-Game Setup Modal */
+.modal-card.sb-card{
+  width:min(480px,100%);
+  max-height:calc(100dvh - 24px);
+  padding:16px 14px;
+  text-align:left;
+  gap:12px;
+}
+.sb-hdr{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.sb-hdr h3{margin:0;font-size:17px}
+.sb-sec{
+  background:var(--pn2);
+  border:1px solid var(--bd);
+  border-radius:14px;
+  padding:10px 11px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.sb-sec-lbl{
+  font-size:11.5px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  color:var(--mu);
+}
+.sb-presets{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.sb-presets button{
+  min-height:34px;
+  padding:0 10px;
+  font-size:12px;
+  border-radius:9px;
+}
+.sb-board-wrap{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  align-items:center;
+}
+.sb-grid{
+  width:min(288px,100%);
+  aspect-ratio:1/1;
+  display:grid;
+  grid-template-columns:repeat(8,minmax(0,1fr));
+  grid-template-rows:repeat(8,minmax(0,1fr));
+  border-radius:8px;
+  overflow:hidden;
+  border:1.5px solid var(--bd);
+}
+.sb-sq{
+  min-width:0;
+  min-height:0;
+  min-height:unset!important;
+  padding:0!important;
+  border:none!important;
+  border-radius:0!important;
+  display:grid;
+  place-items:center;
+}
+.sb-sq.l{background:var(--lt)}
+.sb-sq.d{background:var(--dk)}
+.sb-sq svg{width:84%;height:84%;display:block}
+.sb-palette{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:5px;
+}
+.sb-pal-btn{
+  width:36px;
+  height:36px;
+  min-width:36px;
+  min-height:36px;
+  padding:3px;
+  border-radius:9px;
+}
+.sb-pal-btn svg{width:26px;height:26px}
+.sb-pal-erase{
+  width:auto;
+  padding:0 10px;
+  font-size:12px;
+}
+.sb-bulk-row{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:5px;
+}
+.sb-bulk-row button{
+  min-height:32px;
+  padding:0 9px;
+  font-size:11.5px;
+  border-radius:8px;
+}
+.sb-rule-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:5px 0;
+  border-bottom:1px solid var(--bd);
+}
+.sb-rule-row:last-child{border-bottom:none;padding-bottom:0}
+.sb-pc-tag{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:12.5px;
+  font-weight:700;
+  min-width:74px;
+}
+.sb-pc-tag svg{width:22px;height:22px}
+.sb-chips{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  gap:5px;
+}
+.sb-chips button{
+  min-height:30px;
+  padding:0 8px;
+  font-size:11.5px;
+  border-radius:8px;
+}
+.sb-err{
+  font-size:12px;
+  font-weight:700;
+  color:var(--err);
+  text-align:center;
+}
+.status-pill-btn{
+  min-height:28px!important;
+  padding:0 9px!important;
+  font-size:11.5px!important;
+  border-radius:8px!important;
+  background:var(--pn2)!important;
+}
+
 @media (max-height:520px) and (min-width:560px){
   #play-view{
     display:grid;
@@ -1261,6 +1450,14 @@ code{
   <div id="mate-modal" class="modal-card" role="dialog" aria-label="Checkmate result"></div>
 </div>
 
+<div id="p2-bg" class="modal-bg" hidden>
+  <div id="p2-modal" class="modal-card" role="dialog" aria-label="2-Player Mode"></div>
+</div>
+
+<div id="sb-bg" class="modal-bg" hidden>
+  <div id="sb-modal" class="modal-card sb-card" role="dialog" aria-label="Sandbox Setup"></div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 <script>
 (()=>{
@@ -1291,6 +1488,7 @@ const VALID_DIFFS=new Set(BOT_MODES.map(b=>b.id));
 
 /* ---------- Persistent Profile ---------- */
 const def={
+  name:"",
   done:{},
   pz:{s:0,a:0,r:800,st:0,lastDay:"",cat:{},ok:{},daily:{}},
   g:{w:0,d:0,l:0},
@@ -1306,6 +1504,7 @@ const def={
 };
 let P;
 try{P=Object.assign({},def,JSON.parse(localStorage.getItem("rookie")||"{}"))}catch(e){P=Object.assign({},def)}
+P.name=typeof P.name==="string"?P.name.trim().slice(0,24):"";
 P.pz=Object.assign({},def.pz,P.pz||{});
 P.pz.cat=P.pz.cat||{};P.pz.ok=P.pz.ok||{};P.pz.daily=P.pz.daily||{};
 P.g=Object.assign({},def.g,P.g||{});
@@ -1353,12 +1552,15 @@ const I18N={
     options:"Options",mute:"Mute sound",unmute:"Unmute sound",
     menuAria:"Game modes and options",drawerAria:"Move List",navAria:"Primary navigation",
     play:"Play",me:"Me",
-    modeBasicHdr:"Basic · 2-Player (Auto-Flip)",
+    defaultPlayerName:"Player",editName:"Rename",enterPlayerName:"Enter your player name:",
+    modeBasicFaceHdr:"Basic · 2P (Face-to-Face)",
+    modeBasicSameHdr:"Basic · 2P (Same Direction)",
     modeCoachHdr:"Coach Gemini · Live Mentor",
+    modeSandboxHdr:"Sandbox · Custom Rules",
     modeLearnHdr:"Learn · {title} {step}/{total}",
     modeDailyHdr:"Daily Lv.{lvl}/3 · {diff}",
     language:"Language",langEn:"English",langId:"Indonesia",
-    gameMode:"Game Mode",basic2p:"Basic (2P)",botVsAi:"Bot (vs AI)",coachGemini:"Coach Gemini",
+    gameMode:"Game Mode",basic2p:"Basic (2P)",botVsAi:"Bot (vs AI)",coachGemini:"Coach Gemini",sandboxMode:"Sandbox",
     botMode:"Bot Mode",pieceSize:"Piece Size",scale:"Scale",uiSize:"UI Size",
     compact:"Compact",normal:"Normal",large:"Large",
     coachingDetail:"Coaching Detail",beginner:"Beginner",advanced:"Advanced",
@@ -1371,13 +1573,28 @@ const I18N={
     solved:"Solved ✓",white:"White",black:"Black",
     nextStep:"Next step →",learningHub:"Learning Hub",
     nextPuzzlesIn:"Next puzzles in",nextLevel:"Next Level ({lvl}/3) →",allDailies:"All dailies",
-    newCoachGame:"New Coach Game",newBotMatch:"New Bot Match",playAgain:"Play again?",
+    newCoachGame:"New Coach Game",newBotMatch:"New Bot Match",newSandboxMatch:"New Sandbox Match",playAgain:"Play again?",
     restart:"Restart",undo:"Undo",redo:"Redo",draw:"Draw",flip:"Flip",hint:"Hint",moves:"Moves",
     clear:"Clear",done:"Done",
     playVsBot:"Play vs Bot",pickSideSub:"Select Bot difficulty, then pick your side.",cancel:"Cancel",
+    p2Title:"2-Player Mode",p2Sub:"Choose how the board faces between turns.",
+    p2FaceTitle:"Face-to-Face",p2FaceSub:"Auto-flips 180° every turn",
+    p2SameTitle:"Same Direction",p2SameSub:"Fixed standard orientation",
+    change2pMode:"Change 2P Mode",
+    sandboxRulesBtn:"Rules & Setup",editSandboxRules:"Edit Sandbox Rules",
+    sbTitle:"Sandbox: Custom Rules",sbSub:"Customize pieces on the board and mix hybrid movement rules.",
+    sbPresets:"Quick Chaos Presets",sbPreStd:"Standard",sbPreQueens:"All Queens",sbPreKnights:"All Knights",sbPreRooks:"All Rooks",sbPreHybrid:"Super Hybrid",
+    sbRoster:"Piece Roster (Tap Squares to Place)",sbErase:"Erase",sbBulkSide:"Target",sbBoth:"Both",sbPawnsTo:"Pawns →",sbBackTo:"Back Row →",
+    sbHybridRules:"Custom Hybrid Movement",sbGlobalRules:"Rule Breakers & Opponent",
+    sbIgnoreCheck:"Allow Illegal / Capture King",sbFriendlyFire:"Capture Own Pieces",
+    sbOppSame:"2P Same Dir",sbOppFace:"2P Face-to-Face",sbOppBot:"vs Sandbox Bot",
+    sbStartMatch:"Start Sandbox Match",sbNeedPiece:"Place at least 1 White and 1 Black piece first!",
+    sbRuleKn:"+ Knight Jump",sbRuleDiag:"+ Diagonal",sbRuleOrtho:"+ Straight",sbRuleStep:"+ Side/Back",sbRuleLeap:"+ Leap",sbRuleQ:"+ Queen Slide",
+    sbExtraAbility:"{count} hybrid rules",sbTurnBanner:"Sandbox active ({opp}) — tap Rules to customize.",
     promotePawn:"Promote Pawn",promoteSub:"Choose which piece your pawn becomes on {sq}.",
     checkmate:"Checkmate!",checkmateNoBang:"Checkmate",victory:"Victory!",
     mateSub:"{winner} wins by checkmate.",mateWinSub:"You defeated {bot} as {winner}!",mateLoseSub:"{bot} won by checkmate.",
+    sbKingCapSub:"{winner} captured the enemy King!",sbNoMovesSub:"{winner} wins — opponent has no moves.",
     restartGame:"Restart Game",changeBotColor:"Change Bot / Color",viewBoard:"View Board",
     moveHistoryTitle:"Move History & Coaching",lastMove:"Last Move",
     noMovesYet:"No moves played yet. Tap or drag a piece to start.",
@@ -1409,50 +1626,226 @@ const I18N={
     hintPiece:"Look at the highlighted piece — that’s the one to move.",
     hintSquares:"The highlighted squares show the exact move.",
     hintSolution:"Solution: {why}",
-    overMate:"Checkmate — {winner} wins",overStale:"Stalemate — draw",overRep:"Draw by repetition",
+    overMate:"Checkmate — {winner} wins",overKingCap:"King captured — {winner} wins",overNoPieces:"Victory — {winner} wins",
+    overStale:"Stalemate — draw",overRep:"Draw by repetition",
     overInsuff:"Draw — insufficient material",over50:"Draw — 50-move rule",
     exMove:"{piece} {from}→{to}.",exCap:" Captures {cap}.",exCastle:" Castling: king to safety, rook activated.",
     exEp:" En passant capture.",exPromo:" Promoted to {promo}.",exMate:" Checkmate!",exChk:" Check!",
     exCenter:" Claims the centre.",exDev:" Develops a piece.",
     exNoteStart:" Notation “{san}”: ",exNoteCastle:"castling.",exNotePawnCap:"pawn capture",exNotePawnMove:"pawn move",
     exNoteCap:", x = capture",exNoteChk:", + = check",exNoteMate:", # = checkmate",
-    coachWelcome:"Hey there! I’m Coach Gemini. Play naturally — I’ll give you a heads-up whenever one of your pieces is in danger.",
-    coachReady:"Coach Gemini is ready to play alongside you. Take your time!",
     coachArrowHint:"Red arrow shows an enemy threat to your piece",
     coachTakeBack:"Take back move?",coachContinue:"Continue anyway",
     coachChecking:"Hold on, checking your last move…",
-    coachCheckWarn:"Check! Your King is under attack right now — protect it or step to a safe square.",
-    coachThreat:"Careful! Your {tgt} is being targeted by your opponent’s {atk}. Double-check before you move.",
-    coachCaptured:"I just captured your {cap}. No worries — look for a solid counterplay!",
-    coachMoved:"My move is in. Take a moment to check your pieces are safe before moving!",
-    coachBlunderCap:"Whoa, careful! That move leaves your {tgt} open to be captured for free by their {atk}.",
-    coachBlunderCheck:"Hold up! That opens up your King’s safety — your opponent can deliver check and seize the initiative.",
-    coachBlunderPos:"Watch out, that move looks risky — your opponent has a strong counterattack waiting.",
-    coachGoodCheck:"Nice! A sharp check that puts real pressure on their King.",
-    coachGoodCap:"Clean trade! Your position stays solid and well defended.",
-    coachGoodBest:"Great move! Your pieces look active and well protected.",
-    coachGoodSolid:"Solid choice — safe and steady for your next plan!",
-    coachMateWin:"Awesome job! You found the checkmate!",
-    coachMateLose:"Checkmate! All good — let’s play another one and get even sharper.",
-    coachDraw:"It’s a draw! That was a well-fought game.",
-    coachUndone:"Move undone! Let’s find a safer option.",
-    coachContinueMsg:"Got it, let’s keep playing from there!",
-    coachHintThreat:"Heads up, your {tgt} is targeted by their {atk}! Take a look at the {piece} I highlighted.",
-    coachHintCastle:"Hint: Time to tuck your King away! Consider castling for better safety.",
-    coachHintCap:"Hint: Check out the {piece} I highlighted — there’s an unguarded target in reach!",
-    coachHintCheck:"Hint: Take a look at the {piece} I highlighted — it can put real pressure on their King!",
-    coachHintActive:"Hint: Check out the {piece} I highlighted — moving it helps activate your position."
+    coachWelcome:[
+      "Hey there! I’m Coach Gemini. Play naturally — I’ll give you a heads-up whenever one of your pieces is in danger.",
+      "Welcome to the board! Make your opening move whenever you’re ready, and I’ll watch your back.",
+      "Glad to spar with you! Play at your own pace — I’ll pipe up if a tactic or threat appears.",
+      "Ready for a friendly coaching match? Let’s focus on center control, piece safety, and fun tactics!",
+      "Let’s play! Don’t stress about perfection — I’ll alert you right away if you walk into a trap."
+    ],
+    coachReady:[
+      "Coach Gemini is ready to play alongside you. Take your time!",
+      "Your move whenever you’re ready — let’s build a solid position together.",
+      "All set! Remember: control the center and keep your pieces defended."
+    ],
+    coachOpenCenter:[
+      "Nice central push! Claiming space in the middle gives your pieces room to breathe.",
+      "Great opening instinct — fighting for the center early sets up everything else.",
+      "Classic choice! That pawn immediately challenges central squares and opens diagonals.",
+      "Solid start! Controlling the center helps your bishops and knights enter the game fast.",
+      "Love the central presence! Now let’s get your minor pieces into the action."
+    ],
+    coachOpenDev:[
+      "Smooth development! Getting knights and bishops off the back rank early pays off.",
+      "Great piece activity — developing toward the center makes your army work together.",
+      "Textbook opening move! Bringing out another defender keeps your position healthy.",
+      "Nice tempo! Active pieces create way more tactical chances later on.",
+      "Well played! Every developed piece brings you closer to castling safely."
+    ],
+    coachOpenCastle:[
+      "Awesome castling! Your King is tucked safely away and your Rook enters the game.",
+      "Smart priority — king safety first! Now your rooks can start connecting.",
+      "Clean castle! That shields your King from early central attacks.",
+      "Great timing on the castle! Your position feels super secure now.",
+      "King safely sheltered! You’re free to launch an attack without worrying about the center."
+    ],
+    coachOpenQueenEarly:[
+      "Careful bringing the Queen out so early — enemy minor pieces might chase her around for free tempo!",
+      "She’s strong, alright! Just watch out so your Queen doesn’t become an easy target in the opening.",
+      "Bold Queen move! Make sure she has safe retreat squares before pushing deeper.",
+      "Early Queen adventures can get tricky — keep developing your knights and bishops to back her up."
+    ],
+    coachCheckWarn:[
+      "Check! Your King is under attack right now — protect it or step to a safe square.",
+      "Heads up — you’re in check! Block, capture the attacker, or move your King to safety.",
+      "Watch your King! Check has been called, so answer the threat before anything else.",
+      "King in danger! Check your three escapes: capture the checker, block the line, or sidestep.",
+      "Alert — that’s check! Take a breath and find the safest way out for your King.",
+      "Your King is targeted right now! Handle the check first so you stay in control."
+    ],
+    coachThreat:[
+      "Careful! Your {tgt} is being targeted by your opponent’s {atk}. Double-check before you move.",
+      "Heads up — their {atk} has its sights on your {tgt}. Guard it or move it out of harm’s way!",
+      "Quick warning: your {tgt} is under pressure from that {atk}. Make sure it’s protected.",
+      "Watch out! That {atk} is eyeing your {tgt}. Can you defend it or counterattack?",
+      "Spot the danger: their {atk} is threatening your {tgt}. Check your defenders first!",
+      "Careful here — your {tgt} could be captured by their {atk} if left unguarded."
+    ],
+    coachCaptured:[
+      "I just captured your {cap}. No worries — look for a solid counterplay!",
+      "Got your {cap} there! Don’t sweat it, focus on activating your remaining pieces.",
+      "That {cap} came off the board. Scan for weaknesses in my camp to strike back!",
+      "I picked off your {cap} — stay calm and look for your strongest reply.",
+      "Your {cap} is captured, but there’s plenty of chess left. Look for open lines!",
+      "Nice exchange for me on that {cap} — now see where you can create pressure."
+    ],
+    coachMoved:[
+      "My move is in. Take a moment to check your pieces are safe before moving!",
+      "Over to you! Scan the board for any new threats or open targets.",
+      "Your turn! Ask yourself what my last move was trying to do before you reply.",
+      "Done! Look at the whole board — are all your key pieces still defended?",
+      "Your go! Check if my pieces left anything behind that you can pressure.",
+      "Moved! Keep thinking about king safety and which of your pieces wants a better square.",
+      "Back to you! Look for candidate moves: checks, captures, and improving moves."
+    ],
+    coachBlunderCap:[
+      "Whoa, careful! That move leaves your {tgt} open to be captured for free by their {atk}.",
+      "Hold on — check that {tgt}! Moving there lets their {atk} scoop it up uncontested.",
+      "Wait a second! Their {atk} can snag your {tgt} next turn. Want to rethink that one?",
+      "Oops, easy to miss — your {tgt} becomes a free target for their {atk} after this.",
+      "Careful! That leaves your {tgt} hanging in front of their {atk}.",
+      "Pause and check! Their {atk} is ready to capture your {tgt} right away."
+    ],
+    coachBlunderCheck:[
+      "Hold up! That opens up your King’s safety — your opponent can deliver check and seize the initiative.",
+      "Careful around your King! That square leaves an opening for a nasty check.",
+      "Wait! Watch those diagonals and files — that exposes your King to an immediate check.",
+      "Easy slip! Your King gets uncomfortable after that move because a check is waiting.",
+      "Heads up on king safety — opponent has a sharp check ready that puts you on the back foot.",
+      "Watch out! Leaving that line open lets your opponent attack your King with tempo."
+    ],
+    coachBlunderPos:[
+      "Watch out, that move looks risky — your opponent has a strong counterattack waiting.",
+      "Hmm, hold on! That gives away too much initiative — there’s a cleaner, safer option.",
+      "Careful! That weakens a key square and invites a tough reply.",
+      "Wait a moment — opponent can punish that move tactically. Want another look?",
+      "Risky choice! Look closely at the red arrow to see the counterplay you’re allowing.",
+      "Hold up! You had a much stronger continuation available — let’s check before committing."
+    ],
+    coachGoodCheck:[
+      "Nice! A sharp check that puts real pressure on their King.",
+      "Boom — check! Forcing the King to react keeps you in the driver’s seat.",
+      "Great check! Always look for forcing moves that limit your opponent’s choices.",
+      "Clean check! That disrupts their coordination nicely.",
+      "Sharp! Keeping the enemy King uncomfortable is great attacking chess.",
+      "Well spotted! That check gains momentum right away."
+    ],
+    coachGoodCap:[
+      "Clean trade! Your position stays solid and well defended.",
+      "Nice capture! You scooped up material without hurting your safety.",
+      "Sharp capture! Removing an active defender makes your plan much smoother.",
+      "Well taken! That shifts the material balance in your favor.",
+      "Crisp capture — good eye for undefended or favorable trades!",
+      "Smart exchange! Now keep the pressure on."
+    ],
+    coachGoodBest:[
+      "Great move! Your pieces look active and well protected.",
+      "Spot on! That’s right up there with the strongest move on the board.",
+      "Awesome find! Everything is working in harmony.",
+      "Really strong move! You’re controlling key squares effortlessly.",
+      "Brilliant sense of the position — keep that flow going!",
+      "Top-notch choice! Your piece coordination looks super clean.",
+      "Impressive move! You didn’t give up a single inch there."
+    ],
+    coachGoodSolid:[
+      "Solid choice — safe and steady for your next plan!",
+      "Nice steady move! Keeps everything protected while improving your setup.",
+      "Good practical decision — no weaknesses left behind.",
+      "Clean and disciplined! Slowly tightening your grip on the board.",
+      "Safe and smart! Sometimes the quietest move is the strongest.",
+      "Steady progress! Your structure looks really sturdy.",
+      "I like it — keeps your options wide open for the next phase."
+    ],
+    coachGoodPromo:[
+      "Promotion! Turning a humble pawn into a powerhouse — huge payoff!",
+      "Welcome to the back rank! That promotion completely transforms the game!",
+      "Pawn promoted! Nothing beats watching a pawn march all the way home."
+    ],
+    coachMateWin:[
+      "Awesome job! You found the checkmate!",
+      "Checkmate! What a clean finish — well deserved victory!",
+      "Boom, checkmate! Your tactics and patience really paid off!",
+      "Victory by checkmate! Ready for an even tougher challenge?",
+      "Beautiful finish! You trapped the King with nowhere left to run."
+    ],
+    coachMateLose:[
+      "Checkmate! All good — let’s play another one and get even sharper.",
+      "Checkmate this round! Every tough game teaches us something new — rematch?",
+      "Gotcha with checkmate! Shake it off, check the moves, and let’s run it back.",
+      "That’s mate! Don’t worry, spotting those patterns gets easier every single game.",
+      "Checkmate! Good fight — let’s start a fresh board whenever you’re ready."
+    ],
+    coachDraw:[
+      "It’s a draw! That was a well-fought game.",
+      "Honors even — a hard-earned draw from both sides!",
+      "Draw on the board! Solid defense and balanced play.",
+      "Game ends in a draw — super close battle!"
+    ],
+    coachUndone:[
+      "Move undone! Let’s find a safer option.",
+      "Fresh second look! Take your time and spot a stronger square.",
+      "Taken back! Good habit checking alternatives before committing.",
+      "Rewound! Look around for checks, captures, or better defense.",
+      "Back one step — let’s see what else the position offers!"
+    ],
+    coachContinueMsg:[
+      "Got it, let’s keep playing from there!",
+      "Fair enough — trusting your gut! Let’s see how it plays out.",
+      "Bold call! I respect sticking with your plan — my turn!",
+      "Alright, pushing forward! Let’s watch how the position unfolds.",
+      "No problem, game on! Here comes my reply."
+    ],
+    coachHintThreat:[
+      "Heads up, your {tgt} is targeted by their {atk}! Take a look at the {piece} I highlighted.",
+      "Careful — their {atk} threatens your {tgt}. Check the highlighted {piece} for a solid fix!",
+      "Watch your {tgt} against their {atk}! Look at the {piece} I marked to deal with it.",
+      "Danger on your {tgt} from that {atk} — see how the highlighted {piece} can help!"
+    ],
+    coachHintCastle:[
+      "Hint: Time to tuck your King away! Consider castling for better safety.",
+      "Hint: Protecting your King is top priority — castling looks awesome right now!",
+      "Hint: Look at your King — castling connects your rooks and secures your camp."
+    ],
+    coachHintCap:[
+      "Hint: Check out the {piece} I highlighted — there’s an unguarded target in reach!",
+      "Hint: Keep an eye on that highlighted {piece} — it can win material cleanly!",
+      "Hint: Look closely at the {piece} I marked — a juicy capture is waiting!"
+    ],
+    coachHintCheck:[
+      "Hint: Take a look at the {piece} I highlighted — it can put real pressure on their King!",
+      "Hint: See what the highlighted {piece} can do — a sharp check is right there!",
+      "Hint: Check the {piece} I marked — forcing the enemy King to move helps your attack!"
+    ],
+    coachHintActive:[
+      "Hint: Check out the {piece} I highlighted — moving it helps activate your position.",
+      "Hint: Look at the highlighted {piece} — bringing it into a better square boosts your control!",
+      "Hint: Try finding a stronger home for the {piece} I marked!"
+    ]
   },
   id:{
     options:"Opsi",mute:"Matikan suara",unmute:"Nyalakan suara",
     menuAria:"Mode permainan dan opsi",drawerAria:"Daftar Langkah",navAria:"Navigasi utama",
     play:"Main",me:"Saya",
-    modeBasicHdr:"Dasar · 2 Pemain (Auto-Balik)",
+    defaultPlayerName:"Pemain",editName:"Ubah",enterPlayerName:"Masukkan nama pemain:",
+    modeBasicFaceHdr:"Dasar · 2P (Berhadapan)",
+    modeBasicSameHdr:"Dasar · 2P (Searah)",
     modeCoachHdr:"Coach Gemini · Mentor Langsung",
+    modeSandboxHdr:"Sandbox · Aturan Bebas",
     modeLearnHdr:"Belajar · {title} {step}/{total}",
     modeDailyHdr:"Harian Lv.{lvl}/3 · {diff}",
     language:"Bahasa",langEn:"English",langId:"Indonesia",
-    gameMode:"Mode Main",basic2p:"Dasar (2P)",botVsAi:"Bot (vs AI)",coachGemini:"Coach Gemini",
+    gameMode:"Mode Main",basic2p:"Dasar (2P)",botVsAi:"Bot (vs AI)",coachGemini:"Coach Gemini",sandboxMode:"Sandbox",
     botMode:"Level Bot",pieceSize:"Ukuran Bidak",scale:"Skala",uiSize:"Ukuran UI",
     compact:"Ringkas",normal:"Normal",large:"Besar",
     coachingDetail:"Detail Pelatih",beginner:"Pemula",advanced:"Lanjutan",
@@ -1465,13 +1858,28 @@ const I18N={
     solved:"Selesai ✓",white:"Putih",black:"Hitam",
     nextStep:"Langkah berikut →",learningHub:"Pusat Belajar",
     nextPuzzlesIn:"Teka-teki baru dalam",nextLevel:"Level Berikut ({lvl}/3) →",allDailies:"Semua harian",
-    newCoachGame:"Main Coach Baru",newBotMatch:"Lawan Bot Baru",playAgain:"Main lagi?",
+    newCoachGame:"Main Coach Baru",newBotMatch:"Lawan Bot Baru",newSandboxMatch:"Main Sandbox Baru",playAgain:"Main lagi?",
     restart:"Ulang",undo:"Undo",redo:"Redo",draw:"Gambar",flip:"Balik",hint:"Petunjuk",moves:"Langkah",
     clear:"Hapus",done:"Selesai",
     playVsBot:"Lawan Bot",pickSideSub:"Pilih level Bot, lalu pilih warna bidakmu.",cancel:"Batal",
+    p2Title:"Mode 2 Pemain",p2Sub:"Pilih arah papan saat pergantian giliran.",
+    p2FaceTitle:"Berhadapan",p2FaceSub:"Papan berputar 180° tiap giliran",
+    p2SameTitle:"Searah",p2SameSub:"Arah papan tetap satu arah",
+    change2pMode:"Ganti Mode 2P",
+    sandboxRulesBtn:"Atur Papan",editSandboxRules:"Edit Aturan Sandbox",
+    sbTitle:"Sandbox: Aturan Bebas",sbSub:"Atur bidak awal di papan dan gabungkan gerakan hibrida bebas aturan.",
+    sbPresets:"Preset Cepat",sbPreStd:"Standar",sbPreQueens:"Semua Menteri",sbPreKnights:"Semua Kuda",sbPreRooks:"Semua Benteng",sbPreHybrid:"Super Hibrida",
+    sbRoster:"Susunan Bidak (Ketuk Kotak)",sbErase:"Hapus",sbBulkSide:"Target",sbBoth:"Keduanya",sbPawnsTo:"Pion →",sbBackTo:"Baris Belakang →",
+    sbHybridRules:"Gerak Hibrida Bebas",sbGlobalRules:"Bebas Aturan & Lawan",
+    sbIgnoreCheck:"Bebas Skak / Makan Raja",sbFriendlyFire:"Makan Bidak Sendiri",
+    sbOppSame:"2P Searah",sbOppFace:"2P Berhadapan",sbOppBot:"vs Bot Sandbox",
+    sbStartMatch:"Mulai Main Sandbox",sbNeedPiece:"Pasang minimal 1 bidak Putih dan 1 bidak Hitam dulu!",
+    sbRuleKn:"+ Lompat Kuda",sbRuleDiag:"+ Diagonal",sbRuleOrtho:"+ Lurus",sbRuleStep:"+ Geser/Mundur",sbRuleLeap:"+ Lompati Bidak",sbRuleQ:"+ Gerak Menteri",
+    sbExtraAbility:"{count} aturan hibrida",sbTurnBanner:"Mode Sandbox ({opp}) — ketuk Atur Papan untuk ubah.",
     promotePawn:"Promosi Pion",promoteSub:"Pilih bidak pengganti pionmu di {sq}.",
     checkmate:"Skakmat!",checkmateNoBang:"Skakmat",victory:"Menang!",
     mateSub:"{winner} menang lewat skakmat.",mateWinSub:"Kamu mengalahkan {bot} sebagai {winner}!",mateLoseSub:"{bot} menang lewat skakmat.",
+    sbKingCapSub:"{winner} berhasil menangkap Raja lawan!",sbNoMovesSub:"{winner} menang — lawan kehabisan langkah.",
     restartGame:"Main Lagi",changeBotColor:"Ganti Bot / Warna",viewBoard:"Lihat Papan",
     moveHistoryTitle:"Riwayat Langkah & Pelatih",lastMove:"Langkah Terakhir",
     noMovesYet:"Belum ada langkah. Ketuk atau geser bidak untuk mulai.",
@@ -1503,44 +1911,226 @@ const I18N={
     hintPiece:"Lihat bidak yang disorot — bidak itu yang perlu digerakkan.",
     hintSquares:"Kotak yang disorot menunjukkan langkah tepatnya.",
     hintSolution:"Solusi: {why}",
-    overMate:"Skakmat — {winner} menang",overStale:"Pat (Stalemate) — seri",overRep:"Seri karena pengulangan 3 kali",
+    overMate:"Skakmat — {winner} menang",overKingCap:"Raja tertangkap — {winner} menang",overNoPieces:"Menang — {winner} unggul",
+    overStale:"Pat (Stalemate) — seri",overRep:"Seri karena pengulangan 3 kali",
     overInsuff:"Seri — perwira tidak cukup",over50:"Seri — aturan 50 langkah",
     exMove:"{piece} {from}→{to}.",exCap:" Memakan {cap}.",exCastle:" Rokade: raja aman, benteng aktif.",
     exEp:" Tangkapan en passant.",exPromo:" Promosi jadi {promo}.",exMate:" Skakmat!",exChk:" Skak!",
     exCenter:" Menguasai pusat.",exDev:" Mengembangkan perwira.",
     exNoteStart:" Notasi “{san}”: ",exNoteCastle:"rokade.",exNotePawnCap:"pion makan",exNotePawnMove:"langkah pion",
     exNoteCap:", x = makan",exNoteChk:", + = skak",exNoteMate:", # = skakmat",
-    coachWelcome:"Halo! Aku Coach Gemini. Main santai aja ya — aku bakal ingetin kalau ada perwiramu yang terancam bahaya.",
-    coachReady:"Coach Gemini siap nemenin kamu main. Santai aja ya!",
     coachArrowHint:"Panah merah nunjukin ancaman lawan ke perwira kamu",
     coachTakeBack:"Mau tarik ulang langkah?",coachContinue:"Lanjut saja",
     coachChecking:"Sebentar ya, lagi ngecek langkah barusan…",
-    coachCheckWarn:"Skak! Raja kamu lagi terancam nih, lindungi atau geser ke tempat aman dulu ya.",
-    coachThreat:"Eh hati-hati, {tgt} kamu lagi diincer {atk} lawan nih! Coba cek dulu sebelum melangkah.",
-    coachCaptured:"Aku barusan makan {cap} kamu nih. Santai, coba cari balasan yang oke ya!",
-    coachMoved:"Giliranku udah jalan. Cek dulu semua perwiramu aman sebelum melangkah ya!",
-    coachBlunderCap:"Waduh, hati-hati! Langkah barusan bikin {tgt} kamu bisa langsung dimakan {atk} lawan secara gratis.",
-    coachBlunderCheck:"Eh, tunggu dulu! Pertahanan raja kamu kebuka nih, lawan bisa langsung skak dan nekan balik.",
-    coachBlunderPos:"Waduh, langkah itu agak berisiko nih—lawan punya serangan balasan yang bikin kamu rugi posisi.",
-    coachGoodCheck:"Mantap! Skak yang cakep, lawan jadi tertekan nih.",
-    coachGoodCap:"Cakep! Pertukaran yang bagus, posisimu tetap aman.",
-    coachGoodBest:"Langkah yang oke banget! Posisimu aktif dan aman.",
-    coachGoodSolid:"Lumayan solid nih, aman buat lanjut ke langkah berikutnya!",
-    coachMateWin:"Keren abis! Kamu berhasil menang skakmat!",
-    coachMateLose:"Skakmat nih! Nggak apa-apa, yuk main lagi biar makin jago.",
-    coachDraw:"Permainan berakhir seri! Pertandingan yang seimbang.",
-    coachUndone:"Langkah udah di-undo! Yuk coba cari langkah yang lebih aman.",
-    coachContinueMsg:"Oke, kita lanjut main dari langkah barusan ya!",
-    coachHintThreat:"Hati-hati, {tgt} kamu lagi diincer {atk} lawan tuh! Coba perhatikan {piece} yang kutandai.",
-    coachHintCastle:"Petunjuk: Saatnya amanin raja! Coba rokade biar raja kamu lebih terlindungi.",
-    coachHintCap:"Petunjuk: Coba perhatikan {piece} yang kutandai—ada perwira lawan yang lagi lengah nih!",
-    coachHintCheck:"Petunjuk: Coba cek {piece} yang kutandai, langkahnya bisa bikin raja lawan tertekan!",
-    coachHintActive:"Petunjuk: Coba lirik {piece} yang kutandai—menggerakkannya bisa bikin posisimu makin aktif."
+    coachWelcome:[
+      "Halo! Aku Coach Gemini. Main santai aja ya — aku bakal ingetin kalau ada perwiramu yang terancam bahaya.",
+      "Selamat datang di papan! Jalanin aja langkah pertamamu kapan pun siap, aku bakal jagain dari belakang.",
+      "Asyik, yuk latihan bareng! Main sesuai ritmemu aja — nanti aku kasih aba-aba kalau ada ancaman.",
+      "Siap tanding santai? Fokus kuasai pusat, jagain perwira, dan nikmatin permainannya!",
+      "Yuk mulai! Nggak usah takut salah langkah — aku langsung kasih tau kalau ada jebakan."
+    ],
+    coachReady:[
+      "Coach Gemini siap nemenin kamu main. Santai aja ya!",
+      "Giliranmu kapan aja siap — yuk bangun posisi yang rapi bareng.",
+      "Siap! Ingat ya: kuasai tengah papan dan pastiin perwiramu saling menjaga."
+    ],
+    coachOpenCenter:[
+      "Mantap, langsung rebut pusat papan! Perwira kamu jadi punya ruang gerak yang lega.",
+      "Naluri pembukaan yang keren — kuasai tengah papan dari awal bikin langkah selanjutnya lebih gampang.",
+      "Pilihan klasik! Pion itu langsung nekan kotak pusat sekaligus buka jalur gajah dan menteri.",
+      "Awalan yang solid! Ngontrol tengah papan bikin kuda dan gajahmu cepat keluar.",
+      "Keren, tengah papan udah mulai dikuasai! Sekarang tinggal keluarin perwira ringannya."
+    ],
+    coachOpenDev:[
+      "Pengembangan yang mulus! Kuda dan gajah yang cepat keluar dari baris belakang itu penting banget.",
+      "Aktivitas bidak yang mantap — ngembangin perwira ke arah pusat bikin pasukanmu kompak.",
+      "Langkah pembukaan sesuai teori! Tambah satu perwira aktif lagi bikin posisimu makin kokoh.",
+      "Tempo yang pas! Perwira yang aktif bakal buka banyak peluang taktik nanti.",
+      "Cakep! Makin banyak perwira keluar, makin dekat juga jalan buat rokade aman."
+    ],
+    coachOpenCastle:[
+      "Rokade yang pas banget! Rajamu langsung aman di pojok dan benteng ikut aktif.",
+      "Prioritas cerdas — keamanan raja nomor satu! Sekarang kedua benteng bisa saling nyambung.",
+      "Rokade bersih! Ini ngelindungin Rajamu dari serangan mendadak di tengah papan.",
+      "Timing rokadenya oke banget! Posisimu sekarang kelihatan jauh lebih aman.",
+      "Raja udah masuk bunker aman! Sekarang kamu bebas nyusun serangan."
+    ],
+    coachOpenQueenEarly:[
+      "Hati-hati keluarin Menteri terlalu awal ya — perwira kecil lawan bisa ngejar dia sambil dapat tempo gratis!",
+      "Menteri emang kuat, tapi hati-hati jangan sampai jadi sasaran empuk di awal permainan.",
+      "Langkah Menteri yang berani! Pastiin dia punya jalan pulang aman sebelum maju jauh.",
+      "Petualangan Menteri di awal agak berisiko — imbangin dengan ngembangin kuda dan gajah juga ya."
+    ],
+    coachCheckWarn:[
+      "Skak! Raja kamu lagi terancam nih, lindungi atau geser ke tempat aman dulu ya.",
+      "Awas skak! Tutup jalurnya, makan penyerangnya, atau geser Rajamu ke kotak aman.",
+      "Perhatiin Raja kamu! Posisi lagi skak, wajib diberesin sebelum ngelakuin langkah lain.",
+      "Raja dalam bahaya! Cek tiga cara bebas skak: makan penyerang, blokir, atau kabur.",
+      "Siaga — Raja kena skak! Tenang dulu dan cari jalan keluar paling aman buat Rajamu.",
+      "Raja lagi diincer langsung tuh! Selametin dulu biar kendali permainan tetep di tanganmu."
+    ],
+    coachThreat:[
+      "Eh hati-hati, {tgt} kamu lagi diincer {atk} lawan nih! Coba cek dulu sebelum melangkah.",
+      "Awas ya — {atk} lawan lagi ngarah ke {tgt} kamu. Jagain atau geser ke tempat aman!",
+      "Info cepat nih: {tgt} kamu lagi ditekan sama {atk} itu. Pastiin ada yang ngejagain.",
+      "Waspada! {atk} lawan lagi ngintip {tgt} kamu. Bisa dijaga atau diserang balik?",
+      "Perhatiin bahayanya: {atk} lawan ngancam {tgt} kamu. Cek dulu siapa yang nge-cover!",
+      "Hati-hati ya — {tgt} kamu bisa disikat {atk} lawan kalau dibiarin tanpa penjagaan."
+    ],
+    coachCaptured:[
+      "Aku barusan makan {cap} kamu nih. Santai, coba cari balasan yang oke ya!",
+      "Dapat {cap} kamu tuh! Nggak apa-apa, fokus aktifin bidakmu yang tersisa.",
+      "{cap} kamu baru keambil. Coba intip celah di pertahananku buat bales nyerang!",
+      "Aku sikat {cap} kamu barusan — tetap tenang dan cari balasan terkuatmu.",
+      "{cap} kamu ketangkep, tapi permainan masih panjang. Cari jalur terbuka buat nyerang balik!",
+      "Pertukaran yang lumayan buatku di {cap} itu — sekarang lihat di mana kamu bisa balik nekan."
+    ],
+    coachMoved:[
+      "Giliranku udah jalan. Cek dulu semua perwiramu aman sebelum melangkah ya!",
+      "Giliran kamu! Coba sapu pandangan ke seluruh papan, ada ancaman baru nggak?",
+      "Waktunya kamu jalan! Tebak dulu maksud langkahku barusan sebelum mutusin jawaban.",
+      "Sudah jalan! Coba pastiin semua bidak pentingmu masih saling jaga.",
+      "Yuk giliranmu! Cek apakah langkahku barusan ninggalin celah yang bisa kamu serang.",
+      "Giliranku selesai! Pikirin keamanan raja dan perwira mana yang butuh posisi lebih enak.",
+      "Balik ke kamu! Biasakan cek opsi: skak, makan bidak, dan perbaiki posisi."
+    ],
+    coachBlunderCap:[
+      "Waduh, hati-hati! Langkah barusan bikin {tgt} kamu bisa langsung dimakan {atk} lawan secara gratis.",
+      "Eh tunggu — cek {tgt} kamu! Pindah ke situ bikin {atk} lawan bisa langsung ngembat tanpa perlawanan.",
+      "Sebentar! {atk} lawan bisa nyomot {tgt} kamu di langkah berikutnya nih. Mau dipikir ulang?",
+      "Ups, nyaris kelewat — {tgt} kamu jadi sasaran empuk buat {atk} lawan setelah ini.",
+      "Awas! Langkah itu ninggalin {tgt} kamu menggantung di depan {atk} lawan.",
+      "Rem dulu sebentar! {atk} lawan udah siap makan {tgt} kamu tuh."
+    ],
+    coachBlunderCheck:[
+      "Eh, tunggu dulu! Pertahanan raja kamu kebuka nih, lawan bisa langsung skak dan nekan balik.",
+      "Hati-hati di sekitar Raja! Kotak itu kebuka buat skak yang lumayan repot.",
+      "Awas jalur diagonal dan lajur itu — langkah tadi bikin Raja kamu rawan kena skak.",
+      "Hampir aja! Raja jadi agak terpojok setelah langkah itu karena lawan udah ngintip skak.",
+      "Perhatiin keamanan raja ya — lawan punya skak tajam yang bisa bikin kamu terpaksa bertahan.",
+      "Waduh, ngebuka jalur itu bikin lawan bisa langsung nyerang Rajamu sambil dapat tempo!"
+    ],
+    coachBlunderPos:[
+      "Waduh, langkah itu agak berisiko nih—lawan punya serangan balasan yang bikin kamu rugi posisi.",
+      "Hmm sebentar! Langkah itu ngasih inisiatif terlalu banyak ke lawan — ada opsi yang lebih aman.",
+      "Hati-hati! Itu melemahkan petak penting dan ngundang balasan yang berat.",
+      "Tunggu dulu — lawan bisa ngasih hukuman taktis habis langkah ini. Mau cek lagi?",
+      "Pilihan yang nekat! Coba lihat panah merah buat cek serangan balasan lawan.",
+      "Tahan dulu! Kamu punya lanjutan yang jauh lebih kuat di posisi ini."
+    ],
+    coachGoodCheck:[
+      "Mantap! Skak yang cakep, lawan jadi tertekan nih.",
+      "Boom — skak! Maksa Raja lawan bereaksi bikin kendali tetap di tanganmu.",
+      "Skak yang cerdas! Langkah paksa kayak gini selalu mempersempit pilihan lawan.",
+      "Skak bersih! Koordinasi pertahanan lawan langsung buyar nih.",
+      "Tajam! Bikin Raja lawan nggak nyaman itu kunci main menyerang.",
+      "Jeli banget! Skak ini langsung ngasih momentum ke pihakmu."
+    ],
+    coachGoodCap:[
+      "Cakep! Pertukaran yang bagus, posisimu tetap aman.",
+      "Tangkapan yang bersih! Kamu untung materi tanpa ngorbanin pertahanan.",
+      "Makan bidak yang pas! Nyingkirin penjaga aktif bikin rencanamu makin mulus.",
+      "Eksekusi yang rapi! Keseimbangan bidak makin condong ke pihakmu.",
+      "Jeli banget ngelihat bidak yang kurang terjaga!",
+      "Pertukaran cerdas! Sekarang lanjut jaga tekanannya."
+    ],
+    coachGoodBest:[
+      "Langkah yang oke banget! Posisimu aktif dan aman.",
+      "Tepat sasaran! Itu salah satu langkah terkuat yang ada di papan.",
+      "Temuan yang keren! Semua perwiramu kerja bareng dengan harmonis.",
+      "Langkah kuat banget! Petak-petak penting langsung ada dalam kendalimu.",
+      "Feeling posisimu lagi on fire nih — pertahanin terus!",
+      "Pilihan kelas atas! Koordinasi bidakmu kelihatan rapi banget.",
+      "Keren! Nggak ngasih celah sedikit pun ke lawan di langkah barusan."
+    ],
+    coachGoodSolid:[
+      "Lumayan solid nih, aman buat lanjut ke langkah berikutnya!",
+      "Langkah yang tenang dan mantap! Semua terjaga sambil perbaiki posisi.",
+      "Keputusan praktis yang bagus — nggak ada kelemahan yang kebuka.",
+      "Rapi dan disiplin! Pelan-pelan makin menguasai jalannya permainan.",
+      "Aman dan cerdas! Kadang langkah yang kalem justru paling kuat.",
+      "Progres yang mantap! Struktur bidakmu kelihatan kokoh banget.",
+      "Aku suka langkah ini — semua opsi buat fase berikutnya tetap terbuka."
+    ],
+    coachGoodPromo:[
+      "Promosi! Pion kecil akhirnya berubah jadi kekuatan besar — mantap!",
+      "Selamat sampai baris ujung! Promosi ini langsung ngubah arah permainan!",
+      "Pion promosi! Nggak ada yang lebih puas daripada ngawal pion sampai ujung papan."
+    ],
+    coachMateWin:[
+      "Keren abis! Kamu berhasil menang skakmat!",
+      "Skakmat! Penutupan yang rapi — kemenangan yang layak banget!",
+      "Boom, skakmat! Taktik dan kesabaranmu terbayar lunas!",
+      "Menang lewat skakmat! Siap naik level ke tantangan lebih seru?",
+      "Eksekusi yang indah! Raja lawan terkunci tanpa sisa jalan kabur."
+    ],
+    coachMateLose:[
+      "Skakmat nih! Nggak apa-apa, yuk main lagi biar makin jago.",
+      "Skakmat di ronde ini! Tiap game sulit ngajarin pola baru — mau tanding ulang?",
+      "Kena skakmat deh! Santai, cek lagi langkahnya dan yuk mulai papan baru.",
+      "Yah skakmat! Nggak usah khawatir, lama-lama pola kayak gini pasti gampang kebaca.",
+      "Skakmat! Pertarungan yang seru — yuk mulai ulang kapan pun kamu siap."
+    ],
+    coachDraw:[
+      "Permainan berakhir seri! Pertandingan yang seimbang.",
+      "Skor imbang — seri yang diperjuangkan dengan apik oleh kedua pihak!",
+      "Berakhir remis! Pertahanan solid dan permainan seimbang.",
+      "Game selesai seri — pertarungan yang ketat banget!"
+    ],
+    coachUndone:[
+      "Langkah udah di-undo! Yuk coba cari langkah yang lebih aman.",
+      "Kesempatan kedua! Santai dulu dan cari kotak yang lebih kuat.",
+      "Ditarik ulang! Kebiasaan bagus ngecek opsi lain sebelum fix melangkah.",
+      "Mundur satu langkah — coba cek opsi skak, makan, atau pertahanan yang lebih oke.",
+      "Balik satu langkah — yuk lihat peluang lain yang ada di papan!"
+    ],
+    coachContinueMsg:[
+      "Oke, kita lanjut main dari langkah barusan ya!",
+      "Sip — percaya sama insting sendiri! Yuk kita lihat kelanjutannya.",
+      "Keputusan berani! Aku hargai kamu tetap pegang rencanamu — giliranku!",
+      "Oke gas terus! Kita pantau gimana posisinya berkembang nanti.",
+      "Siap, lanjut main! Nih balasan dariku."
+    ],
+    coachHintThreat:[
+      "Hati-hati, {tgt} kamu lagi diincer {atk} lawan tuh! Coba perhatikan {piece} yang kutandai.",
+      "Awas — {atk} lawan ngancam {tgt} kamu. Cek {piece} yang kutandai buat solusi aman!",
+      "Jagain {tgt} kamu dari {atk} itu! Lihat {piece} yang udah kutandai buat nanganinnya.",
+      "Bahaya di {tgt} kamu gara-gara {atk} lawan — coba lihat gimana {piece} ini bisa bantu!"
+    ],
+    coachHintCastle:[
+      "Petunjuk: Saatnya amanin raja! Coba rokade biar raja kamu lebih terlindungi.",
+      "Petunjuk: Keamanan raja paling utama — rokade kelihatan pas banget sekarang!",
+      "Petunjuk: Lirik Rajamu — rokade nyambungin benteng sekaligus ngamanin pertahanan."
+    ],
+    coachHintCap:[
+      "Petunjuk: Coba perhatikan {piece} yang kutandai—ada perwira lawan yang lagi lengah nih!",
+      "Petunjuk: Cek {piece} yang kutandai—ada peluang menang materi dengan bersih!",
+      "Petunjuk: Perhatiin baik-baik {piece} yang kutandai—ada tangkapan menguntungkan di depan mata!"
+    ],
+    coachHintCheck:[
+      "Petunjuk: Coba cek {piece} yang kutandai, langkahnya bisa bikin raja lawan tertekan!",
+      "Petunjuk: Lihat apa yang bisa dilakuin {piece} yang kutandai—ada skak tajam tuh!",
+      "Petunjuk: Lirik {piece} yang kutandai—maksa Raja lawan bergerak bikin seranganmu makin lancar!"
+    ],
+    coachHintActive:[
+      "Petunjuk: Coba lirik {piece} yang kutandai—menggerakkannya bisa bikin posisimu makin aktif.",
+      "Petunjuk: Perhatiin {piece} yang kutandai—pindah ke kotak lebih baik bikin kontrolmu naik!",
+      "Petunjuk: Coba cari posisi yang lebih oke buat {piece} yang udah kutandai ini!"
+    ]
   }
 };
 function t(key,vars){
   const d=I18N[P.lang]||I18N.en;
-  let s=(d[key]!==undefined?d[key]:I18N.en[key])||key;
+  let val=(d[key]!==undefined?d[key]:I18N.en[key]);
+  if(Array.isArray(val))val=val[0];
+  let s=(val!==undefined?val:key);
+  if(vars)for(const k in vars)s=s.replaceAll("{"+k+"}",vars[k]);
+  return s;
+}
+function tVar(key,idx,vars){
+  const d=I18N[P.lang]||I18N.en;
+  let val=(d[key]!==undefined?d[key]:I18N.en[key]);
+  let s=Array.isArray(val)?val[((idx||0)%val.length+val.length)%val.length]:(val!==undefined?val:key);
   if(vars)for(const k in vars)s=s.replaceAll("{"+k+"}",vars[k]);
   return s;
 }
@@ -1563,6 +2153,9 @@ const IC={
   redo:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" aria-hidden="true"><path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg>`,
   draw:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`,
   flip:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" aria-hidden="true"><path d="M7 16V4m0 0L4 7m3-3l3 3M17 8v12m0 0l-3-3m3 3l3-3"/></svg>`,
+  faceToFace:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" aria-hidden="true"><path d="M8 19V5m0 0L4.5 8.5M8 5l3.5 3.5"/><path d="M16 5v14m0 0l-3.5-3.5M16 19l3.5-3.5"/></svg>`,
+  sameDir:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" aria-hidden="true"><path d="M12 19V5m0 0L6.5 10.5M12 5l5.5 5.5"/></svg>`,
+  sandbox:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" aria-hidden="true"><path d="M9 3h6"/><path d="M10 3v5l-5.2 9.1A2 2 0 0 0 6.5 20h11a2 2 0 0 0 1.7-2.9L14 8V3"/><path d="M7.5 14.5h9"/></svg>`,
   hint:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.8 10.6c.7.6 1.2 1.4 1.3 2.4h5c.1-1 .6-1.8 1.3-2.4A6 6 0 0 0 12 3z"/></svg>`,
   list:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>`,
   close:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`
@@ -1817,7 +2410,7 @@ function isPuzzleUnlocked(i){
   return false;
 }
 
-/* ---------- Non-Blocking 5-Tier Minimax Web Worker AI ---------- */
+/* ---------- Non-Blocking 5-Tier Minimax Web Worker AI + Opening Book ---------- */
 const AI_WORKER_SRC=`
 "use strict";
 const VAL=[0,100,320,330,500,900,20000];
@@ -1890,12 +2483,37 @@ const RDIR=[[-1,0],[1,0],[0,-1],[0,1]];
 const KDIR=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
 
 const DIFF_CFG={
-  easy:     {maxD:1,budget:90, noise:110,agg:0},
-  medium:   {maxD:2,budget:150,noise:32, agg:6},
-  hard:     {maxD:3,budget:230,noise:0,  agg:12},
-  nightmare:{maxD:4,budget:380,noise:0,  agg:28},
-  mittens:  {maxD:4,budget:480,noise:0,  agg:46}
+  easy:     {maxD:1,budget:55, qd:0,noise:280,agg:0},
+  medium:   {maxD:2,budget:140,qd:2,noise:65, agg:5},
+  hard:     {maxD:3,budget:240,qd:4,noise:16, agg:11},
+  nightmare:{maxD:4,budget:380,qd:4,noise:10, agg:24},
+  mittens:  {maxD:5,budget:500,qd:5,noise:8,  agg:42}
 };
+
+const OPEN_BOOK={
+  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w":["e2e4","d2d4","c2c4","g1f3","b2b3"],
+  "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b":["e7e5","c7c5","e7e6","c7c6","d7d5","g8f6","g7g6"],
+  "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b":["d7d5","g8f6","e7e6","f7f5","c7c5","g7g6"],
+  "rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b":["e7e5","g8f6","c7c5","e7e6","c7c6"],
+  "rnbqkbnr/pppppppp/8/8/8/5N2/PPPPPPPP/RNBQKB1R b":["d7d5","g8f6","c7c5","e7e6","g7g6"],
+  "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w":["g1f3","f1c4","b1c3","d2d4"],
+  "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b":["b8c6","g8f6","d7d6"],
+  "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w":["f1b5","f1c4","d2d4","b1c3"],
+  "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b":["f8c5","g8f6","f8e7","d7d6"],
+  "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b":["a7a6","g8f6","f8c5","d7d6"],
+  "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w":["g1f3","b1c3","c2c3","d2d4"],
+  "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b":["d7d6","b8c6","e7e6","g7g6"],
+  "rnbqkbnr/pppp1ppp/4p3/8/4P3/8/PPPP1PPP/RNBQKBNR w":["d2d4","d2d3","g1f3","b1c3"],
+  "rnbqkbnr/pppp1ppp/4p3/8/3PP3/8/PPP2PPP/RNBQKBNR b":["d7d5","c7c5"],
+  "rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR w":["d2d4","b1c3","g1f3","d2d3"],
+  "rnbqkbnr/pp1ppppp/2p5/8/3PP3/8/PPP2PPP/RNBQKBNR b":["d7d5"],
+  "rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR w":["c2c4","g1f3","c1f4","e2e3"],
+  "rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR b":["e7e6","c7c6","d5c4","g8f6"],
+  "rnbqkb1r/pppppppp/5n2/8/3P4/8/PPP1PPPP/RNBQKBNR w":["c2c4","g1f3","c1f4","c1g5"],
+  "rnbqkb1r/pppppppp/5n2/8/2PP4/8/PP2PPPP/RNBQKBNR b":["e7e6","g7g6","c7c5","e7e5"]
+};
+const EASY_OPEN_W=["e2e3","d2d3","e2e4","d2d4","a2a3","h2h3","b1c3","g1f3","c2c3","b2b3","g2g3"];
+const EASY_OPEN_B=["e7e6","d7d6","e7e5","c7c5","a7a6","h7h6","b8c6","g8f6","c7c6","b7b6"];
 
 function parseFen(fen){
   const p=fen.split(" "),rows=p[0].split("/");
@@ -1921,7 +2539,8 @@ function parseFen(fen){
     if(p[2].includes("q"))cr|=8;
   }
   const ep=p[3]&&p[3]!=="-"?((8-+p[3][1])*8+(p[3].charCodeAt(0)-97)):-1;
-  return{b,turn:p[1]==="w"?1:-1,cr,ep,wk,bk};
+  const fm=parseInt(p[5]||"1",10)||1;
+  return{b,turn:p[1]==="w"?1:-1,cr,ep,wk,bk,fm,bookKey:p[0]+" "+p[1]};
 }
 
 function attacked(b,sq,by){
@@ -2113,9 +2732,9 @@ function evalBoard(st,agg,aiSide){
 function quiesce(st,alpha,beta,qDepth,ctx){
   if((++ctx.nodes&63)===0&&performance.now()>ctx.deadline)throw 1;
   const stand=evalBoard(st,ctx.agg,ctx.aiSide);
+  if(qDepth<=0)return stand;
   if(stand>=beta)return beta;
   if(alpha<stand)alpha=stand;
-  if(qDepth<=0)return alpha;
   const ms=genMoves(st,true).sort((a,b)=>b.cap-a.cap);
   const side=st.turn;
   for(let i=0;i<ms.length;i++){
@@ -2132,7 +2751,7 @@ function quiesce(st,alpha,beta,qDepth,ctx){
 
 function search(st,depth,alpha,beta,ctx){
   if((++ctx.nodes&63)===0&&performance.now()>ctx.deadline)throw 1;
-  if(depth<=0)return quiesce(st,alpha,beta,4,ctx);
+  if(depth<=0)return quiesce(st,alpha,beta,ctx.qd,ctx);
   const ms=genMoves(st,false);
   ms.sort((a,b)=>(b.cap+(b.pr?800:0))-(a.cap+(a.pr?800:0)));
   const side=st.turn;
@@ -2159,7 +2778,7 @@ function sqToStr(sq){return "abcdefgh"[sq&7]+(8-(sq>>3))}
 function pickMove(fen,diff){
   const cfg=DIFF_CFG[diff]||DIFF_CFG.hard;
   const st=parseFen(fen),side=st.turn;
-  const ctx={nodes:0,deadline:performance.now()+cfg.budget,agg:cfg.agg,aiSide:side};
+  const ctx={nodes:0,deadline:performance.now()+cfg.budget,agg:cfg.agg,aiSide:side,qd:cfg.qd};
   const raw=genMoves(st,false),legal=[];
   for(let i=0;i<raw.length;i++){
     const m=raw[i],u=makeMove(st,m);
@@ -2168,6 +2787,35 @@ function pickMove(fen,diff){
     unmake(st,u);
   }
   if(!legal.length)return null;
+
+  /* Beginner Easy Bot: plays eccentric openings, random moves, misses captures, and blunders naturally */
+  if(diff==="easy"){
+    if(st.fm===1){
+      const pool=(side===1?EASY_OPEN_W:EASY_OPEN_B).filter(u=>legal.some(m=>(sqToStr(m.f)+sqToStr(m.t))===u));
+      if(pool.length&&Math.random()<0.85)return pool[(Math.random()*pool.length)|0];
+    }
+    if(Math.random()<0.38){
+      const rm=legal[(Math.random()*legal.length)|0];
+      return sqToStr(rm.f)+sqToStr(rm.t)+PCHAR[rm.pr];
+    }
+    const shallow=legal.map(m=>{
+      const u=makeMove(st,m);
+      const sc=-evalBoard(st,0,side)+(Math.random()*240-120);
+      unmake(st,u);
+      return{m,sc};
+    }).sort((a,b)=>b.sc-a.sc);
+    const span=Math.max(1,Math.ceil(shallow.length*0.65));
+    const chosen=Math.random()<0.72?shallow[(Math.random()*span)|0].m:shallow[0].m;
+    return sqToStr(chosen.f)+sqToStr(chosen.t)+PCHAR[chosen.pr];
+  }
+
+  /* Opening Book Variety for Medium, Hard, Nightmare, Mittens */
+  const book=OPEN_BOOK[st.bookKey];
+  if(book&&book.length&&Math.random()<0.88){
+    const cand=book.filter(u=>legal.some(m=>(sqToStr(m.f)+sqToStr(m.t)+PCHAR[m.pr])===u));
+    if(cand.length)return cand[(Math.random()*cand.length)|0];
+  }
+
   let scored=legal.map(m=>({m,sc:0}));
   for(let d=1;d<=cfg.maxD;d++){
     try{
@@ -2189,9 +2837,10 @@ function pickMove(fen,diff){
     }catch(e){break}
   }
   let chosen=scored[0].m;
-  if(cfg.noise>0&&scored.length>1){
+  const effNoise=(st.fm<=8&&scored[0].sc<9000)?Math.max(cfg.noise,20):cfg.noise;
+  if(effNoise>0&&scored.length>1){
     const top=scored[0].sc;
-    const pool=scored.filter((x,idx)=>idx<4&&(top-x.sc)<=cfg.noise);
+    const pool=scored.filter((x,idx)=>idx<4&&(top-x.sc)<=effNoise);
     chosen=pool[(Math.random()*pool.length)|0].m;
   }
   return sqToStr(chosen.f)+sqToStr(chosen.t)+PCHAR[chosen.pr];
@@ -2209,7 +2858,7 @@ function legalMoves(st){
 }
 function bestAtDepth(st,d,budget){
   const ms=legalMoves(st);if(!ms.length)return null;
-  const ctx={nodes:0,deadline:performance.now()+budget,agg:0,aiSide:st.turn};
+  const ctx={nodes:0,deadline:performance.now()+budget,agg:0,aiSide:st.turn,qd:4};
   let bestM=ms[0],bestSc=-1e9;
   for(let i=0;i<ms.length;i++){
     const m=ms[i],u=makeMove(st,m);
@@ -2277,8 +2926,12 @@ function runFallbackAsync(fen,diff,cb){
   const g=new Chess(fen);
   const ms=g.moves({verbose:true});
   if(!ms.length)return cb(null);
+  if(diff==="easy"&&Math.random()<0.42){
+    const rm=ms[(Math.random()*ms.length)|0];
+    return setTimeout(()=>cb(rm.from+rm.to+(rm.promotion||"")),0);
+  }
   let i=0,best=ms[0],bestSc=-1e9;
-  const agg=(diff==="mittens"?45:diff==="nightmare"?28:diff==="hard"?12:0);
+  const agg=(diff==="mittens"?42:diff==="nightmare"?24:diff==="hard"?11:0);
   const endDeadline=performance.now()+220;
   function step(){
     const t0=performance.now();
@@ -2288,8 +2941,9 @@ function runFallbackAsync(fen,diff,cb){
       let sc=g.in_checkmate()?1e6:-evalShallow(g);
       if(agg&&g.in_check())sc+=agg;
       if(agg&&m.captured)sc+=Math.round(agg*.5);
-      if(diff==="easy")sc+=Math.random()*95;
-      else if(diff==="medium")sc+=Math.random()*28;
+      if(diff==="easy")sc+=(Math.random()*340-170);
+      else if(diff==="medium")sc+=Math.random()*55;
+      else if(g.history().length<=8)sc+=Math.random()*18;
       g.undo();
       if(sc>bestSc){bestSc=sc;best=m}
       if(performance.now()>=endDeadline)break;
@@ -2320,14 +2974,382 @@ function runCoachEvalFallback(fenBefore,fenAfter,cb){
   }),0);
 }
 
+/* ---------- Sandbox Custom Rules Engine ---------- */
+const SB_KN=[[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
+const SB_BD=[[-1,-1],[-1,1],[1,-1],[1,1]];
+const SB_RD=[[-1,0],[1,0],[0,-1],[0,1]];
+const SB_KD=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+const SB_VAL={p:100,n:320,b:330,r:500,q:900,k:5000};
+const cloneSbGrid=gr=>gr.map(row=>row.map(c=>c?{type:c.type,color:c.color}:null));
+const cloneSbRules=r=>JSON.parse(JSON.stringify(r));
+function defaultSbGrid(){return new Chess().board().map(row=>row.map(c=>c?{type:c.type,color:c.color}:null))}
+function defaultSbRules(){
+  return{
+    p:{step:false,kn:false},
+    n:{diag:false,ortho:false},
+    b:{kn:false,ortho:false},
+    r:{kn:false,diag:false,leap:false},
+    q:{kn:false,leap:false},
+    k:{kn:false,queen:false},
+    ignoreCheck:false,
+    friendlyFire:false
+  };
+}
+function countSbRules(r){
+  let n=0;
+  for(const k of["p","n","b","r","q","k"])for(const f in r[k])if(r[k][f])n++;
+  if(r.ignoreCheck)n++;
+  if(r.friendlyFire)n++;
+  return n;
+}
+function sqToRC(sq){return[8-+sq[1],sq.charCodeAt(0)-97]}
+function rcToSq(r,c){return "abcdefgh"[c]+(8-r)}
+
+function sbRays(board,r,c,color,dirs,leap,friendly,out){
+  for(const[dr,dc]of dirs){
+    let nr=r+dr,nc=c+dc;
+    while(nr>=0&&nr<8&&nc>=0&&nc<8){
+      const dest=board[nr][nc];
+      if(!dest){out.push([nr,nc])}
+      else{
+        if(dest.color!==color||friendly)out.push([nr,nc]);
+        if(!leap)break;
+      }
+      nr+=dr;nc+=dc;
+    }
+  }
+}
+function sbPseudoMovesForPiece(board,r,c,rules,epSq,turn,skipCastle){
+  const pc=board[r][c];if(!pc)return[];
+  const color=pc.color,tp=pc.type,ff=!!rules.friendlyFire;
+  const targets=[];
+  const addStep=(nr,nc)=>{
+    if(nr<0||nr>7||nc<0||nc>7)return;
+    const d=board[nr][nc];
+    if(!d||d.color!==color||ff)targets.push([nr,nc]);
+  };
+  const addKnight=()=>{for(const[dr,dc]of SB_KN)addStep(r+dr,c+dc)};
+
+  if(tp==="p"){
+    const dir=color==="w"?-1:1,startR=color==="w"?6:1,promoR=color==="w"?0:7;
+    const nr=r+dir;
+    if(nr>=0&&nr<8){
+      if(!board[nr][c]){
+        targets.push([nr,c]);
+        if(r===startR&&!board[r+2*dir][c])targets.push([r+2*dir,c,true]);
+      }
+      for(const dc of[-1,1]){
+        const nc=c+dc;if(nc<0||nc>7)continue;
+        const d=board[nr][nc];
+        if((d&&(d.color!==color||ff))||(epSq&&rcToSq(nr,nc)===epSq))targets.push([nr,nc]);
+      }
+    }
+    if(rules.p.step){
+      for(const[dr,dc]of SB_KD){
+        if(dr===dir&&dc===0)continue;
+        addStep(r+dr,c+dc);
+      }
+    }
+    if(rules.p.kn)addKnight();
+    const out=[];
+    for(const item of targets){
+      const tr=item[0],tc=item[1],isDouble=!!item[2];
+      const toSq=rcToSq(tr,tc);
+      const isEp=(!board[tr][tc]&&epSq&&toSq===epSq&&Math.abs(tc-c)===1&&tr===r+dir);
+      if(tr===promoR){
+        for(const pr of["q","r","b","n"])out.push({fr:r,fc:c,tr,tc,pr,ep:false,dp:false});
+      }else{
+        out.push({fr:r,fc:c,tr,tc,pr:"",ep:isEp,dp:isDouble});
+      }
+    }
+    return out;
+  }
+
+  if(tp==="n"){
+    addKnight();
+    if(rules.n.diag)sbRays(board,r,c,color,SB_BD,false,ff,targets);
+    if(rules.n.ortho)sbRays(board,r,c,color,SB_RD,false,ff,targets);
+  }else if(tp==="b"){
+    sbRays(board,r,c,color,SB_BD,false,ff,targets);
+    if(rules.b.kn)addKnight();
+    if(rules.b.ortho)sbRays(board,r,c,color,SB_RD,false,ff,targets);
+  }else if(tp==="r"){
+    sbRays(board,r,c,color,SB_RD,!!rules.r.leap,ff,targets);
+    if(rules.r.kn)addKnight();
+    if(rules.r.diag)sbRays(board,r,c,color,SB_BD,!!rules.r.leap,ff,targets);
+  }else if(tp==="q"){
+    sbRays(board,r,c,color,SB_BD.concat(SB_RD),!!rules.q.leap,ff,targets);
+    if(rules.q.kn)addKnight();
+  }else if(tp==="k"){
+    for(const[dr,dc]of SB_KD)addStep(r+dr,c+dc);
+    if(rules.k.kn)addKnight();
+    if(rules.k.queen)sbRays(board,r,c,color,SB_BD.concat(SB_RD),false,ff,targets);
+    if(!skipCastle){
+      const homeR=color==="w"?7:0;
+      if(r===homeR&&c===4){
+        const opp=color==="w"?"b":"w";
+        const kSafe=rules.ignoreCheck||!sbAttacked(board,homeR,4,opp,rules);
+        if(kSafe){
+          const rkH=board[homeR][7];
+          if(rkH&&rkH.color===color&&rkH.type==="r"&&!board[homeR][5]&&!board[homeR][6]){
+            if(rules.ignoreCheck||(!sbAttacked(board,homeR,5,opp,rules)&&!sbAttacked(board,homeR,6,opp,rules)))
+              targets.push([homeR,6,false,"k"]);
+          }
+          const rkA=board[homeR][0];
+          if(rkA&&rkA.color===color&&rkA.type==="r"&&!board[homeR][1]&&!board[homeR][2]&&!board[homeR][3]){
+            if(rules.ignoreCheck||(!sbAttacked(board,homeR,3,opp,rules)&&!sbAttacked(board,homeR,2,opp,rules)))
+              targets.push([homeR,2,false,"q"]);
+          }
+        }
+      }
+    }
+  }
+  const seen=new Set(),out=[];
+  for(const item of targets){
+    const tr=item[0],tc=item[1],cs=item[3]||"";
+    const key=(tr<<3)|tc|(cs==="k"?64:cs==="q"?128:0);
+    if(seen.has(key))continue;
+    seen.add(key);
+    out.push({fr:r,fc:c,tr,tc,pr:"",ep:false,dp:false,cs});
+  }
+  return out;
+}
+
+function sbAttacked(board,tr,tc,byColor,rules){
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    const p=board[r][c];
+    if(!p||p.color!==byColor)continue;
+    const ms=sbPseudoMovesForPiece(board,r,c,rules,null,byColor,true);
+    for(let i=0;i<ms.length;i++){
+      if(ms[i].tr===tr&&ms[i].tc===tc)return true;
+    }
+  }
+  return false;
+}
+
+function sbFindKings(board,color){
+  const res=[];
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    const p=board[r][c];
+    if(p&&p.color===color&&p.type==="k")res.push([r,c]);
+  }
+  return res;
+}
+
+function createSandboxGame(startBoard,rules){
+  let bd=cloneSbGrid(startBoard);
+  const rl=cloneSbRules(rules);
+  let turn="w",ep=null,half=0,full=1,kingCapWinner="",noPieceWinner="";
+  const hist=[];
+
+  function countPieces(c){
+    let n=0;
+    for(let r=0;r<8;r++)for(let k=0;k<8;k++)if(bd[r][k]&&bd[r][k].color===c)n++;
+    return n;
+  }
+  function inCheckColor(c){
+    if(rl.ignoreCheck)return false;
+    const ks=sbFindKings(bd,c);
+    if(!ks.length)return false;
+    const opp=c==="w"?"b":"w";
+    return ks.some(([kr,kc])=>sbAttacked(bd,kr,kc,opp,rl));
+  }
+  function applyToBoard(b,m){
+    const pc=b[m.fr][m.fc];
+    let cap=b[m.tr][m.tc];
+    b[m.tr][m.tc]=m.pr?{type:m.pr,color:pc.color}:{type:pc.type,color:pc.color};
+    b[m.fr][m.fc]=null;
+    if(m.ep){
+      cap=b[m.fr][m.tc];
+      b[m.fr][m.tc]=null;
+    }
+    if(m.cs==="k"){b[m.fr][5]=b[m.fr][7];b[m.fr][7]=null}
+    else if(m.cs==="q"){b[m.fr][3]=b[m.fr][0];b[m.fr][0]=null}
+    return cap;
+  }
+  function buildVerbose(m,chkFn){
+    const pc=bd[m.fr][m.fc];
+    const from=rcToSq(m.fr,m.fc),to=rcToSq(m.tr,m.tc);
+    const cap=m.ep?bd[m.fr][m.tc]:bd[m.tr][m.tc];
+    const flags=(m.cs?m.cs:"")+(m.ep?"e":(cap?"c":"n"))+(m.pr?"p":"");
+    let san="";
+    if(m.cs==="k")san="O-O";
+    else if(m.cs==="q")san="O-O-O";
+    else{
+      const pl=pc.type==="p"?"":pc.type.toUpperCase();
+      san=(pc.type==="p"&&cap?from[0]:pl)+(cap?"x":"")+to+(m.pr?"="+m.pr.toUpperCase():"");
+    }
+    if(chkFn){
+      const suffix=chkFn();
+      if(suffix)san+=suffix;
+    }
+    return{from,to,color:pc.color,piece:pc.type,captured:cap?cap.type:"",promotion:m.pr||"",flags,san};
+  }
+  function legalRaw(onlySq){
+    if(kingCapWinner||noPieceWinner)return[];
+    const out=[];
+    let r0=0,r1=7,c0=0,c1=7;
+    if(onlySq){const[sr,sc]=sqToRC(onlySq);r0=r1=sr;c0=c1=sc}
+    const opp=turn==="w"?"b":"w";
+    for(let r=r0;r<=r1;r++)for(let c=c0;c<=c1;c++){
+      const p=bd[r][c];
+      if(!p||p.color!==turn)continue;
+      const ms=sbPseudoMovesForPiece(bd,r,c,rl,ep,turn,false);
+      for(const m of ms){
+        if(!rl.ignoreCheck){
+          const sim=cloneSbGrid(bd);
+          applyToBoard(sim,m);
+          const ks=sbFindKings(sim,turn);
+          if(ks.some(([kr,kc])=>sbAttacked(sim,kr,kc,opp,rl)))continue;
+        }
+        out.push(m);
+      }
+    }
+    return out;
+  }
+  function moves(opts){
+    const o=opts||{};
+    const ms=legalRaw(o.square);
+    if(o.verbose)return ms.map(m=>buildVerbose(m,null));
+    return ms.map(m=>buildVerbose(m,null).san);
+  }
+  function move(spec){
+    if(!spec)return null;
+    const ms=legalRaw(spec.from);
+    const[tr,tc]=sqToRC(spec.to);
+    const pr=spec.promotion||"";
+    let match=ms.find(m=>m.tr===tr&&m.tc===tc&&(m.pr===pr||(!m.pr&&!pr)));
+    if(!match&&!pr)match=ms.find(m=>m.tr===tr&&m.tc===tc);
+    if(!match)return null;
+    const snap={bd:cloneSbGrid(bd),turn,ep,half,full,kingCapWinner,noPieceWinner};
+    const pc=bd[match.fr][match.fc];
+    const cap=applyToBoard(bd,match);
+    const opp=turn==="w"?"b":"w";
+    if(cap&&cap.type==="k"&&!sbFindKings(bd,opp).length)kingCapWinner=turn;
+    else if(countPieces(opp)===0)noPieceWinner=turn;
+    ep=match.dp?rcToSq((match.fr+match.tr)>>1,match.fc):null;
+    if(turn==="b")full++;
+    turn=opp;
+    half=(pc.type==="p"||cap)?0:(half+1);
+    const mvObj=buildVerboseFromSnap(snap.bd,match,cap);
+    if(!kingCapWinner&&!noPieceWinner){
+      if(inCheckmate())mvObj.san+="#";
+      else if(inCheckColor(turn))mvObj.san+="+";
+    }else mvObj.san+="#";
+    hist.push({snap,mv:mvObj});
+    return Object.assign({},mvObj);
+  }
+  function buildVerboseFromSnap(prevBd,m,cap){
+    const pc=prevBd[m.fr][m.fc],from=rcToSq(m.fr,m.fc),to=rcToSq(m.tr,m.tc);
+    const flags=(m.cs?m.cs:"")+(m.ep?"e":(cap?"c":"n"))+(m.pr?"p":"");
+    let san="";
+    if(m.cs==="k")san="O-O";
+    else if(m.cs==="q")san="O-O-O";
+    else{
+      const pl=pc.type==="p"?"":pc.type.toUpperCase();
+      san=(pc.type==="p"&&cap?from[0]:pl)+(cap?"x":"")+to+(m.pr?"="+m.pr.toUpperCase():"");
+    }
+    return{from,to,color:pc.color,piece:pc.type,captured:cap?cap.type:"",promotion:m.pr||"",flags,san};
+  }
+  function undo(){
+    const top=hist.pop();if(!top)return null;
+    bd=cloneSbGrid(top.snap.bd);
+    turn=top.snap.turn;ep=top.snap.ep;half=top.snap.half;full=top.snap.full;
+    kingCapWinner=top.snap.kingCapWinner;noPieceWinner=top.snap.noPieceWinner;
+    return Object.assign({},top.mv);
+  }
+  function inCheckmate(){
+    if(kingCapWinner||noPieceWinner)return false;
+    return !legalRaw().length&&inCheckColor(turn);
+  }
+  function inStalemate(){
+    if(kingCapWinner||noPieceWinner)return false;
+    return !legalRaw().length&&!inCheckColor(turn);
+  }
+  function fen(){
+    const rows=[];
+    for(let r=0;r<8;r++){
+      let s="",empty=0;
+      for(let c=0;c<8;c++){
+        const p=bd[r][c];
+        if(!p){empty++}
+        else{if(empty){s+=empty;empty=0}s+=p.color==="w"?p.type.toUpperCase():p.type}
+      }
+      if(empty)s+=empty;
+      rows.push(s);
+    }
+    return `${rows.join("/")} ${turn} - ${ep||"-"} ${half} ${full}`;
+  }
+  return{
+    isSandbox:true,
+    rules:rl,
+    fen,
+    board:()=>cloneSbGrid(bd),
+    get:sq=>{const[r,c]=sqToRC(sq);return(r>=0&&r<8&&c>=0&&c<8&&bd[r][c])?{type:bd[r][c].type,color:bd[r][c].color}:null},
+    turn:()=>turn,
+    in_check:()=>inCheckColor(turn),
+    in_checkmate:inCheckmate,
+    in_stalemate:inStalemate,
+    in_threefold_repetition:()=>false,
+    insufficient_material:()=>false,
+    in_draw:()=>half>=100,
+    isKingCaptured:()=>kingCapWinner,
+    isNoPieces:()=>noPieceWinner,
+    game_over:()=>!!(kingCapWinner||noPieceWinner||inCheckmate()||inStalemate()||half>=100),
+    moves,
+    move,
+    undo,
+    history:opts=>(opts&&opts.verbose)?hist.map(x=>Object.assign({},x.mv)):hist.map(x=>x.mv.san),
+    pgn:()=>{
+      const parts=[];
+      for(let i=0;i<hist.length;i+=2)parts.push(`${i/2+1}. ${hist[i].mv.san}${hist[i+1]?" "+hist[i+1].mv.san:""}`);
+      return parts.join(" ");
+    }
+  };
+}
+
+function sbPickBotMove(g){
+  const ms=g.moves({verbose:true});
+  if(!ms.length)return null;
+  const side=g.turn();
+  let best=ms[0],bestSc=-1e9;
+  for(const m of ms){
+    let sc=Math.random()*24;
+    if(m.captured)sc+=SB_VAL[m.captured]||(m.captured==="k"?1e5:200);
+    if(m.promotion)sc+=SB_VAL[m.promotion]||800;
+    const tr=8-+m.to[1],tc=m.to.charCodeAt(0)-97;
+    if(tr>=2&&tr<=5&&tc>=2&&tc<=5)sc+=18;
+    const res=g.move({from:m.from,to:m.to,promotion:m.promotion||"q"});
+    if(res){
+      if((g.isKingCaptured&&g.isKingCaptured()===side)||(g.isNoPieces&&g.isNoPieces()===side)||g.in_checkmate())sc+=1e6;
+      else{
+        if(g.in_check())sc+=55;
+        const oppMs=g.moves({verbose:true});
+        let maxLoss=0;
+        for(const om of oppMs){
+          if(om.captured){
+            const v=SB_VAL[om.captured]||0;
+            if(v>maxLoss)maxLoss=v;
+          }
+        }
+        sc-=maxLoss*0.75;
+      }
+      g.undo();
+    }
+    if(sc>bestSc){bestSc=sc;best=m}
+  }
+  return best;
+}
+
 /* ---------- Game State ---------- */
 const DC={green:"#2e9e44",red:"#d33",blue:"#2f7de1",yellow:"#e6b800"};
 
 const S={
   tab:"play",      // "play" | "me"
-  mode:"basic",    // "basic" | "bot" | "coach" | "learn" | "puz"
+  mode:"basic",    // "basic" | "bot" | "coach" | "sandbox" | "learn" | "puz"
   g:new Chess(),
-  col:"w",         // player's color in bot/coach mode
+  col:"w",         // player's color in bot/coach/sandbox-bot mode
+  basicFlip:true,  // true = Face-to-Face (auto-flip 180), false = Same Direction
   flip:false,
   sel:null,
   legal:[],
@@ -2353,6 +3375,7 @@ const S={
   over:"",
   overSpec:null,
   mateWin:"",      // "w" | "b" | ""
+  mateReason:"",   // "" | "kingCap" | "noPieces"
   mateModalOpen:false,
   chkWarn:false,
   busy:false,
@@ -2364,6 +3387,16 @@ const S={
   menuOpen:false,
   drawerOpen:false,
   colorModalOpen:false,
+  p2ModalOpen:false,
+  sbSetupOpen:false,
+  sbCfg:{
+    board:defaultSbGrid(),
+    brush:{type:"q",color:"w"},
+    bulkSide:"both",
+    opp:"same",
+    rules:defaultSbRules(),
+    err:""
+  },
   dm:false,
   dc:"green",
   ds:null,
@@ -2372,6 +3405,8 @@ const S={
   coachMsg:"",
   coachKey:"coachReady",
   coachArgs:null,
+  coachVariant:0,
+  lastCoachVar:{},
   coachTone:"",    // "" | "good" | "warn"
   coachHintUsed:false,
   coachArrows:[],  // [{a,b,c}]
@@ -2385,18 +3420,29 @@ function setMsg(key,vars){
   S.msgSpec=key?{key,vars:vars||null}:null;
   S.msg=key?t(key,vars):"";
 }
-function setCoach(key,args){
+function pickCoachVariant(key){
+  const d=I18N[P.lang]||I18N.en;
+  const val=(d[key]!==undefined?d[key]:I18N.en[key]);
+  if(!Array.isArray(val)||val.length<=1)return 0;
+  const prev=S.lastCoachVar[key];
+  let idx=(Math.random()*val.length)|0;
+  if(idx===prev)idx=(idx+1+((Math.random()*(val.length-1))|0))%val.length;
+  S.lastCoachVar[key]=idx;
+  return idx;
+}
+function setCoach(key,args,keepVar){
   S.coachKey=key||"";
   S.coachArgs=args||null;
-  S.coachMsg=key?formatCoachKey(key,args):"";
+  if(!keepVar)S.coachVariant=key?pickCoachVariant(key):0;
+  S.coachMsg=key?formatCoachKey(key,args,S.coachVariant):"";
 }
-function formatCoachKey(key,args){
+function formatCoachKey(key,args,variant){
   const v=args?Object.assign({},args):{};
   if(v.tgtType)v.tgt=pcName(v.tgtType);
   if(v.atkType)v.atk=pcName(v.atkType);
   if(v.capType)v.cap=pcName(v.capType);
   if(v.pieceType)v.piece=pcName(v.pieceType);
-  return t(key,v);
+  return tVar(key,variant,v);
 }
 
 let chkWarnTimer=0;
@@ -2423,6 +3469,7 @@ function clrDraw(){if(P.fx.cl){S.dr={a:[],h:{}};S.ds=null}}
 function hasDrawMarks(){return !!(S.dr.a.length||Object.keys(S.dr.h).length||S.ds)}
 function sideOK(){
   if(S.mode==="bot"||S.mode==="coach")return !S.busy&&!S.over&&!S.coachPending&&S.g.turn()===S.col;
+  if(S.mode==="sandbox")return !S.busy&&!S.over&&(S.sbCfg.opp!=="bot"||S.g.turn()===S.col);
   if(S.mode==="puz")return !S.solved&&!S.over&&!S.pzBusy;
   if(S.mode==="learn")return !S.solved&&!S.over;
   return !S.over;
@@ -2685,7 +3732,7 @@ function ov(){
     const L=P.fx.arr?[...D.a]:[];
     if(P.fx.arr&&S.pv&&S.pv[0]!==S.pv[1])L.push({a:S.pv[0],b:S.pv[1],c:S.pv[2],pv:1});
     if(S.mode==="coach"&&S.coachArrows.length)for(const a of S.coachArrows)L.push(a);
-    if(S.hintArrow&&(S.mode==="basic"||S.mode==="bot"))L.push(S.hintArrow);
+    if(S.hintArrow&&(S.mode==="basic"||S.mode==="bot"||S.mode==="sandbox"))L.push(S.hintArrow);
     for(const r of L){
       const col=DC[r.c]||r.c;
       const[x1,y1]=xySvg(r.a),[x2,y2]=xySvg(r.b),dx=x2-x1,dy=y2-y1,kn=Math.abs(dx*dy)===200;
@@ -2739,21 +3786,26 @@ function cancelAI(){
   S.pzBusy=false;
   if(S.aiTimer){clearTimeout(S.aiTimer);S.aiTimer=0}
 }
-function loadFen(fen){
+function resetBoardState(){
   cancelAI();
   clearCheckWarn();
   S.pp=null;S.dr={a:[],h:{}};S.ds=null;
-  S.g=new Chess(fen);
   S.sel=null;S.legal=[];S.last=null;
   S.h=0;S.hint=null;S.hintArrow=null;S.hm="";S.hmSpec=null;
   S.redo=[];S.solved=false;
   S.pzStep=0;S.pzBusy=false;
   S.bad=false;S.msgSpec=null;S.ex="";S.exSpec=null;S.tried=false;S.over="";S.overSpec=null;
-  S.mateWin="";S.mateModalOpen=false;
+  S.mateWin="";S.mateReason="";S.mateModalOpen=false;
   S.coachArrows=[];S.coachPending=null;S.coachPreFen="";
 }
-function startBasic(){
+function loadFen(fen){
+  resetBoardState();
+  S.g=new Chess(fen);
+}
+function startBasic(autoFlip){
+  if(autoFlip!==undefined)S.basicFlip=!!autoFlip;
   S.mode="basic";S.tab="play";S.flip=false;
+  S.p2ModalOpen=false;S.menuOpen=false;
   loadFen(new Chess().fen());S.msg="";
   render();
 }
@@ -2775,6 +3827,61 @@ function startCoach(){
   setCoach("coachWelcome");
   S.coachTone="";S.coachHintUsed=false;
   render();
+}
+function hasBothColors(grid){
+  let w=0,b=0;
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    const p=grid[r][c];
+    if(p){if(p.color==="w")w++;else b++}
+  }
+  return w>0&&b>0;
+}
+function startSandbox(){
+  if(!hasBothColors(S.sbCfg.board)){
+    S.sbCfg.err=t("sbNeedPiece");
+    renderUIOnly();
+    return;
+  }
+  S.sbCfg.err="";
+  S.mode="sandbox";S.tab="play";S.col="w";S.flip=false;
+  S.sbSetupOpen=false;S.menuOpen=false;S.p2ModalOpen=false;S.colorModalOpen=false;
+  resetBoardState();
+  S.g=createSandboxGame(S.sbCfg.board,S.sbCfg.rules);
+  S.msg="";
+  render();
+}
+function applySandboxPreset(name){
+  const b=defaultSbGrid(),r=defaultSbRules();
+  if(name==="queens"){
+    for(let c=0;c<8;c++){b[6][c]={type:"q",color:"w"};b[1][c]={type:"q",color:"b"}}
+  }else if(name==="knights"){
+    for(let row=0;row<8;row++)for(let c=0;c<8;c++){
+      if(b[row][c]&&b[row][c].type!=="k")b[row][c]={type:"n",color:b[row][c].color};
+    }
+  }else if(name==="rooks"){
+    for(let c=0;c<8;c++){b[6][c]={type:"r",color:"w"};b[1][c]={type:"r",color:"b"}}
+  }else if(name==="hybrid"){
+    r.q.kn=true;r.r.kn=true;r.r.leap=true;r.b.kn=true;r.p.step=true;r.ignoreCheck=true;
+  }
+  S.sbCfg.board=b;S.sbCfg.rules=r;S.sbCfg.err="";
+  renderUIOnly();
+}
+function sbBulkReplace(target,pieceType){
+  const b=S.sbCfg.board,side=S.sbCfg.bulkSide;
+  const doW=side==="both"||side==="w",doB=side==="both"||side==="b";
+  if(target==="pawns"){
+    if(doW)for(let c=0;c<8;c++)b[6][c]={type:pieceType,color:"w"};
+    if(doB)for(let c=0;c<8;c++)b[1][c]={type:pieceType,color:"b"};
+  }else if(target==="back"){
+    const std=["r","n","b","q","k","b","n","r"];
+    for(let c=0;c<8;c++){
+      if(c===4)continue;
+      if(doW)b[7][c]={type:pieceType==="std"?std[c]:pieceType,color:"w"};
+      if(doB)b[0][c]={type:pieceType==="std"?std[c]:pieceType,color:"b"};
+    }
+  }
+  S.sbCfg.err="";
+  renderUIOnly();
 }
 function startLesson(li,si){
   S.mode="learn";S.tab="play";S.flip=false;
@@ -2801,6 +3908,7 @@ function restartCurrent(){
   else if(S.mode==="puz")startPuzzle();
   else if(S.mode==="bot"){S.colorModalOpen=true;render()}
   else if(S.mode==="coach")startCoach();
+  else if(S.mode==="sandbox")startSandbox();
   else startBasic();
 }
 
@@ -2855,6 +3963,29 @@ function findCoachThreat(){
     if(gain>bestScore){bestScore=gain;best=c}
   }
   return best&&bestScore>=2?{from:best.from,to:best.to,atk:best.piece,tgt:best.captured}:null;
+}
+
+function triggerSandboxBotMove(){
+  if(S.busy||S.mode!=="sandbox"||S.sbCfg.opp!=="bot"||S.over||S.g.turn()===S.col)return;
+  const tk=++S.tok,fen=S.g.fen();
+  S.busy=true;
+  renderUIOnly();
+  const wait=750+Math.round(Math.random()*650);
+  S.aiTimer=setTimeout(()=>{
+    S.aiTimer=0;
+    if(tk!==S.tok||S.mode!=="sandbox"||S.g.fen()!==fen)return;
+    const mv=sbPickBotMove(S.g);
+    S.busy=false;
+    if(!mv){render();return}
+    const m=S.g.move({from:mv.from,to:mv.to,promotion:mv.promotion||"q"});
+    if(!m){render();return}
+    S.last=[m.from,m.to];
+    S.bad=false;
+    setMsg("");
+    setExplain(m,S.g,"Bot: ");
+    snd(kind(m,S.g));clrDraw();endCheck();
+    render({m});
+  },wait);
 }
 
 function triggerBotMove(){
@@ -2943,10 +4074,21 @@ function evaluateCoachMove(fenBefore,m){
       }else{
         S.coachTone="good";
         S.coachArrows=[];
-        if(S.g.in_check()){
+        const ply=S.g.history().length;
+        if(m.promotion){
+          setCoach("coachGoodPromo");
+        }else if(S.g.in_check()){
           setCoach("coachGoodCheck");
         }else if(m.captured){
           setCoach("coachGoodCap");
+        }else if(ply<=12&&m.piece==="k"&&/[kq]/.test(m.flags)){
+          setCoach("coachOpenCastle");
+        }else if(ply<=6&&m.piece==="q"){
+          setCoach("coachOpenQueenEarly");
+        }else if(ply<=8&&m.piece==="p"&&"de".includes(m.to[0])&&"45".includes(m.to[1])){
+          setCoach("coachOpenCenter");
+        }else if(ply<=10&&"nb".includes(m.piece)&&m.from[1]===(m.color==="w"?"1":"8")){
+          setCoach("coachOpenDev");
         }else if(loss<35){
           setCoach("coachGoodBest");
         }else{
@@ -3096,7 +4238,7 @@ function doMove(f,t,pr,fromDrag){
     }
   }else{
     endCheck();
-    if(S.mode==="basic"&&!S.over)S.flip=g.turn()==="b";
+    if(((S.mode==="basic"&&S.basicFlip)||(S.mode==="sandbox"&&S.sbCfg.opp==="face"))&&!S.over)S.flip=g.turn()==="b";
   }
 
   if(g.history().length===L){
@@ -3104,6 +4246,7 @@ function doMove(f,t,pr,fromDrag){
     render(animObj);
     if(S.mode==="bot"&&!S.over)triggerBotMove();
     else if(S.mode==="coach"&&!S.over)evaluateCoachMove(fenBefore,m);
+    else if(S.mode==="sandbox"&&S.sbCfg.opp==="bot"&&!S.over)triggerSandboxBotMove();
   }else{
     render();
     shakeSq(f);
@@ -3147,12 +4290,22 @@ function recordPz(ok){
 
 function endCheck(){
   const g=S.g;let key="",vars=null,res=null;
-  if(g.in_checkmate()){
+  const kingCap=(g.isKingCaptured&&g.isKingCaptured())||"";
+  const noPcs=(g.isNoPieces&&g.isNoPieces())||"";
+  if(kingCap){
+    key="overKingCap";vars={wn:kingCap};
+    S.mateWin=kingCap;S.mateReason="kingCap";
+    S.mateModalOpen=true;
+  }else if(noPcs){
+    key="overNoPieces";vars={wn:noPcs};
+    S.mateWin=noPcs;S.mateReason="noPieces";
+    S.mateModalOpen=true;
+  }else if(g.in_checkmate()){
     const wn=g.turn()==="w"?"b":"w";
     key="overMate";vars={wn};
     res=wn===S.col?"w":"l";
-    S.mateWin=wn;
-    if(S.mode==="basic"||S.mode==="bot"||S.mode==="coach")S.mateModalOpen=true;
+    S.mateWin=wn;S.mateReason="";
+    if(S.mode==="basic"||S.mode==="bot"||S.mode==="coach"||S.mode==="sandbox")S.mateModalOpen=true;
   }
   else if(g.in_stalemate()){key="overStale";res="d"}
   else if(g.in_threefold_repetition()){key="overRep";res="d"}
@@ -3180,11 +4333,12 @@ function endCheck(){
 function undo(){
   if(S.busy||S.pzBusy)cancelAI();
   clearCheckWarn();
-  S.pp=null;S.mateModalOpen=false;S.mateWin="";
+  S.pp=null;S.mateModalOpen=false;S.mateWin="";S.mateReason="";
   S.coachPending=null;S.coachArrows=[];S.coachTone="";
   const g=S.g;
   if(!g.history().length)return;
-  let n=((S.mode==="bot"||S.mode==="coach")&&g.turn()===S.col&&g.history().length>=2)?2:1;
+  const vsAiTurn=(S.mode==="bot"||S.mode==="coach"||(S.mode==="sandbox"&&S.sbCfg.opp==="bot"))&&g.turn()===S.col&&g.history().length>=2;
+  let n=vsAiTurn?2:1;
   if(S.mode==="puz"&&S.pzStep===1&&g.history().length>=2){n=2;S.pzStep=0}
   S.over="";S.overSpec=null;
   let lastAnim=null,undone=0;
@@ -3192,7 +4346,7 @@ function undo(){
     const m=g.undo();S.redo.push(m);
     lastAnim={m,rev:true};undone++;
   }
-  if(S.mode==="basic")S.flip=g.turn()==="b";
+  if((S.mode==="basic"&&S.basicFlip)||(S.mode==="sandbox"&&S.sbCfg.opp==="face"))S.flip=g.turn()==="b";
   S.solved=false;S.sel=null;S.legal=[];S.hint=null;S.hintArrow=null;S.hm="";S.hmSpec=null;S.bad=false;
   if(S.mode==="learn"){S.msgSpec={type:"lessonStep"};S.msg=cur().tx;}
   else if(S.mode==="puz"){S.msgSpec={type:"puzPrompt"};S.msg=pText(getTodayPuzzles()[S.pi]);}
@@ -3213,12 +4367,13 @@ function redo(){
   const m=g.move({from:o.from,to:o.to,promotion:o.promotion||"q"});
   if(!m)return;
   let lastM=m,redone=1;
-  if((S.mode==="bot"||S.mode==="coach")&&!g.game_over()&&g.turn()!==S.col&&S.redo.length){
+  const isVsAi=(S.mode==="bot"||S.mode==="coach"||(S.mode==="sandbox"&&S.sbCfg.opp==="bot"));
+  if(isVsAi&&!g.game_over()&&g.turn()!==S.col&&S.redo.length){
     const o2=S.redo.pop();
     const m2=g.move({from:o2.from,to:o2.to,promotion:o2.promotion||"q"});
     if(m2){lastM=m2;redone++}
   }
-  if(S.mode==="basic")S.flip=g.turn()==="b";
+  if((S.mode==="basic"&&S.basicFlip)||(S.mode==="sandbox"&&S.sbCfg.opp==="face"))S.flip=g.turn()==="b";
   S.coachPending=null;S.coachArrows=[];S.hintArrow=null;S.hm="";S.hmSpec=null;
   S.last=[lastM.from,lastM.to];
   setExplain(lastM,g,"");
@@ -3226,7 +4381,8 @@ function redo(){
   endCheck();
   snd(kind(lastM,g));clrDraw();
   render(redone===1?{m:lastM}:null);
-  if((S.mode==="bot"||S.mode==="coach")&&!S.over&&g.turn()!==S.col)triggerBotMove();
+  if(S.mode==="sandbox"&&S.sbCfg.opp==="bot"&&!S.over&&g.turn()!==S.col)triggerSandboxBotMove();
+  else if((S.mode==="bot"||S.mode==="coach")&&!S.over&&g.turn()!==S.col)triggerBotMove();
 }
 
 function coachHint(){
@@ -3261,6 +4417,18 @@ function coachHint(){
 function hint(){
   SND.click();
   if(S.mode==="coach"){coachHint();return}
+  if(S.mode==="sandbox"){
+    if(S.over||S.busy)return;
+    const o=sbPickBotMove(S.g);
+    if(!o)return;
+    S.hint=null;
+    S.hintArrow={a:o.from,b:o.to,c:"#4b9bff",hint:1};
+    S.hmSpec={type:"std",san:o.san,piece:o.piece,to:o.to};
+    S.hm=t("hintSuggested",{san:o.san,piece:pcName(o.piece),to:o.to});
+    S.h=3;
+    renderUIOnly();
+    return;
+  }
   if(S.mode==="basic"||S.mode==="bot"){
     if(S.over||S.busy)return;
     const fen=S.g.fen();
@@ -3309,7 +4477,7 @@ function hint(){
 }
 
 function refreshTranslatedState(){
-  if(S.coachKey)setCoach(S.coachKey,S.coachArgs);
+  if(S.coachKey)setCoach(S.coachKey,S.coachArgs,true);
   if(S.exSpec)S.ex=buildExplainText(S.exSpec.m,S.exSpec.inMate,S.exSpec.inChk,S.exSpec.prefix);
   if(S.overSpec)S.over=t(S.overSpec.key,S.overSpec.vars&&S.overSpec.vars.wn?{winner:t(S.overSpec.vars.wn==="w"?"white":"black")}:undefined);
   if(S.msgSpec){
@@ -3343,9 +4511,13 @@ function modeLabel(){
     return `Bot · ${badge} (${colName(S.col)})`;
   }
   if(S.mode==="coach")return t("modeCoachHdr");
+  if(S.mode==="sandbox"){
+    const cnt=countSbRules(S.sbCfg.rules);
+    return cnt?`${t("modeSandboxHdr")} (${cnt})`:t("modeSandboxHdr");
+  }
   if(S.mode==="learn")return t("modeLearnHdr",{title:lTitle(S.li),step:S.si+1,total:LS[S.li].s.length});
   if(S.mode==="puz"){const list=getTodayPuzzles();return t("modeDailyHdr",{lvl:S.pi+1,diff:pDiff(list[S.pi])})}
-  return t("modeBasicHdr");
+  return t(S.basicFlip?"modeBasicFaceHdr":"modeBasicSameHdr");
 }
 
 function renderBotModeButtons(){
@@ -3382,10 +4554,11 @@ function renderHeaderAndMenu(){
         `<button data-a="lang" data-v="en" class="${P.lang==="en"?"on":""}">${t("langEn")}</button>`+
         `<button data-a="lang" data-v="id" class="${P.lang==="id"?"on":""}">${t("langId")}</button>`+
       `</div></div>`+
-      `<div class="menu-sec"><div class="menu-lbl">${t("gameMode")}</div><div class="seg-3">`+
+      `<div class="menu-sec"><div class="menu-lbl">${t("gameMode")}</div><div class="seg">`+
         `<button data-a="mode-basic" class="${S.mode==="basic"?"on":""}">${t("basic2p")}</button>`+
         `<button data-a="mode-bot" class="${S.mode==="bot"?"on":""}">${t("botVsAi")}</button>`+
         `<button data-a="mode-coach" class="${S.mode==="coach"?"on":""}">${t("coachGemini")}</button>`+
+        `<button data-a="mode-sandbox" class="${S.mode==="sandbox"?"on":""}">${t("sandboxMode")}</button>`+
       `</div></div>`+
       `<div class="menu-sec"><div class="menu-lbl">${t("botMode")}</div>${renderBotModeButtons()}</div>`+
       `<div class="menu-sec"><div class="menu-lbl">${t("pieceSize")}</div>`+
@@ -3456,6 +4629,10 @@ function renderStatusAndBanner(){
       stText=g.turn()===S.col?t("yourTurn"):(S.mode==="coach"?t("coachTurn"):t("botTurn"));
       stSub=g.in_check()?t("check"):lbl;
     }
+  }else if(S.mode==="sandbox"){
+    if(S.over)stText=S.over;
+    else if(S.busy){stText=t("botThinking");stSub=t("sandboxMode");}
+    if(!S.over)stSub=`<button data-a="mode-sandbox" class="status-pill-btn">${t("sandboxRulesBtn")}</button>`;
   }else if(S.mode==="learn"){
     stText=`${lTitle(S.li)} · ${S.si+1}/${LS[S.li].s.length}`;
     stSub=S.solved?t("solved"):"";
@@ -3472,7 +4649,7 @@ function renderStatusAndBanner(){
 
   const ban=$("#banner");
   const showLearnPuz=S.mode==="learn"||S.mode==="puz";
-  const text=S.hm&&S.h?S.hm:(S.over&&(S.mode==="bot"||S.mode==="coach")&&!S.msg?`${S.over}. ${t("playAgain")}`:S.msg);
+  const text=S.hm&&S.h?S.hm:(S.over&&(S.mode==="bot"||S.mode==="coach"||S.mode==="sandbox")&&!S.msg?`${S.over}. ${t("playAgain")}`:S.msg);
   if(!showLearnPuz&&!text){ban.hidden=true;return}
   ban.hidden=false;
   ban.className=(S.hm&&S.h)?"hint":(S.bad?"bad":"");
@@ -3490,8 +4667,9 @@ function renderStatusAndBanner(){
       acts+=`<button data-a="npz" class="${S.solved?"pri":""}" ${canNext?"":"disabled"}>${t("nextLevel",{lvl:nxt+1})}</button>`;
     }
     acts+=`<button data-a="go-me">${t("allDailies")}</button>`;
-  }else if(S.over&&(S.mode==="bot"||S.mode==="coach")){
-    acts+=`<button data-a="restart" class="pri">${S.mode==="coach"?t("newCoachGame"):t("newBotMatch")}</button>`;
+  }else if(S.over&&(S.mode==="bot"||S.mode==="coach"||S.mode==="sandbox")){
+    acts+=`<button data-a="restart" class="pri">${S.mode==="coach"?t("newCoachGame"):(S.mode==="sandbox"?t("newSandboxMatch"):t("newBotMatch"))}</button>`;
+    if(S.mode==="sandbox")acts+=`<button data-a="mode-sandbox">${t("editSandboxRules")}</button>`;
   }
   ban.innerHTML=`<div class="banner-top"><span>${text}</span></div>${acts?`<div class="banner-actions">${acts}</div>`:""}`;
 }
@@ -3527,12 +4705,18 @@ function renderMeView(){
     m.items.push({l,i});
   });
 
+  const playerName=P.name||t("defaultPlayerName");
+  const escHtml=s=>String(s).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+
   $("#me-view").innerHTML=`<div class="me-wrap">
     <div class="card">
       <div class="me-hero">
         <div class="me-emblem">${IC.queenLogo}</div>
         <div class="me-hero-info">
-          <div class="me-hero-title">Rookie: Learn Chess</div>
+          <div class="me-name-row">
+            <div class="me-hero-title">${escHtml(playerName)}</div>
+            <button data-a="rename-player" class="name-edit-btn">${t("editName")}</button>
+          </div>
           <div class="mu">${t("heroSub",{dn,tot,sc:solvedCount,r:z.r})}</div>
           <div class="bar"><i style="width:${tot?dn/tot*100:0}%"></i></div>
         </div>
@@ -3642,7 +4826,13 @@ function renderMateModal(){
   const wn=colName(S.mateWin);
   let headline=t("checkmate");
   let sub=t("mateSub",{winner:wn});
-  if(S.mode==="bot"){
+  if(S.mateReason==="kingCap"){
+    headline=t("victory");
+    sub=t("sbKingCapSub",{winner:wn});
+  }else if(S.mateReason==="noPieces"){
+    headline=t("victory");
+    sub=t("sbNoMovesSub",{winner:wn});
+  }else if(S.mode==="bot"){
     const bn=botName(currentBotMeta());
     if(S.mateWin===S.col){
       headline=t("victory");
@@ -3658,7 +4848,119 @@ function renderMateModal(){
     `<div class="mu">${sub}</div>`+
     `<button data-a="mate-restart" class="pri" style="width:100%">${t("restartGame")}</button>`+
     `${S.mode==="bot"?`<button data-a="mode-bot" style="width:100%">${t("changeBotColor")}</button>`:""}`+
+    `${S.mode==="basic"?`<button data-a="mode-basic" style="width:100%">${t("change2pMode")}</button>`:""}`+
+    `${S.mode==="sandbox"?`<button data-a="mode-sandbox" style="width:100%">${t("editSandboxRules")}</button>`:""}`+
     `<button data-a="close-mate" style="width:100%">${t("viewBoard")}</button>`;
+}
+
+function renderP2Modal(){
+  const bg=$("#p2-bg");
+  bg.hidden=!S.p2ModalOpen;
+  if(!S.p2ModalOpen)return;
+  $("#p2-modal").innerHTML=
+    `<div class="modal-emblem">${IC.queenLogo}</div>`+
+    `<h3>${t("p2Title")}</h3>`+
+    `<div class="mu">${t("p2Sub")}</div>`+
+    `<div class="p2-choices">`+
+      `<button data-a="start-basic" data-flip="1" class="p2-opt${S.basicFlip?" on":""}">`+
+        `<span class="p2-ico">${IC.faceToFace}</span>`+
+        `<span class="p2-title">${t("p2FaceTitle")}</span>`+
+        `<span class="p2-sub">${t("p2FaceSub")}</span>`+
+      `</button>`+
+      `<button data-a="start-basic" data-flip="0" class="p2-opt${!S.basicFlip?" on":""}">`+
+        `<span class="p2-ico">${IC.sameDir}</span>`+
+        `<span class="p2-title">${t("p2SameTitle")}</span>`+
+        `<span class="p2-sub">${t("p2SameSub")}</span>`+
+      `</button>`+
+    `</div>`+
+    `<button data-a="close-p2" style="width:100%">${t("cancel")}</button>`;
+}
+
+function renderSandboxModal(){
+  const bg=$("#sb-bg");
+  bg.hidden=!S.sbSetupOpen;
+  if(!S.sbSetupOpen)return;
+  const cfg=S.sbCfg,r=cfg.rules,br=cfg.brush;
+  const palPieces=[
+    ["w","q"],["w","r"],["w","b"],["w","n"],["w","p"],["w","k"],
+    ["b","q"],["b","r"],["b","b"],["b","n"],["b","p"],["b","k"]
+  ];
+  const ruleDefs=[
+    {k:"q",chips:[["kn",t("sbRuleKn")],["leap",t("sbRuleLeap")]]},
+    {k:"r",chips:[["kn",t("sbRuleKn")],["diag",t("sbRuleDiag")],["leap",t("sbRuleLeap")]]},
+    {k:"b",chips:[["kn",t("sbRuleKn")],["ortho",t("sbRuleOrtho")]]},
+    {k:"n",chips:[["diag",t("sbRuleDiag")],["ortho",t("sbRuleOrtho")]]},
+    {k:"p",chips:[["step",t("sbRuleStep")],["kn",t("sbRuleKn")]]},
+    {k:"k",chips:[["kn",t("sbRuleKn")],["queen",t("sbRuleQ")]]}
+  ];
+  let boardHtml="";
+  for(let row=0;row<8;row++)for(let col=0;col<8;col++){
+    const pc=cfg.board[row][col];
+    boardHtml+=`<button data-a="sb-sq" data-r="${row}" data-c="${col}" class="sb-sq ${(row+col)%2?"d":"l"}" aria-label="${rcToSq(row,col)}">${pc?pieceUse(pc.type,pc.color):""}</button>`;
+  }
+  $("#sb-modal").innerHTML=
+    `<div class="sb-hdr"><h3>${t("sbTitle")}</h3><button data-a="close-sb" class="icon-btn" aria-label="${t("cancel")}">${IC.close}</button></div>`+
+    `<div class="mu" style="margin-top:-6px">${t("sbSub")}</div>`+
+
+    `<div class="sb-sec">`+
+      `<div class="sb-sec-lbl">${t("sbPresets")}</div>`+
+      `<div class="sb-presets">`+
+        `<button data-a="sb-pre" data-v="std">${t("sbPreStd")}</button>`+
+        `<button data-a="sb-pre" data-v="queens">${t("sbPreQueens")}</button>`+
+        `<button data-a="sb-pre" data-v="knights">${t("sbPreKnights")}</button>`+
+        `<button data-a="sb-pre" data-v="rooks">${t("sbPreRooks")}</button>`+
+        `<button data-a="sb-pre" data-v="hybrid">${t("sbPreHybrid")}</button>`+
+      `</div>`+
+    `</div>`+
+
+    `<div class="sb-sec">`+
+      `<div class="sb-sec-lbl">${t("sbRoster")}</div>`+
+      `<div class="sb-board-wrap">`+
+        `<div class="sb-palette">`+
+          palPieces.map(([c,tp])=>{
+            const on=br&&br.color===c&&br.type===tp;
+            return `<button data-a="sb-brush" data-c="${c}" data-t="${tp}" class="sb-pal-btn${on?" on":""}" aria-label="${c}${tp}">${pieceUse(tp,c)}</button>`;
+          }).join("")+
+          `<button data-a="sb-brush" data-c="" data-t="" class="sb-pal-btn sb-pal-erase${!br?" on":""}">${t("sbErase")}</button>`+
+        `</div>`+
+        `<div class="sb-grid">${boardHtml}</div>`+
+      `</div>`+
+      `<div class="sb-bulk-row">`+
+        `<span class="mu" style="font-size:11.5px;font-weight:700">${t("sbBulkSide")}:</span>`+
+        `<button data-a="sb-side" data-v="both" class="${cfg.bulkSide==="both"?"on":""}">${t("sbBoth")}</button>`+
+        `<button data-a="sb-side" data-v="w" class="${cfg.bulkSide==="w"?"on":""}">${t("white")}</button>`+
+        `<button data-a="sb-side" data-v="b" class="${cfg.bulkSide==="b"?"on":""}">${t("black")}</button>`+
+      `</div>`+
+      `<div class="sb-bulk-row">`+
+        `<span class="mu" style="font-size:11.5px;font-weight:700">${t("sbPawnsTo")}</span>`+
+        ` ${["q","r","b","n","p"].map(pt=>`<button data-a="sb-bulk" data-tgt="pawns" data-pt="${pt}">${pcName(pt)}</button>`).join("")}`+
+      `</div>`+
+      `<div class="sb-bulk-row">`+
+        `<span class="mu" style="font-size:11.5px;font-weight:700">${t("sbBackTo")}</span>`+
+        ` ${["q","r","b","n","std"].map(pt=>`<button data-a="sb-bulk" data-tgt="back" data-pt="${pt}">${pt==="std"?t("sbPreStd"):pcName(pt)}</button>`).join("")}`+
+      `</div>`+
+    `</div>`+
+
+    `<div class="sb-sec">`+
+      `<div class="sb-sec-lbl">${t("sbHybridRules")}</div>`+
+      ruleDefs.map(rd=>`<div class="sb-rule-row"><span class="sb-pc-tag">${pieceUse(rd.k,"w")}<span>${PROMO_NAMES[P.lang][rd.k]||pcName(rd.k)}</span></span><div class="sb-chips">${rd.chips.map(([ck,lbl])=>`<button data-a="sb-rule" data-pc="${rd.k}" data-k="${ck}" class="${r[rd.k][ck]?"on":""}">${lbl}</button>`).join("")}</div></div>`).join("")+
+    `</div>`+
+
+    `<div class="sb-sec">`+
+      `<div class="sb-sec-lbl">${t("sbGlobalRules")}</div>`+
+      `<div class="seg" style="gap:6px">`+
+        `<button data-a="sb-grule" data-k="ignoreCheck" class="${r.ignoreCheck?"on":""}" style="min-height:38px;font-size:12px">${t("sbIgnoreCheck")}</button>`+
+        `<button data-a="sb-grule" data-k="friendlyFire" class="${r.friendlyFire?"on":""}" style="min-height:38px;font-size:12px">${t("sbFriendlyFire")}</button>`+
+      `</div>`+
+      `<div class="seg-3" style="gap:6px">`+
+        `<button data-a="sb-opp" data-v="same" class="${cfg.opp==="same"?"on":""}" style="min-height:38px;font-size:12px">${t("sbOppSame")}</button>`+
+        `<button data-a="sb-opp" data-v="face" class="${cfg.opp==="face"?"on":""}" style="min-height:38px;font-size:12px">${t("sbOppFace")}</button>`+
+        `<button data-a="sb-opp" data-v="bot" class="${cfg.opp==="bot"?"on":""}" style="min-height:38px;font-size:12px">${t("sbOppBot")}</button>`+
+      `</div>`+
+    `</div>`+
+
+    `${cfg.err?`<div class="sb-err">${cfg.err}</div>`:""}`+
+    `<button data-a="sb-start" class="pri" style="width:100%">${IC.sandbox}<span>${t("sbStartMatch")}</span></button>`;
 }
 
 function renderUIOnly(){
@@ -3681,6 +4983,8 @@ function renderUIOnly(){
     `<button data-a="tab" data-v="me" class="${!isPlay?"on":""}">${IC.me}<span>${t("me")}</span></button>`;
   renderDrawer();
   renderColorModal();
+  renderP2Modal();
+  renderSandboxModal();
   renderPromoModal();
   renderMateModal();
 }
@@ -3728,9 +5032,33 @@ document.addEventListener("click",e=>{
   if(a==="toggle-menu"){S.menuOpen=!S.menuOpen;renderUIOnly()}
   else if(a==="tab"){S.tab=d.v;S.menuOpen=false;renderUIOnly();if(S.tab==="play")requestAnimationFrame(cacheBoardRect)}
   else if(a==="go-me"){S.tab="me";S.menuOpen=false;renderUIOnly()}
-  else if(a==="mode-basic"){S.menuOpen=false;S.mateModalOpen=false;startBasic()}
+  else if(a==="mode-basic"){S.menuOpen=false;S.mateModalOpen=false;S.p2ModalOpen=true;renderUIOnly()}
+  else if(a==="start-basic"){startBasic(d.flip==="1")}
+  else if(a==="close-p2"){S.p2ModalOpen=false;renderUIOnly()}
   else if(a==="mode-bot"){S.menuOpen=false;S.mateModalOpen=false;S.colorModalOpen=true;renderUIOnly()}
   else if(a==="mode-coach"){S.menuOpen=false;S.mateModalOpen=false;startCoach()}
+  else if(a==="mode-sandbox"){S.menuOpen=false;S.mateModalOpen=false;S.sbSetupOpen=true;S.sbCfg.err="";renderUIOnly()}
+  else if(a==="close-sb"){S.sbSetupOpen=false;renderUIOnly()}
+  else if(a==="sb-pre"){applySandboxPreset(d.v)}
+  else if(a==="sb-brush"){S.sbCfg.brush=(d.c&&d.t)?{color:d.c,type:d.t}:null;renderUIOnly()}
+  else if(a==="sb-sq"){
+    const rr=+d.r,cc=+d.c,br=S.sbCfg.brush,curP=S.sbCfg.board[rr][cc];
+    if(!br)S.sbCfg.board[rr][cc]=null;
+    else if(curP&&curP.color===br.color&&curP.type===br.type)S.sbCfg.board[rr][cc]=null;
+    else S.sbCfg.board[rr][cc]={color:br.color,type:br.type};
+    S.sbCfg.err="";renderUIOnly();
+  }
+  else if(a==="sb-side"){S.sbCfg.bulkSide=d.v;renderUIOnly()}
+  else if(a==="sb-bulk"){sbBulkReplace(d.tgt,d.pt)}
+  else if(a==="sb-rule"){S.sbCfg.rules[d.pc][d.k]=!S.sbCfg.rules[d.pc][d.k];renderUIOnly()}
+  else if(a==="sb-grule"){S.sbCfg.rules[d.k]=!S.sbCfg.rules[d.k];renderUIOnly()}
+  else if(a==="sb-opp"){S.sbCfg.opp=d.v;renderUIOnly()}
+  else if(a==="sb-start"){startSandbox()}
+  else if(a==="rename-player"){
+    const curN=P.name||t("defaultPlayerName");
+    const nv=window.prompt(t("enterPlayerName"),curN);
+    if(nv!==null){P.name=nv.trim().slice(0,24);save();renderUIOnly()}
+  }
   else if(a==="bot-col"){startBot(d.c)}
   else if(a==="close-color"){S.colorModalOpen=false;renderUIOnly()}
   else if(a==="coach-hint")coachHint();
@@ -3745,6 +5073,7 @@ document.addEventListener("click",e=>{
     S.mateModalOpen=false;
     if(S.mode==="bot")startBot(S.col);
     else if(S.mode==="coach")startCoach();
+    else if(S.mode==="sandbox")startSandbox();
     else startBasic();
   }
   else if(a==="close-mate"){S.mateModalOpen=false;renderUIOnly()}
@@ -3791,6 +5120,8 @@ document.addEventListener("click",e=>{
 $("#menu-backdrop").addEventListener("click",()=>{S.menuOpen=false;renderUIOnly()});
 $("#drawer-bg").addEventListener("click",()=>{S.drawerOpen=false;renderUIOnly()});
 $("#color-bg").addEventListener("click",e=>{if(e.target.id==="color-bg"){S.colorModalOpen=false;renderUIOnly()}});
+$("#p2-bg").addEventListener("click",e=>{if(e.target.id==="p2-bg"){S.p2ModalOpen=false;renderUIOnly()}});
+$("#sb-bg").addEventListener("click",e=>{if(e.target.id==="sb-bg"){S.sbSetupOpen=false;renderUIOnly()}});
 $("#promo-bg").addEventListener("click",e=>{
   if(e.target.id==="promo-bg"){
     if(performance.now()-S.ppAt<250)return;
@@ -3827,7 +5158,7 @@ bdEl.addEventListener("pointerdown",e=>{
     rc={s:sqAtClient(e.clientX,e.clientY),c:e.shiftKey?"red":e.ctrlKey?"yellow":e.altKey?"blue":"green"};
     return;
   }
-  if(e.button!==0||S.pp||S.menuOpen||S.drawerOpen||S.colorModalOpen||S.mateModalOpen)return;
+  if(e.button!==0||S.pp||S.menuOpen||S.drawerOpen||S.colorModalOpen||S.p2ModalOpen||S.sbSetupOpen||S.mateModalOpen)return;
   cacheBoardRect();
   const sq=sqAtClient(e.clientX,e.clientY);if(!sq)return;
   if(S.dm){
@@ -3842,7 +5173,7 @@ bdEl.addEventListener("pointerdown",e=>{
     return;
   }
   const p=S.g.get(sq);
-  const canDrag=!!(p&&p.color===S.g.turn()&&((S.mode!=="bot"&&S.mode!=="coach")||p.color===S.col));
+  const canDrag=!!(p&&p.color===S.g.turn()&&((S.mode!=="bot"&&S.mode!=="coach"&&!(S.mode==="sandbox"&&S.sbCfg.opp==="bot"))||p.color===S.col));
   if(canDrag){
     const wasSel=S.sel===sq;
     if(!wasSel){
@@ -3950,6 +5281,8 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Escape"){
     if(S.mateModalOpen){S.mateModalOpen=false;renderUIOnly()}
     else if(S.pp){S.pp=null;renderUIOnly()}
+    else if(S.sbSetupOpen){S.sbSetupOpen=false;renderUIOnly()}
+    else if(S.p2ModalOpen){S.p2ModalOpen=false;renderUIOnly()}
     else if(S.colorModalOpen){S.colorModalOpen=false;renderUIOnly()}
     else if(S.menuOpen){S.menuOpen=false;renderUIOnly()}
     else if(S.drawerOpen){S.drawerOpen=false;renderUIOnly()}
