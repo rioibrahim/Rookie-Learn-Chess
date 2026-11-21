@@ -29,7 +29,7 @@
   --hint:#4b9bff;
   --shadow:0 12px 32px rgba(0,0,0,.46);
   --radius:14px;
-  --board-scale:1;
+  --piece-scale:1.2;
 }
 @media (prefers-color-scheme:light){
   :root:not([data-theme="dark"]){
@@ -307,11 +307,23 @@ header#hdr{
   grid-template-columns:repeat(3,minmax(0,1fr));
   gap:8px;
 }
+.seg-4{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:6px;
+}
 .seg button,.seg-3 button{
   width:100%;
   min-height:44px;
   border-radius:12px;
   font-size:13.5px;
+}
+.seg-4 button{
+  width:100%;
+  min-height:42px;
+  padding:0 4px;
+  border-radius:10px;
+  font-size:12.5px;
 }
 .diff-list{
   display:flex;
@@ -484,7 +496,7 @@ main{
   border-radius:10px;
 }
 
-/* Maximized 1:1 Chessboard Container (Scaled by --board-scale) */
+/* Fixed 90% Screen-Width Square Chessboard Container */
 #bwrap{
   flex:1 1 0;
   min-height:0;
@@ -495,8 +507,8 @@ main{
 }
 #bw{
   position:relative;
-  width:calc(min(100cqw,100cqh) * var(--board-scale,1));
-  height:calc(min(100cqw,100cqh) * var(--board-scale,1));
+  width:min(90vw,100cqw,100cqh);
+  height:min(90vw,100cqw,100cqh);
   min-width:0;
   margin:0;
   touch-action:none;
@@ -590,12 +602,12 @@ main{
 }
 .sq.cap .ind{
   display:block;
-  inset:7%;
+  inset:4%;
   border-radius:50%;
-  border:4px solid rgba(0,0,0,.26);
+  border:3.5px solid rgba(0,0,0,.28);
 }
 
-/* Persistent GPU-Composited Piece Layer (~90% Square Fill) */
+/* Persistent GPU-Composited Piece Layer (Default +20% Piece Scale) */
 #pl{
   position:absolute;
   inset:0;
@@ -612,7 +624,7 @@ main{
   height:12.5%;
   display:grid;
   place-items:center;
-  padding:2.5%;
+  padding:0;
   pointer-events:none;
   transform-origin:center center;
   transition:transform var(--p-ms,160ms) cubic-bezier(.2,.8,.2,1);
@@ -628,7 +640,14 @@ main{
 .pp.mate-king svg{
   filter:drop-shadow(0 0 8px #ff2e4c) drop-shadow(0 0 16px rgba(239,68,68,.9));
 }
-.pp svg{width:100%;height:100%;display:block}
+.pp svg{
+  width:74%;
+  height:74%;
+  display:block;
+  transform:scale(var(--piece-scale,1.2));
+  transform-origin:center center;
+  transition:transform .12s ease;
+}
 #ov{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
 
 /* Inline Draw Color Strip (Shown When Draw Mode Active) */
@@ -1174,7 +1193,7 @@ const def={
   diff:"easy",
   theme:"auto",
   uiSize:"normal",
-  boardPct:100,
+  pieceBoost:20,
   fx:{anim:true,spd:1,cap:true,hl:true,arr:true,cl:true,rm:false}
 };
 let P;
@@ -1185,7 +1204,7 @@ P.g=Object.assign({},def.g,P.g||{});
 P.fx=Object.assign({},def.fx,P.fx||{});
 if(!VALID_DIFFS.has(P.diff))P.diff="easy";
 if(!["compact","normal","large"].includes(P.uiSize))P.uiSize="normal";
-P.boardPct=Math.max(72,Math.min(100,Number(P.boardPct)||100));
+{const pb=Number(P.pieceBoost);P.pieceBoost=Number.isFinite(pb)?Math.max(-10,Math.min(35,pb)):20;}
 const save=()=>{try{localStorage.setItem("rookie",JSON.stringify(P))}catch(e){}};
 const applyTheme=()=>{
   const r=document.documentElement;
@@ -1198,7 +1217,7 @@ const applyTheme=()=>{
 const applyUIScale=()=>{
   const r=document.documentElement;
   r.setAttribute("data-ui",P.uiSize);
-  r.style.setProperty("--board-scale",(P.boardPct/100).toFixed(2));
+  r.style.setProperty("--piece-scale",((100+P.pieceBoost)/100).toFixed(2));
 };
 applyTheme();
 applyUIScale();
@@ -2553,9 +2572,12 @@ function renderHeaderAndMenu(){
         `<button data-a="mode-bot" class="${S.mode==="bot"?"on":""}">Bot (vs AI)</button>`+
       `</div></div>`+
       `<div class="menu-sec"><div class="menu-lbl">Bot Mode</div>${renderBotModeButtons()}</div>`+
-      `<div class="menu-sec"><div class="menu-lbl">UI &amp; Board Size</div>`+
+      `<div class="menu-sec"><div class="menu-lbl">Piece Size</div>`+
+        `<div class="seg-4">${[[0,"0%"],[10,"+10%"],[20,"+20%"],[30,"+30%"]].map(([v,n])=>`<button data-a="psz" data-v="${v}" class="${P.pieceBoost===v?"on":""}">${n}</button>`).join("")}</div>`+
+        `<div class="vol-wrap"><span class="mu">Scale</span><input type="range" min="-10" max="35" step="5" value="${P.pieceBoost}" data-a="psz" aria-label="Piece size scale"><span id="pszv" class="vol-val">${P.pieceBoost>0?"+"+P.pieceBoost:P.pieceBoost}%</span></div>`+
+      `</div>`+
+      `<div class="menu-sec"><div class="menu-lbl">UI Size</div>`+
         `<div class="seg-3">${[["compact","Compact"],["normal","Normal"],["large","Large"]].map(([v,n])=>`<button data-a="uisz" data-v="${v}" class="${P.uiSize===v?"on":""}">${n}</button>`).join("")}</div>`+
-        `<div class="vol-wrap"><span class="mu">Board</span><input type="range" min="72" max="100" step="2" value="${P.boardPct}" data-a="bsz" aria-label="Board scale"><span id="bszv" class="vol-val">${P.boardPct}%</span></div>`+
       `</div>`+
       `<div class="menu-sec"><div class="menu-lbl">Coaching Detail</div><div class="seg">`+
         `<button data-a="beg" data-v="1" class="${P.beg?"on":""}">Beginner</button>`+
@@ -2843,7 +2865,7 @@ function copyText(txt,label){
 document.addEventListener("click",e=>{
   const b=e.target.closest("[data-a]");if(!b)return;
   const a=b.dataset.a,d=b.dataset;
-  if(a==="vol"||a==="bsz")return;
+  if(a==="vol"||(a==="psz"&&b.tagName==="INPUT"))return;
   SND.click();
   if(a==="toggle-menu"){S.menuOpen=!S.menuOpen;renderUIOnly()}
   else if(a==="tab"){S.tab=d.v;S.menuOpen=false;renderUIOnly();if(S.tab==="play")requestAnimationFrame(cacheBoardRect)}
@@ -2861,9 +2883,12 @@ document.addEventListener("click",e=>{
   else if(a==="diff"){P.diff=d.v;save();renderUIOnly()}
   else if(a==="uisz"){
     P.uiSize=d.v;
-    P.boardPct=d.v==="compact"?86:d.v==="large"?100:96;
     save();applyUIScale();renderUIOnly();
     requestAnimationFrame(cacheBoardRect);
+  }
+  else if(a==="psz"){
+    P.pieceBoost=+d.v;
+    save();applyUIScale();renderUIOnly();
   }
   else if(a==="beg"){P.beg=d.v==="1";save();renderUIOnly()}
   else if(a==="mute"){P.mute=!P.mute;save();renderUIOnly()}
@@ -3067,11 +3092,11 @@ document.addEventListener("input",e=>{
     P.vol=+e.target.value;save();
     const vv=$("#volv");if(vv)vv.textContent=Math.round(P.vol*100)+"%";
     tone(440,.05);
-  }else if(a==="bsz"){
-    P.boardPct=+e.target.value;save();
+  }else if(a==="psz"){
+    P.pieceBoost=+e.target.value;save();
     applyUIScale();
-    const bv=$("#bszv");if(bv)bv.textContent=P.boardPct+"%";
-    requestAnimationFrame(cacheBoardRect);
+    const pv=$("#pszv");if(pv)pv.textContent=(P.pieceBoost>0?"+"+P.pieceBoost:P.pieceBoost)+"%";
+    document.querySelectorAll('#menu-pop button[data-a="psz"]').forEach(btn=>btn.classList.toggle("on",+btn.dataset.v===P.pieceBoost));
   }
 });
 
