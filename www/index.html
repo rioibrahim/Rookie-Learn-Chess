@@ -519,15 +519,24 @@ main{
   -webkit-user-select:none;
   transform-origin:center center;
   will-change:transform;
-  transition:transform .42s cubic-bezier(.22,1,.36,1);
+  transform:rotate(0deg);
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
 }
-#bw.board-flip-anim{
-  animation:boardAutoRotate .62s cubic-bezier(.22,1,.36,1);
+#bw.board-rotating{
+  transition:transform .88s cubic-bezier(.25,1,.5,1);
+  transform:rotate(180deg);
 }
-@keyframes boardAutoRotate{
-  0%{transform:rotate(-180deg) scale(.96);opacity:.92}
-  45%{transform:rotate(-78deg) scale(.94);opacity:.97}
-  100%{transform:rotate(0deg) scale(1);opacity:1}
+#bw.board-rotating .pp svg{
+  transition:transform .88s cubic-bezier(.25,1,.5,1);
+  transform:rotate(-180deg) scale(var(--piece-scale,1.2));
+}
+#bw.board-rotating .pp.face-rot svg{
+  transform:rotate(0deg) scale(var(--piece-scale,1.2));
+}
+#bw.board-rot-snap,
+#bw.board-rot-snap .pp svg{
+  transition:none!important;
 }
 #bd{
   display:grid;
@@ -683,8 +692,10 @@ main{
   width:74%;
   height:74%;
   display:block;
-  transform:scale(var(--piece-scale,1.2));
+  transform:rotate(0deg) scale(var(--piece-scale,1.2));
   transform-origin:center center;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
   transition:transform .12s ease,opacity .16s ease;
 }
 .pp.face-rot svg{
@@ -1401,7 +1412,7 @@ code{
 }
 .sb-opp-grid{
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:8px;
 }
 .sb-global-grid button,.sb-opp-grid button{
@@ -3652,31 +3663,60 @@ let renderedFen="";
 let renderedFlip=null;
 let renderedFace=null;
 let boardRotTimer=0;
-function triggerBoardRotateAnim(){
-  if(!bwEl||P.fx.rm||!P.fx.anim)return;
+let boardRotListener=null;
+function finishBoardRotateSnap(){
   if(boardRotTimer){clearTimeout(boardRotTimer);boardRotTimer=0}
-  bwEl.classList.remove("board-flip-anim");
-  void bwEl.offsetWidth;
-  bwEl.classList.add("board-flip-anim");
-  boardRotTimer=setTimeout(()=>{
-    boardRotTimer=0;
-    bwEl.classList.remove("board-flip-anim");
-    cacheBoardRect();
-  },660);
-}
-function stopBoardRotateAnim(){
-  if(boardRotTimer){clearTimeout(boardRotTimer);boardRotTimer=0}
-  if(bwEl&&bwEl.classList.contains("board-flip-anim")){
-    bwEl.classList.remove("board-flip-anim");
-    cacheBoardRect();
+  if(boardRotListener&&bwEl){
+    bwEl.removeEventListener?.("transitionend",boardRotListener);
+    boardRotListener=null;
+  }
+  if(bwEl){
+    bwEl.classList.add("board-rot-snap");
+    bwEl.classList.remove("board-rotating");
+    void bwEl.offsetWidth;
   }
 }
-if(bwEl&&typeof bwEl.addEventListener==="function"){
-  bwEl.addEventListener("animationend",()=>{
+function triggerBoardRotateAnim(targetFlip,tk){
+  const nextFlip=targetFlip!==undefined?targetFlip:!S.flip;
+  if(!bwEl||P.fx.rm||!P.fx.anim){
+    S.flip=nextFlip;
+    S.flipBusy=false;
+    render();
+    return;
+  }
+  finishBoardRotateSnap();
+  bwEl.classList.remove("board-rot-snap");
+  void bwEl.offsetWidth;
+  S.flipBusy=true;
+  const complete=()=>{
     if(boardRotTimer){clearTimeout(boardRotTimer);boardRotTimer=0}
-    bwEl.classList.remove("board-flip-anim");
+    if(boardRotListener){
+      bwEl.removeEventListener?.("transitionend",boardRotListener);
+      boardRotListener=null;
+    }
+    bwEl.classList.add("board-rot-snap");
+    bwEl.classList.remove("board-rotating");
+    S.flipBusy=false;
+    if(tk===undefined||tk===S.tok)S.flip=nextFlip;
+    render();
+    void bwEl.offsetWidth;
+    bwEl.classList.remove("board-rot-snap");
     cacheBoardRect();
-  });
+  };
+  boardRotListener=e=>{
+    if(!e||(e.target===bwEl&&e.propertyName==="transform"))complete();
+  };
+  bwEl.addEventListener?.("transitionend",boardRotListener);
+  bwEl.classList.add("board-rotating");
+  boardRotTimer=setTimeout(complete,940);
+}
+function stopBoardRotateAnim(){
+  if(boardRotTimer||boardRotListener||(bwEl&&bwEl.classList.contains("board-rotating"))){
+    finishBoardRotateSnap();
+    bwEl&&bwEl.classList.remove("board-rot-snap");
+    cacheBoardRect();
+  }
+  S.flipBusy=false;
 }
 
 function isFaceToFaceMode(){
@@ -3997,6 +4037,7 @@ function drawTap(sq){
 /* ---------- Game Modes & Lifecycle ---------- */
 function cancelFlipTimer(){
   if(S.flipTimer){clearTimeout(S.flipTimer);S.flipTimer=0}
+  stopBoardRotateAnim();
   S.flipBusy=false;
 }
 function cancelAI(){
@@ -4459,17 +4500,16 @@ function doMove(f,t,pr,fromDrag){
       const baseMs=dur();
       const distSq=Math.hypot(t.charCodeAt(0)-f.charCodeAt(0),(+t[1])-(+f[1]));
       const slideMs=!baseMs?0:(fromDrag?95:Math.min(baseMs+95,baseMs+Math.round(distSq*14)));
-      const pauseMs=P.fx.rm?40:240;
+      const pauseMs=(P.fx.rm||!P.fx.anim)?40:280;
       S.flipBusy=true;
       S.flipTimer=setTimeout(()=>{
         S.flipTimer=0;
-        S.flipBusy=false;
-        if(tk!==S.tok||S.over||!isAutoFlipTurn())return;
+        if(tk!==S.tok||S.over||!isAutoFlipTurn()){S.flipBusy=false;return}
         const nextFlip=S.g.turn()==="b";
         if(nextFlip!==S.flip){
-          S.flip=nextFlip;
-          triggerBoardRotateAnim();
-          render();
+          triggerBoardRotateAnim(nextFlip,tk);
+        }else{
+          S.flipBusy=false;
         }
       },slideMs+pauseMs);
     }
@@ -4559,7 +4599,8 @@ function endCheck(){
 }
 
 function undo(){
-  if(S.busy||S.pzBusy)cancelAI();
+  if(S.busy||S.pzBusy||S.flipBusy)cancelAI();
+  else cancelFlipTimer();
   clearCheckWarn();
   S.pp=null;S.mateModalOpen=false;S.mateWin="";S.mateReason="";
   S.coachPending=null;S.coachArrows=[];S.coachTone="";
@@ -4574,10 +4615,7 @@ function undo(){
     const m=g.undo();S.redo.push(m);
     lastAnim={m,rev:true};undone++;
   }
-  if(isAutoFlipTurn()){
-    const nextFlip=g.turn()==="b";
-    if(nextFlip!==S.flip){S.flip=nextFlip;triggerBoardRotateAnim()}
-  }
+  if(isAutoFlipTurn())S.flip=g.turn()==="b";
   S.solved=false;S.sel=null;S.legal=[];S.hint=null;S.hintArrow=null;S.hm="";S.hmSpec=null;S.bad=false;
   if(S.mode==="learn"){S.msgSpec={type:"lessonStep"};S.msg=cur().tx;}
   else if(S.mode==="puz"){S.msgSpec={type:"puzPrompt"};S.msg=pText(getTodayPuzzles()[S.pi]);}
@@ -4592,8 +4630,8 @@ function undo(){
 }
 
 function redo(){
-  if(S.busy||S.pzBusy)cancelAI();
-  cancelFlipTimer();
+  if(S.busy||S.pzBusy||S.flipBusy)cancelAI();
+  else cancelFlipTimer();
   clearCheckWarn();
   const g=S.g,o=S.redo.pop();if(!o)return;
   const m=g.move({from:o.from,to:o.to,promotion:o.promotion||"q"});
@@ -4605,10 +4643,7 @@ function redo(){
     const m2=g.move({from:o2.from,to:o2.to,promotion:o2.promotion||"q"});
     if(m2){lastM=m2;redone++}
   }
-  if(isAutoFlipTurn()){
-    const nextFlip=g.turn()==="b";
-    if(nextFlip!==S.flip){S.flip=nextFlip;triggerBoardRotateAnim()}
-  }
+  if(isAutoFlipTurn())S.flip=g.turn()==="b";
   S.coachPending=null;S.coachArrows=[];S.hintArrow=null;S.hm="";S.hmSpec=null;
   S.last=[lastM.from,lastM.to];
   setExplain(lastM,g,"");
@@ -5203,8 +5238,7 @@ function renderSandboxModal(){
         `<button data-a="sb-grule" data-k="friendlyFire" class="${r.friendlyFire?"on":""}">${t("sbFriendlyFire")}</button>`+
       `</div>`+
       `<div class="sb-opp-grid">`+
-        `<button data-a="sb-opp" data-v="same" class="${cfg.opp==="same"?"on":""}">${t("sbOppSame")}</button>`+
-        `<button data-a="sb-opp" data-v="face" class="${cfg.opp==="face"?"on":""}">${t("sbOppFace")}</button>`+
+        `<button data-a="sb-opp" data-v="2p" class="${cfg.opp!=="bot"?"on":""}">${t("play2p")}</button>`+
         `<button data-a="sb-opp" data-v="bot" class="sb-opp-disabled" aria-disabled="true">${t("sbOppBot")}</button>`+
       `</div>`+
       `<div class="sb-unavail-note">${t("sbBotUnavailable")}</div>`+
@@ -5497,7 +5531,7 @@ document.addEventListener("click",e=>{
   else if(a==="sb-grule"){S.sbCfg.rules[d.k]=!S.sbCfg.rules[d.k];renderUIOnly()}
   else if(a==="sb-opp"){
     if(d.v==="bot"){showToast(t("sbBotUnavailable"));return}
-    S.sbCfg.opp=d.v;renderUIOnly();
+    S.sbCfg.opp="same";renderUIOnly();
   }
   else if(a==="sb-start"){startSandbox()}
   else if(a==="rename-player"){
@@ -5541,7 +5575,7 @@ document.addEventListener("click",e=>{
   }
   else if(a==="beg"){P.beg=d.v==="1";save();refreshTranslatedState();renderUIOnly()}
   else if(a==="mute"){P.mute=!P.mute;save();renderUIOnly()}
-  else if(a==="flip"){cancelFlipTimer();S.flip=!S.flip;triggerBoardRotateAnim();render()}
+  else if(a==="flip"){cancelFlipTimer();triggerBoardRotateAnim(!S.flip)}
   else if(a==="undo")undo();
   else if(a==="redo")redo();
   else if(a==="hint")hint();
@@ -5607,7 +5641,8 @@ bdEl.addEventListener("pointerdown",e=>{
     return;
   }
   if(e.button!==0||S.pp||S.menuOpen||S.drawerOpen||S.colorModalOpen||S.p2ModalOpen||S.sbSetupOpen||S.mateModalOpen)return;
-  stopBoardRotateAnim();cacheBoardRect();
+  if(S.flipBusy)return;
+  cacheBoardRect();
   const sq=sqAtClient(e.clientX,e.clientY);if(!sq)return;
   if(S.dm){
     drag={mode:"draw",sq,x:e.clientX,y:e.clientY,moved:false,id:e.pointerId};
@@ -5735,7 +5770,7 @@ document.addEventListener("keydown",e=>{
     else if(S.menuOpen){S.menuOpen=false;renderUIOnly()}
     else if(S.drawerOpen){S.drawerOpen=false;renderUIOnly()}
     else{S.dr={a:[],h:{}};S.ds=null;ov();renderDrawBar()}
-  }else if(e.key==="f"||e.key==="F"){S.flip=!S.flip;triggerBoardRotateAnim();render()}
+  }else if(e.key==="f"||e.key==="F"){cancelFlipTimer();triggerBoardRotateAnim(!S.flip)}
   else if(e.key==="ArrowLeft")undo();
   else if(e.key==="ArrowRight")redo();
 });
