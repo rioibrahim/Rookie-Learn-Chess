@@ -29,6 +29,7 @@
   --hint:#4b9bff;
   --shadow:0 12px 32px rgba(0,0,0,.46);
   --radius:14px;
+  --board-scale:1;
 }
 @media (prefers-color-scheme:light){
   :root:not([data-theme="dark"]){
@@ -366,7 +367,7 @@ header#hdr{
   cursor:pointer;
 }
 .vol-val{
-  min-width:42px;
+  min-width:44px;
   text-align:right;
   font-weight:700;
   font-size:13px;
@@ -442,7 +443,7 @@ main{
   flex:0 0 auto;
 }
 
-/* Contextual Banner for Lessons / Puzzles / Hints / Warnings / Mittens Chat */
+/* Contextual Banner for Lessons / Puzzles / Hints / Warnings / Checkmate */
 #banner{
   flex:0 0 auto;
   padding:10px 12px;
@@ -465,11 +466,6 @@ main{
   border-left-color:var(--hint);
   background:rgba(75,155,255,.12);
 }
-#banner.mittens{
-  border-color:rgba(239,68,68,.42);
-  border-left:4px solid #ef4444;
-  background:rgba(239,68,68,.09);
-}
 .banner-top{
   display:flex;
   align-items:flex-start;
@@ -488,7 +484,7 @@ main{
   border-radius:10px;
 }
 
-/* Maximized 1:1 Chessboard Container */
+/* Maximized 1:1 Chessboard Container (Scaled by --board-scale) */
 #bwrap{
   flex:1 1 0;
   min-height:0;
@@ -499,8 +495,8 @@ main{
 }
 #bw{
   position:relative;
-  width:min(100cqw,100cqh);
-  height:min(100cqw,100cqh);
+  width:calc(min(100cqw,100cqh) * var(--board-scale,1));
+  height:calc(min(100cqw,100cqh) * var(--board-scale,1));
   min-width:0;
   margin:0;
   touch-action:none;
@@ -674,7 +670,31 @@ main{
   height:21px;
 }
 
-/* ME VIEW: Player Stats, Learn Lessons & Tactical Puzzles */
+/* UI Size Presets (Compact / Normal / Large) */
+:root[data-ui="compact"] header#hdr{
+  padding:calc(5px + env(safe-area-inset-top,0px)) calc(10px + env(safe-area-inset-right,0px)) 5px calc(10px + env(safe-area-inset-left,0px));
+}
+:root[data-ui="compact"] .app-badge{width:32px;height:32px;padding:4px}
+:root[data-ui="compact"] .icon-btn{width:38px;height:38px;min-width:38px;min-height:38px}
+:root[data-ui="compact"] .menu-btn{min-height:38px;padding:0 11px;font-size:13px}
+:root[data-ui="compact"] #play-view{padding:4px calc(8px + env(safe-area-inset-right,0px)) 4px calc(8px + env(safe-area-inset-left,0px));gap:5px}
+:root[data-ui="compact"] #status-bar{min-height:34px;padding:5px 10px}
+:root[data-ui="compact"] .status-txt{font-size:12.5px}
+:root[data-ui="compact"] #bctl button{min-height:39px;font-size:9.5px;border-radius:9px}
+:root[data-ui="compact"] #bctl button svg{width:17px;height:17px}
+:root[data-ui="compact"] nav#botbar{padding:6px calc(10px + env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) calc(10px + env(safe-area-inset-left,0px))}
+:root[data-ui="compact"] nav#botbar button{min-height:40px;font-size:13px}
+
+:root[data-ui="large"] #play-view{gap:10px}
+:root[data-ui="large"] #status-bar{min-height:46px;padding:9px 14px}
+:root[data-ui="large"] .status-txt{font-size:15px}
+:root[data-ui="large"] #bctl{gap:6px}
+:root[data-ui="large"] #bctl button{min-height:54px;font-size:11px;border-radius:12px}
+:root[data-ui="large"] #bctl button svg{width:24px;height:24px}
+:root[data-ui="large"] nav#botbar button{min-height:52px;font-size:15px}
+:root[data-ui="large"] button{min-height:48px}
+
+/* ME VIEW: Player Stats, Daily Puzzles & Comprehensive Learning Hub */
 #me-view{
   flex:1 1 0;
   min-height:0;
@@ -765,6 +785,15 @@ main{
   line-height:1.2;
   margin-bottom:2px;
 }
+.mod-hdr{
+  font-size:11.5px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:var(--ac);
+  margin:12px 0 6px;
+}
+.mod-hdr:first-child{margin-top:2px}
 .item-list{
   display:flex;
   flex-direction:column;
@@ -772,12 +801,13 @@ main{
 }
 .list-btn{
   width:100%;
-  min-height:52px;
+  min-height:54px;
   padding:10px 14px;
   border-radius:12px;
   justify-content:space-between;
   text-align:left;
   background:var(--pn2);
+  white-space:normal;
 }
 .list-btn .l-left{
   display:flex;
@@ -785,6 +815,7 @@ main{
   align-items:flex-start;
   gap:2px;
   min-width:0;
+  padding-right:8px;
 }
 .list-btn .l-title{font-size:14.5px;font-weight:700}
 .list-btn .l-sub{font-size:12px;color:var(--mu);font-weight:500}
@@ -796,11 +827,17 @@ main{
   background:var(--pn);
   border:1px solid var(--bd);
   color:var(--mu);
+  flex:0 0 auto;
 }
 .badge.done{
   background:var(--ac-soft);
   border-color:var(--ac-ring);
   color:var(--ac);
+}
+.badge.today{
+  background:var(--ac);
+  border-color:var(--ac);
+  color:var(--acon);
 }
 
 /* Fixed Bottom Bar (Play | Me) */
@@ -1114,41 +1151,30 @@ code{
 (()=>{
 "use strict";
 const $=q=>document.querySelector(q);
+const todayKey=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
 
-/* ---------- Bot Modes & Mittens Flavor ---------- */
+/* ---------- 5 Bot Modes ---------- */
 const BOT_MODES=[
   {id:"easy",name:"Easy",sub:"Casual beginner"},
   {id:"medium",name:"Medium",sub:"Balanced club player"},
   {id:"hard",name:"Hard",sub:"Strong tactical search"},
   {id:"nightmare",name:"Nightmare",sub:"Aggressive minimax search"},
-  {id:"mittens",name:"Mittens",sub:"Maximum aggression · 1 Elo?",red:true}
+  {id:"mittens",name:"Mittens",sub:"Maximum aggression",red:true}
 ];
 const VALID_DIFFS=new Set(BOT_MODES.map(b=>b.id));
-const MITTENS_LINES={
-  start:"Mittens: Meow. I'm only 1 Elo… surely you'll go easy on me?",
-  move:[
-    "Mittens: Purr… interesting choice.",
-    "Mittens: Have you calculated 14 moves ahead? No? Cute.",
-    "Mittens: *sharpens claws on the center squares*",
-    "Mittens: Your pieces look very… edible.",
-    "Mittens: Meow. Let's see how long your King survives."
-  ],
-  cap:"Mittens: *bats your piece off the board* Mine now. Meow.",
-  chk:"Mittens: Check! Nowhere to hide, human.",
-  win:"Mittens: Checkmate. Better luck in your next nine lives! Meow.",
-  lose:"Mittens: Hiss!! Impossible… I was lagging!"
-};
 
 /* ---------- Persistent Profile ---------- */
 const def={
   done:{},
-  pz:{s:0,a:0,r:800,st:0,cat:{},ok:{}},
+  pz:{s:0,a:0,r:800,st:0,lastDay:"",cat:{},ok:{}},
   g:{w:0,d:0,l:0},
   vol:.65,
   mute:false,
   beg:true,
   diff:"easy",
   theme:"auto",
+  uiSize:"normal",
+  boardPct:100,
   fx:{anim:true,spd:1,cap:true,hl:true,arr:true,cl:true,rm:false}
 };
 let P;
@@ -1158,6 +1184,8 @@ P.pz.cat=P.pz.cat||{};P.pz.ok=P.pz.ok||{};
 P.g=Object.assign({},def.g,P.g||{});
 P.fx=Object.assign({},def.fx,P.fx||{});
 if(!VALID_DIFFS.has(P.diff))P.diff="easy";
+if(!["compact","normal","large"].includes(P.uiSize))P.uiSize="normal";
+P.boardPct=Math.max(72,Math.min(100,Number(P.boardPct)||100));
 const save=()=>{try{localStorage.setItem("rookie",JSON.stringify(P))}catch(e){}};
 const applyTheme=()=>{
   const r=document.documentElement;
@@ -1167,7 +1195,13 @@ const applyTheme=()=>{
   const mc=document.querySelector('meta[name="theme-color"]');
   if(mc)mc.setAttribute("content",isLight?"#f2efe9":"#161512");
 };
+const applyUIScale=()=>{
+  const r=document.documentElement;
+  r.setAttribute("data-ui",P.uiSize);
+  r.style.setProperty("--board-scale",(P.boardPct/100).toFixed(2));
+};
 applyTheme();
+applyUIScale();
 
 /* ---------- Crisp Inline SVG Assets & Tight ~90% Piece ViewBoxes ---------- */
 const QUEEN_SVG=`<svg viewBox="0 0 48 48" fill="#ffffff" shape-rendering="geometricPrecision" aria-hidden="true"><circle cx="9.5" cy="13.5" r="2.3"/><circle cx="16.8" cy="9.5" r="2.3"/><circle cx="24" cy="7.8" r="2.5"/><circle cx="31.2" cy="9.5" r="2.3"/><circle cx="38.5" cy="13.5" r="2.3"/><path d="M12.2 29.5h23.6l2.6-13.5-7.4 9.9-1.7-13.6-5.3 12.6-5.3-12.6-1.7 13.6-7.4-9.9 2.6 13.5z"/><rect x="11.5" y="31.5" width="25" height="3.7" rx="1.85"/><rect x="9.2" y="37.2" width="29.6" height="5.2" rx="2.4"/></svg>`;
@@ -1233,43 +1267,66 @@ const SND={
   click:()=>tone(500,.03,"sine",.08)
 };
 
-/* ---------- Exact 6 Lessons (13 Steps) & 7 Verified Puzzles ---------- */
+/* ---------- In-Depth Multi-Module Learning Hub (10 Lessons, 23 Interactive Steps) ---------- */
 const K_FEN="4k3/8/8/8/8/8/8/4K3 w - - 0 1";
 const LS=[
-  {t:"Pawn",s:[
-    {fen:"4k3/8/8/8/8/8/4P3/4K3 w - - 0 1",tx:"Pawns march forward only. On their first move they may advance one OR two squares. Move the e-pawn two squares.",best:"e2e4",acc:["e3","e4"],idea:"A pawn never goes backward or sideways. On its first move it can take a double step.",why:"e2–e4 is a double step, only allowed on a pawn’s first move. It also claims the centre."},
-    {fen:"4k3/8/8/3p4/4P3/8/8/4K3 w - - 0 1",tx:"Pawns move straight but capture diagonally. Capture the black pawn.",best:"e4d5",acc:["d5"],idea:"Pawns capture one square diagonally forward, not straight ahead.",why:"exd5: the pawn captured diagonally. “e” = file left, “x” = capture, “d5” = destination."},
-    {fen:"4k3/P7/8/8/8/8/8/4K3 w - - 0 1",tx:"A pawn reaching the far rank promotes — choose Queen, Rook, Bishop, or Knight in the promotion modal.",best:"a7a8",acc:["a8"],idea:"This pawn is one step from the last rank.",why:"a8=Q: promotion turns a humble pawn into a stronger piece."}
+  {mod:"1. Piece Mastery & Special Rules",t:"Pawns & Promotion",s:[
+    {fen:"4k3/8/8/8/8/8/4P3/4K3 w - - 0 1",tx:"Pawns advance strictly forward. From their starting rank, pawns may move one OR two squares. Advance the e2 pawn two squares.",best:"e2e4",acc:["e3","e4"],idea:"Count two squares up the e-file from e2.",why:"1. e4 claims central space and opens diagonals for your bishop and queen."},
+    {fen:"4k3/8/8/3p4/4P3/8/8/4K3 w - - 0 1",tx:"Pawns push straight ahead, yet capture one square diagonally forward. Capture the d5 pawn.",best:"e4d5",acc:["d5"],idea:"Attack diagonally from e4 to d5.",why:"exd5 removes Black’s central pawn using the pawn’s diagonal capture rule."},
+    {fen:"4k3/P7/8/8/8/8/8/4K3 w - - 0 1",tx:"Promotion: When a pawn reaches the far rank, it transforms. Push a7 to a8 and choose your promotion piece.",best:"a7a8",acc:["a8"],idea:"Advance the pawn onto the 8th rank.",why:"Promotion turns a 1-point pawn into a decisive Queen, Rook, Bishop, or Knight."}
   ]},
-  {t:"Rook",s:[
-    {fen:"4k3/8/8/8/8/8/8/R3K3 w - - 0 1",tx:"Rooks slide any number of squares along files and ranks. Move the rook to the top of the a-file.",best:"a1a8",acc:["a8"],idea:"Rooks move in straight lines as far as nothing blocks them.",why:"Ra8+ slid up the open file and gives check too."},
-    {fen:"4k3/8/8/3p4/8/8/8/3RK3 w - - 0 1",tx:"Rooks capture the first enemy piece in their path. Capture the pawn on d5.",best:"d1d5",acc:["d5"],idea:"Look straight up the d-file.",why:"Rxd5: the rook slid up the file and captured. Rooks love open files."}
+  {mod:"1. Piece Mastery & Special Rules",t:"Rooks & Bishops",s:[
+    {fen:"4k3/8/8/8/8/8/8/R3K3 w - - 0 1",tx:"Rooks slide any unobstructed distance along ranks and files. Slide the rook to the top of the a-file.",best:"a1a8",acc:["a8"],idea:"Move straight up the open a-file.",why:"Ra8+ controls the entire file and delivers check to the enemy king."},
+    {fen:"4k3/8/8/3p4/8/8/8/3RK3 w - - 0 1",tx:"Rooks capture the first enemy piece in their line of fire. Capture the undefended pawn on d5.",best:"d1d5",acc:["d5"],idea:"Slide directly up the d-file to d5.",why:"Rxd5 wins a free pawn and keeps the rook active on the central file."},
+    {fen:"4k3/8/8/8/8/8/8/2B1K3 w - - 0 1",tx:"Bishops travel along diagonals of a single square color. Sweep the c1 bishop across the long diagonal to h6.",best:"c1h6",acc:["h6"],idea:"Follow the dark-square diagonal c1→d2→e3→f4→g5→h6.",why:"Bc1–h6 commands six squares along one uninterrupted diagonal."}
   ]},
-  {t:"Bishop",s:[
-    {fen:"4k3/8/8/8/8/8/8/2B1K3 w - - 0 1",tx:"Bishops slide diagonally and stay on one square colour forever. Move the bishop to h6.",best:"c1h6",acc:["h6"],idea:"Follow the long diagonal up and to the right.",why:"Bc1–h6 slid along a single diagonal. A light-squared bishop never touches dark squares."}
+  {mod:"1. Piece Mastery & Special Rules",t:"Knights, Queens & Kings",s:[
+    {fen:"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",tx:"Knights are the only pieces that leap over others in an “L” shape. Jump the g1 knight over your pawns to f3.",best:"g1f3",acc:["f3","h3"],idea:"Two squares forward, one square sideways.",why:"Nf3 leaps cleanly over the 2nd rank pawns and controls e5 and d4."},
+    {fen:"4k3/8/8/8/3Q4/8/8/4K3 w - - 0 1",tx:"The Queen combines Rook + Bishop mobility. Move her diagonally from d4 to a7.",best:"d4a7",acc:["a7"],idea:"Slide diagonally up and left to a7.",why:"Qa7 demonstrates long-range diagonal reach—though in real games avoid exposing her too early."},
+    {fen:"4k3/8/8/8/8/8/4r3/4K3 w - - 0 1",tx:"When your King is in CHECK, you must escape immediately. Capture the checking rook on e2.",best:"e1e2",acc:["e2","d1","f1"],idea:"The rook is adjacent and unprotected.",why:"Kxe2 eliminates the attacker. Always check capture, block, or King escape options."}
   ]},
-  {t:"Knight",s:[
-    {fen:"4k3/8/8/8/3N4/8/8/4K3 w - - 0 1",tx:"Knights move in an “L”: two squares one way, then one square sideways. Move the knight to f5.",best:"d4f5",acc:["f5"],idea:"Count two squares along a rank, then one along a file.",why:"d4→f5 is two right and one up: an L shape. Central knights control eight squares."},
-    {fen:"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",tx:"Knights are the only pieces that JUMP over others. Develop the g1 knight to f3.",best:"g1f3",acc:["f3","h3"],idea:"Your knight leaps right over the pawn wall.",why:"Nf3 jumps over your pawns, develops a piece, and eyes the centre."}
+  {mod:"1. Piece Mastery & Special Rules",t:"Castling & En Passant",s:[
+    {fen:"r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1",tx:"Castling is a once-per-game move safeguarding the King while activating a Rook. Castle kingside (O-O).",best:"e1g1",acc:["g1","c1"],idea:"Move your King two squares toward the h1 rook.",why:"O-O tucks the King behind safety while bringing the Rook toward the center."},
+    {fen:"4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1",tx:"En Passant: Black’s pawn just jumped two squares past your e5 pawn. Capture it “in passing” by moving e5 to d6.",best:"e5d6",acc:["d6"],idea:"Step diagonally behind the d5 pawn onto d6.",why:"exd6 (en passant) prevents enemy pawns from sneaking past without risking capture."}
   ]},
-  {t:"Queen",s:[
-    {fen:"4k3/8/8/8/3Q4/8/8/4K3 w - - 0 1",tx:"The queen = rook + bishop. Move her diagonally to a7.",best:"d4a7",acc:["a7"],idea:"Use the bishop-like diagonal move.",why:"Qa7 moved diagonally. In real games, avoid bringing the queen out too early."},
-    {fen:"4k3/8/8/8/3Q4/8/8/4K3 w - - 0 1",tx:"Now use the rook-like move: slide the queen sideways to h4.",best:"d4h4",acc:["h4"],idea:"Slide straight right along the 4th rank.",why:"Qh4: same queen, rook-style move. From the centre she eyes up to 27 squares."}
+  {mod:"2. Opening Principles",t:"Control the Center",s:[
+    {fen:"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",tx:"Golden Rule #1: Fight for the center (d4, d5, e4, e5). Push the king’s pawn to e4.",best:"e2e4",acc:["e4","d4"],idea:"Occupy e4 or d4 on Move 1.",why:"1. e4 claims central space and clears lines for both your bishop and queen."},
+    {fen:"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",tx:"Golden Rule #2: Develop knights before bishops. Develop your knight toward the center and attack e5.",best:"g1f3",acc:["f3","c3"],idea:"Move g1 to f3 to pressure the e5 pawn.",why:"Nf3 develops a minor piece with tempo by attacking Black’s e5 pawn."}
   ]},
-  {t:"King",s:[
-    {fen:K_FEN,tx:"The king moves one square in any direction (never into check). Move the king to e2.",best:"e1e2",acc:["d1","d2","e2","f2","f1"],idea:"Just one single square in any safe direction.",why:"The king takes single steps and must never step onto an attacked square."},
-    {fen:"4k3/8/8/8/8/8/4r3/4K3 w - - 0 1",tx:"Your king is in CHECK! Escape by capturing the attacking rook.",best:"e1e2",acc:["e2","d1","f1"],idea:"The rook is undefended right in front of your king.",why:"Kxe2 removed the attacker. Escape check by moving, capturing, or blocking."},
-    {fen:"r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1",tx:"Castling: the king moves two squares toward a rook and the rook hops over. Castle kingside.",best:"e1g1",acc:["g1","c1"],idea:"Move the KING two squares toward the h1 rook.",why:"O-O tucks the king to safety and activates the rook in a single turn."}
+  {mod:"2. Opening Principles",t:"Development & King Safety",s:[
+    {fen:"r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",tx:"Develop your kingside bishop to an active diagonal eyeing Black’s vulnerable f7 square.",best:"f1c4",acc:["c4","b5"],idea:"Aim the light-squared bishop at c4.",why:"Bc4 targets f7 (initially defended only by Black’s King) and clears the kingside for castling."},
+    {fen:"r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",tx:"Don’t leave your King in the center! Complete development by castling kingside.",best:"e1g1",acc:["g1"],idea:"Move the King from e1 to g1.",why:"Castling early connects your rooks and shields the King before tactics erupt."}
+  ]},
+  {mod:"3. Tactical Motifs",t:"Double Attacks & Forks",s:[
+    {fen:"r3k3/8/8/3N4/8/8/8/4K3 w - - 0 1",tx:"A Fork hits two valuable targets at once. Jump your knight to deliver a Royal Fork on King and Rook.",best:"d5c7",acc:["c7"],idea:"Check which knight square attacks both e8 and a8.",why:"Nc7+ forces the King to move, winning the trapped Rook on a8."},
+    {fen:"r3k3/8/8/8/1Q6/8/8/4K3 w - - 0 1",tx:"Queens excel at long-range forks. Slide your Queen to deliver check while attacking the undefended rook.",best:"b4e4",acc:["e4"],idea:"Align with e8 vertically and a8 diagonally.",why:"Qe4+ checks the King on the e-file while targeting the corner rook on a8."}
+  ]},
+  {mod:"3. Tactical Motifs",t:"Pins & Skewers",s:[
+    {fen:"4k3/8/4q3/8/8/8/5B2/R5K1 w - - 0 1",tx:"An Absolute Pin freezes a piece because moving it exposes the King. Pin Black’s Queen to its King.",best:"a1e1",acc:["e1"],idea:"Move your Rook onto the e-file where your Bishop defends it.",why:"Re1 locks the Queen onto the e-file (supported by Bf2), winning the Queen."},
+    {fen:"7r/8/8/4k3/8/8/8/4B1K1 w - - 0 1",tx:"A Skewer forces a high-value piece to move, exposing another piece behind it. Skewer the King to win the h8 rook.",best:"e1c3",acc:["c3"],idea:"Check the e5 King along the c3–h8 diagonal.",why:"Bc3+ forces the King aside, letting Bxh8 scoop up the rook behind it."}
+  ]},
+  {mod:"4. Endgames & Strategy",t:"Rook & Queen Checkmates",s:[
+    {fen:"6k1/5ppp/8/8/8/8/8/R3K3 w - - 0 1",tx:"Back-Rank Checkmate: Black’s own pawns trap its King. Deliver mate along the 8th rank.",best:"a1a8",acc:["a8"],idea:"Slide the Rook all the way to a8.",why:"Ra8# exploits the missing luft (escape square) on the back rank."},
+    {fen:"7k/8/6K1/8/8/8/8/5Q2 w - - 0 1",tx:"Queen + King Mate: Your King already seals g7 and h7. Deliver checkmate with the Queen.",best:"f1f8",acc:["f8","g7","h3","a1"],accMate:true,idea:"Check the h8 King along the 8th rank or h8 diagonal.",why:"With the King cutting off escape squares, a single Queen check seals checkmate."}
+  ]},
+  {mod:"4. Endgames & Strategy",t:"Open Files & Outposts",s:[
+    {fen:"4k3/p4ppp/8/8/8/8/P4PPP/R5K1 w - - 0 1",tx:"Rooks thrive on open files with zero pawns in their path. Seize an open central file.",best:"a1e1",acc:["c1","d1","e1"],idea:"Slide a1 onto the completely open c, d, or e file.",why:"Placing Rooks on open files lets them invade the 7th rank later in the game."},
+    {fen:"4k3/1pp2ppp/8/8/4P3/2N5/PP3PPP/4K3 w - - 0 1",tx:"An Outpost is a square enemy pawns can never attack. Plant your Knight on the d5 outpost.",best:"c3d5",acc:["d5"],idea:"Jump your Knight onto d5, backed up by your e4 pawn.",why:"Nd5 dominates the board because no black c- or e-pawn remains to drive it off."}
   ]}
 ];
+
+/* ---------- Daily Tactical Puzzles System (10 Verified Challenges) ---------- */
 const PZraw=[
   {c:"Mate in 1",fen:"6k1/5ppp/8/8/8/8/8/R3K3 w - - 0 1",t:"Back-rank mate: the king is boxed in by its own pawns."},
-  {c:"Mate in 1",fen:"7k/8/6K1/8/8/8/8/5Q2 w - - 0 1",t:"Queen and king cooperate."},
-  {c:"Mate in 1",fen:"r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4",t:"The famous Scholar’s Mate pattern."},
-  {c:"Mate in 1",fen:"6rk/6pp/8/6N1/8/8/8/6K1 w - - 0 1",t:"Smothered mate: the king is trapped by its own pieces."},
-  {c:"Mate in 1",fen:"k7/8/1K6/8/8/8/8/7R w - - 0 1",t:"Use your king to cut off escape squares."},
-  {c:"Mate in 1",fen:"4r1k1/8/8/8/8/8/5PPP/6K1 b - - 0 1",t:"Black to move — same back-rank idea."},
-  {c:"Forks",fen:"r3k3/8/8/3N4/8/8/8/4K3 w - - 0 1",sol:"d5c7",t:"Find a knight move that attacks the king AND the rook.",why:"Nc7+ forks king and rook; the king must move, then Nxa8 wins the rook."}
+  {c:"Mate in 1",fen:"7k/8/6K1/8/8/8/8/5Q2 w - - 0 1",t:"Queen and king cooperate along the edge of the board."},
+  {c:"Royal Fork",fen:"r3k3/8/8/3N4/8/8/8/4K3 w - - 0 1",sol:"d5c7",t:"Find a knight move that attacks both the king AND the rook.",why:"Nc7+ forks king and rook; the king must move, then Nxa8 wins the rook."},
+  {c:"Smothered Mate",fen:"6rk/6pp/8/6N1/8/8/8/6K1 w - - 0 1",t:"Smothered mate: the king is trapped by its own pieces."},
+  {c:"Absolute Pin",fen:"4k3/8/4q3/8/8/8/5B2/R5K1 w - - 0 1",sol:"a1e1",t:"Pin Black’s queen to its king on the e-file.",why:"Re1 pins the queen to the king (and is protected by Bf2), winning the queen."},
+  {c:"Skewer",fen:"7r/8/8/4k3/8/8/8/4B1K1 w - - 0 1",sol:"e1c3",t:"Skewer the enemy king to capture the rook behind it.",why:"Bc3+ forces the king off the diagonal so Bxh8 wins the rook."},
+  {c:"Back-Rank Mate",fen:"4r1k1/8/8/8/8/8/5PPP/6K1 b - - 0 1",t:"Black to move — deliver checkmate on the back rank."},
+  {c:"Arabian Mate",fen:"7k/2R5/5N2/8/8/8/8/6K1 w - - 0 1",t:"Knight and rook team up to trap the cornered king."},
+  {c:"Queen Fork",fen:"r3k3/8/8/8/1Q6/8/8/4K3 w - - 0 1",sol:"b4e4",t:"Deliver check while attacking the corner rook at the same time.",why:"Qe4+ forks the e8 king and the a8 rook."},
+  {c:"Scholar’s Mate",fen:"r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4",t:"Strike the weakest square around Black’s king."}
 ];
 
 if(typeof Chess!=="function"){
@@ -1279,6 +1336,13 @@ if(typeof Chess!=="function"){
 
 const mateMove=fen=>{const g=new Chess(fen);return g.moves({verbose:true}).find(m=>{g.move(m);const r=g.in_checkmate();g.undo();return r})};
 const PZ=PZraw.filter(p=>{const g=new Chess(p.fen);return p.sol?g.moves({verbose:true}).some(m=>m.from+m.to===p.sol):!!mateMove(p.fen)});
+
+function dailyUnlockedCount(){
+  let n=1;
+  while(n<PZ.length&&P.pz.ok[n-1])n++;
+  return n;
+}
+function isPuzzleUnlocked(i){return i<dailyUnlockedCount()}
 
 /* ---------- Non-Blocking 5-Tier Minimax Web Worker AI ---------- */
 const AI_WORKER_SRC=`
@@ -1785,6 +1849,7 @@ const dur=()=>P.fx.anim&&!P.fx.rm?[300,170,95][P.fx.spd]:0;
 function kind(m,g){return g.in_checkmate()?"mate":g.in_check()?"chk":m.promotion?"promo":(m.piece==="k"&&/[kq]/.test(m.flags))?"castle":m.captured?"cap":"move"}
 function snd(k){SND[k]&&SND[k]()}
 function clrDraw(){if(P.fx.cl){S.dr={a:[],h:{}};S.ds=null}}
+function hasDrawMarks(){return !!(S.dr.a.length||Object.keys(S.dr.h).length||S.ds)}
 function sideOK(){
   if(S.mode==="bot")return !S.busy&&!S.over&&S.g.turn()===S.col;
   if(S.mode==="learn"||S.mode==="puz")return !S.solved&&!S.over;
@@ -2030,7 +2095,7 @@ function updateCheckClass(){
   }
 }
 
-/* ---------- Drawing Overlay ---------- */
+/* ---------- Drawing Overlay & Dynamic Clear Sync ---------- */
 function ov(){
   const e=$("#ov");if(!e)return;
   let h="";const D=S.dr;
@@ -2057,6 +2122,19 @@ function ov(){
   }
   e.innerHTML=h;
 }
+function renderDrawBar(){
+  const db=$("#draw-bar");
+  if(!db)return;
+  db.hidden=!S.dm;
+  if(!S.dm)return;
+  const showClr=hasDrawMarks();
+  db.innerHTML=
+    `<div class="sw-row">${["green","red","blue","yellow"].map(k=>`<button data-a="dc" data-c="${k}" class="sw" aria-label="Draw ${k}" style="background:${DC[k]};${S.dc===k?"outline:2.5px solid var(--tx);outline-offset:2px":""}"></button>`).join("")}</div>`+
+    `<div class="draw-acts">`+
+      `<button data-a="cd" ${showClr?"":"hidden"}>Clear</button>`+
+      `<button data-a="dm" class="pri">Done</button>`+
+    `</div>`;
+}
 function draw(a,b,c){
   const D=S.dr;
   if(a===b){
@@ -2069,11 +2147,13 @@ function draw(a,b,c){
     else D.a.push({a,b,c});
   }
   ov();
+  renderDrawBar();
 }
 function drawTap(sq){
   if(!S.ds){S.ds=sq;SND.click()}
   else{draw(S.ds,sq,S.dc);S.ds=null}
   ov();
+  renderDrawBar();
 }
 
 /* ---------- Game Modes & Lifecycle ---------- */
@@ -2104,7 +2184,7 @@ function startBot(colorChoice){
   S.mode="bot";S.tab="play";S.col=c;S.flip=c==="b";
   S.colorModalOpen=false;S.menuOpen=false;
   loadFen(new Chess().fen());
-  S.msg=P.diff==="mittens"?MITTENS_LINES.start:"";
+  S.msg="";
   render();
   if(c==="b")triggerBotMove();
 }
@@ -2133,17 +2213,11 @@ function restartCurrent(){
 }
 
 /* ---------- Non-Blocking Bot Move with Natural 600–1200ms Thinking Delay ---------- */
-function mittensTaunt(m,g){
-  if(g.in_checkmate())return MITTENS_LINES.win;
-  if(g.in_check())return MITTENS_LINES.chk;
-  if(m.captured)return MITTENS_LINES.cap;
-  return MITTENS_LINES.move[(Math.random()*MITTENS_LINES.move.length)|0];
-}
 function triggerBotMove(){
   if(S.busy||S.mode!=="bot"||S.over||S.g.turn()===S.col)return;
   const tk=++S.tok,fen=S.g.fen();
   const startedAt=performance.now();
-  const targetDelay=600+Math.round(Math.random()*600); // Realistic 600ms - 1,200ms delay
+  const targetDelay=600+Math.round(Math.random()*600);
   S.busy=true;
   renderUIOnly();
 
@@ -2162,8 +2236,8 @@ function triggerBotMove(){
       if(!m){render();return}
       S.last=[m.from,m.to];
       S.bad=false;
+      S.msg="";
       S.ex="Bot: "+explain(m,S.g);
-      if(P.diff==="mittens")S.msg=mittensTaunt(m,S.g);
       snd(kind(m,S.g));clrDraw();endCheck();
       render({m});
     },wait);
@@ -2250,12 +2324,13 @@ function doMove(f,t,pr,fromDrag){
   S.ex=explain(m,g);
   const sk=kind(m,g),L=g.history().length;
   S.bad=false;
-  if(S.mode==="bot"&&P.diff!=="mittens")S.msg="";
+  if(S.mode==="bot")S.msg="";
   let animObj={m,instant:!!fromDrag};
 
   if(S.mode==="learn"){
     const s=cur();
-    if(m.from===s.best.slice(0,2)&&s.acc.includes(m.to)){
+    const matched=(m.from===s.best.slice(0,2)&&s.acc.includes(m.to))||(s.accMate&&g.in_checkmate());
+    if(matched){
       S.solved=true;S.msg=s.why+" ✓";
       P.done[S.li+"-"+S.si]=1;save();
       if(S.si===LS[S.li].s.length-1&&LS[S.li].s.every((_,i)=>P.done[S.li+"-"+i]))S.msg+=" Lesson complete!";
@@ -2270,18 +2345,13 @@ function doMove(f,t,pr,fromDrag){
     if(ok){
       S.msg=(p.why||`${m.san} is checkmate!`) +" ✓";
       S.solved=true;
-      if(!S.tried)recordPz(true);
+      recordPz(true);
       SND.ok();
     }else{
       g.undo();S.last=null;S.ex="";S.bad=true;animObj=null;
       S.msg=`${m.san} isn’t the solution. Try again or tap Hint.`;
       SND.err();
-      if(!S.tried){S.tried=true;recordPz(false)}
-    }
-  }else if(S.mode==="bot"){
-    endCheck();
-    if(S.over&&g.in_checkmate()&&P.diff==="mittens"&&S.mateWin===S.col){
-      S.msg=MITTENS_LINES.lose;
+      recordPz(false);
     }
   }else{
     endCheck();
@@ -2311,10 +2381,22 @@ function shakeSq(sq){
 
 function recordPz(ok){
   const p=PZ[S.pi],z=P.pz;
-  if(ok&&S.tried)return;
+  if(ok){
+    if(!z.ok[S.pi]){
+      z.ok[S.pi]=1;
+      z.lastDay=todayKey();
+    }
+    if(!S.tried){
+      z.a++;z.cat[p.c]=z.cat[p.c]||{a:0,s:0};z.cat[p.c].a++;
+      z.s++;z.cat[p.c].s++;
+      z.st++;z.r+=12;
+    }
+    S.tried=true;save();
+    return;
+  }
+  if(S.tried)return;
   z.a++;z.cat[p.c]=z.cat[p.c]||{a:0,s:0};z.cat[p.c].a++;
-  if(ok&&!S.tried){z.s++;z.cat[p.c].s++;z.st++;z.r+=12;z.ok[S.pi]=1}
-  else{z.st=0;z.r=Math.max(400,z.r-8)}
+  z.st=0;z.r=Math.max(400,z.r-8);
   S.tried=true;save();
 }
 
@@ -2414,7 +2496,7 @@ function hint(){
   if(S.mode==="learn"){const s=cur();b=[s.best.slice(0,2),s.best.slice(2)];idea=s.idea;why=s.why}
   else{
     const p=PZ[S.pi];
-    if(p.sol){b=[p.sol.slice(0,2),p.sol.slice(2)];idea="Look for a knight fork attacking two valuable pieces at once.";why=p.why}
+    if(p.sol){b=[p.sol.slice(0,2),p.sol.slice(2)];idea="Look closely for the decisive tactical blow.";why=p.why}
     else{const m=mateMove(p.fen);b=[m.from,m.to];idea="Start with checks — which check leaves the king zero escape squares?";why=`${m.san} is checkmate.`}
   }
   S.h=Math.min(4,S.h+1);
@@ -2432,7 +2514,7 @@ function modeLabel(){
     return `Bot · ${badge} (${S.col==="w"?"White":"Black"})`;
   }
   if(S.mode==="learn")return `Learn · ${LS[S.li].t} ${S.si+1}/${LS[S.li].s.length}`;
-  if(S.mode==="puz")return `Puzzle ${S.pi+1}/${PZ.length} · ${PZ[S.pi].c}`;
+  if(S.mode==="puz")return `Daily #${S.pi+1}/${PZ.length} · ${PZ[S.pi].c}`;
   return "Basic · 2-Player";
 }
 
@@ -2471,6 +2553,10 @@ function renderHeaderAndMenu(){
         `<button data-a="mode-bot" class="${S.mode==="bot"?"on":""}">Bot (vs AI)</button>`+
       `</div></div>`+
       `<div class="menu-sec"><div class="menu-lbl">Bot Mode</div>${renderBotModeButtons()}</div>`+
+      `<div class="menu-sec"><div class="menu-lbl">UI &amp; Board Size</div>`+
+        `<div class="seg-3">${[["compact","Compact"],["normal","Normal"],["large","Large"]].map(([v,n])=>`<button data-a="uisz" data-v="${v}" class="${P.uiSize===v?"on":""}">${n}</button>`).join("")}</div>`+
+        `<div class="vol-wrap"><span class="mu">Board</span><input type="range" min="72" max="100" step="2" value="${P.boardPct}" data-a="bsz" aria-label="Board scale"><span id="bszv" class="vol-val">${P.boardPct}%</span></div>`+
+      `</div>`+
       `<div class="menu-sec"><div class="menu-lbl">Coaching Detail</div><div class="seg">`+
         `<button data-a="beg" data-v="1" class="${P.beg?"on":""}">Beginner</button>`+
         `<button data-a="beg" data-v="0" class="${!P.beg?"on":""}">Advanced</button>`+
@@ -2478,10 +2564,8 @@ function renderHeaderAndMenu(){
       `<div class="menu-sec"><div class="menu-lbl">Board Tools &amp; Sound</div>`+
         `<div class="menu-grid">`+
           `<button data-a="dm" class="${S.dm?"on":""}">Draw Mode${S.dm?" ON":""}</button>`+
-          `${(S.dr.a.length||Object.keys(S.dr.h).length)?`<button data-a="cd">Clear Marks</button>`:""}`+
           B("hl","Highlights")+B("arr","Arrows")+B("anim","Animations")+B("cap","Capture FX")+B("rm","Reduced Motion")+
         `</div>`+
-        `${S.dm?`<div class="sw-row">${["green","red","blue","yellow"].map(k=>`<button data-a="dc" data-c="${k}" class="sw" aria-label="Draw ${k}" style="background:${DC[k]};${S.dc===k?"outline:2.5px solid var(--tx);outline-offset:2px":""}"></button>`).join("")}</div>`:""}`+
         `<div class="vol-wrap"><span class="mu">Vol</span><input type="range" min="0" max="1" step=".05" value="${P.vol}" data-a="vol" aria-label="Sound volume"><span id="volv" class="vol-val">${Math.round(P.vol*100)}%</span></div>`+
       `</div>`+
       `<div class="menu-sec"><div class="menu-lbl">Animation Speed &amp; Theme</div>`+
@@ -2499,17 +2583,17 @@ function renderStatusAndBanner(){
   if(S.over){stText=S.over;stSub="Game Over"}
   else if(S.mode==="bot"){
     if(S.busy){
-      stText=P.diff==="mittens"?"Mittens is thinking…":"Bot is thinking…";
+      stText="Bot is thinking…";
       stSub=P.diff==="mittens"?`<span class="mittens-pill">Mittens</span>`:bm.name;
     }else{
-      stText=g.turn()===S.col?"Your turn":(P.diff==="mittens"?"Mittens’ turn":"Bot’s turn");
+      stText=g.turn()===S.col?"Your turn":"Bot’s turn";
       stSub=g.in_check()?"CHECK":(P.diff==="mittens"?`<span class="mittens-pill">Mittens</span>`:bm.name);
     }
   }else if(S.mode==="learn"){
     stText=`${LS[S.li].t} · Step ${S.si+1}/${LS[S.li].s.length}`;
     stSub=S.solved?"Solved ✓":"";
   }else if(S.mode==="puz"){
-    stText=`Puzzle ${S.pi+1}/${PZ.length} · ${PZ[S.pi].c}`;
+    stText=`Daily Puzzle #${S.pi+1} · ${PZ[S.pi].c}`;
     stSub=S.solved?"Solved ✓":(turnW?"White":"Black");
   }
   $("#status-bar").innerHTML=
@@ -2521,16 +2605,17 @@ function renderStatusAndBanner(){
   const text=S.hm&&S.h?S.hm:(S.over&&S.mode==="bot"&&!S.msg?`${S.over}. Play again?`:S.msg);
   if(!showLearnPuz&&!text){ban.hidden=true;return}
   ban.hidden=false;
-  const isMittensMsg=S.mode==="bot"&&P.diff==="mittens"&&!S.bad&&!(S.hm&&S.h);
-  ban.className=(S.hm&&S.h)?"hint":(S.bad?"bad":(isMittensMsg?"mittens":""));
+  ban.className=(S.hm&&S.h)?"hint":(S.bad?"bad":"");
   let acts="";
   if(S.mode==="learn"){
     acts+=`<button data-a="next" class="${S.solved?"pri":""}" ${S.solved?"":"disabled"}>Next step →</button>`+
-          `<button data-a="go-me">All lessons</button>`;
+          `<button data-a="go-me">Learning Hub</button>`;
   }else if(S.mode==="puz"){
+    const nxt=(S.pi+1)%PZ.length;
+    const canNext=isPuzzleUnlocked(nxt)||S.solved;
     acts+=`<button data-a="ppz" ${S.pi?"":"disabled"}>← Prev</button>`+
-          `<button data-a="npz" class="${S.solved?"pri":""}">Next puzzle →</button>`+
-          `<button data-a="go-me">All puzzles</button>`;
+          `<button data-a="npz" class="${S.solved?"pri":""}" ${canNext?"":"disabled"}>Next daily →</button>`+
+          `<button data-a="go-me">All dailies</button>`;
   }else if(S.over&&S.mode==="bot"){
     acts+=`<button data-a="mode-bot" class="pri">New Bot Match</button>`;
   }
@@ -2547,28 +2632,31 @@ function renderActionBar(){
     `<button data-a="flip" aria-label="Flip board">${IC.flip}<span>Flip</span></button>`+
     `<button data-a="hint" aria-label="Hint" ${S.over?"disabled":""}>${IC.hint}<span>Hint</span></button>`+
     `<button data-a="drawer" class="${S.drawerOpen?"on":""}" aria-label="Moves list">${IC.list}<span>Moves${mv.length?` (${mv.length})`:""}</span></button>`;
-  const db=$("#draw-bar");
-  if(db){
-    db.hidden=!S.dm;
-    if(S.dm){
-      db.innerHTML=
-        `<div class="sw-row">${["green","red","blue","yellow"].map(k=>`<button data-a="dc" data-c="${k}" class="sw" aria-label="Draw ${k}" style="background:${DC[k]};${S.dc===k?"outline:2.5px solid var(--tx);outline-offset:2px":""}"></button>`).join("")}</div>`+
-        `<div class="draw-acts">${(S.dr.a.length||Object.keys(S.dr.h).length)?`<button data-a="cd">Clear</button>`:""}<button data-a="dm" class="pri">Done</button></div>`;
-    }
-  }
+  renderDrawBar();
 }
 
 function renderMeView(){
   const tot=LS.reduce((a,l)=>a+l.s.length,0),dn=Object.keys(P.done).length,z=P.pz;
   const nxL=LS.findIndex((l,i)=>!l.s.every((_,j)=>P.done[i+"-"+j]));
-  const nextPz=PZ.findIndex((_,i)=>!z.ok[i]);
+  const unlocked=dailyUnlockedCount();
+  const nextPz=Math.min(unlocked-1,PZ.length-1);
+  const solvedCount=Object.keys(z.ok).length;
+
+  // Group Learning Hub lessons by module
+  const mods=[];
+  LS.forEach((l,i)=>{
+    let m=mods.find(x=>x.name===l.mod);
+    if(!m){m={name:l.mod,items:[]};mods.push(m)}
+    m.items.push({l,i});
+  });
+
   $("#me-view").innerHTML=`<div class="me-wrap">
     <div class="card">
       <div class="me-hero">
         <div class="me-emblem">${IC.queenLogo}</div>
         <div class="me-hero-info">
           <div class="me-hero-title">Rookie Player Profile</div>
-          <div class="mu">${dn} of ${tot} lesson steps completed · Rating ${z.r}</div>
+          <div class="mu">${dn} of ${tot} lesson steps · ${solvedCount}/${PZ.length} Daily Puzzles · Rating ${z.r}</div>
           <div class="bar"><i style="width:${tot?dn/tot*100:0}%"></i></div>
         </div>
       </div>
@@ -2578,36 +2666,41 @@ function renderMeView(){
       <h3><span>Your Statistics</span></h3>
       <div class="stats-grid">
         <div class="stat"><b>${z.r}</b>Puzzle Rating</div>
-        <div class="stat"><b>${z.a?Math.round(z.s/z.a*100):0}%</b>Puzzle Accuracy</div>
-        <div class="stat"><b>${z.st}</b>Puzzle Streak</div>
+        <div class="stat"><b>${z.st}</b>Daily Streak</div>
+        <div class="stat"><b>${z.a?Math.round(z.s/z.a*100):0}%</b>Accuracy</div>
         <div class="stat"><b>${P.g.w}/${P.g.d}/${P.g.l}</b>Bot W / D / L</div>
       </div>
     </div>
 
     <div class="card">
-      <h3><span>Learn Chess (${dn}/${tot})</span>${nxL>=0?`<button data-a="lesson" data-i="${nxL}" class="pri" style="min-height:36px;padding:0 12px;font-size:12.5px">Continue</button>`:""}</h3>
+      <h3><span>Daily Puzzles (${solvedCount}/${PZ.length})</span><button data-a="puzzle" data-i="${nextPz}" class="pri" style="min-height:36px;padding:0 12px;font-size:12.5px">${solvedCount===PZ.length?"Replay #1":"Play Daily #"+(nextPz+1)}</button></h3>
+      <div class="mu" style="margin-bottom:10px">Solve each daily challenge to build your streak and unlock the next tactical test.</div>
       <div class="item-list">
-        ${LS.map((l,i)=>{
-          const comp=l.s.filter((_,j)=>P.done[i+"-"+j]).length,all=comp===l.s.length;
-          return `<button class="list-btn" data-a="lesson" data-i="${i}">`+
-            `<span class="l-left"><span class="l-title">${i+1}. ${l.t}</span><span class="l-sub">${l.s.length} interactive step${l.s.length>1?"s":""}</span></span>`+
-            `<span class="badge ${all?"done":""}">${all?"Done ✓":`${comp}/${l.s.length}`}</span>`+
+        ${PZ.map((p,i)=>{
+          const solved=!!z.ok[i];
+          const open=isPuzzleUnlocked(i);
+          const isCurrent=open&&!solved&&i===nextPz;
+          return `<button class="list-btn" data-a="puzzle" data-i="${i}" ${open?"":"disabled"}>`+
+            `<span class="l-left"><span class="l-title">Daily Puzzle #${i+1} · ${p.c}</span><span class="l-sub">${open?p.t:`Solve Daily Puzzle #${i} to unlock`}</span></span>`+
+            `<span class="badge ${solved?"done":(isCurrent?"today":"")}">${solved?"Solved ✓":(isCurrent?"Today":(open?"Play":"Locked"))}</span>`+
           `</button>`;
         }).join("")}
       </div>
     </div>
 
     <div class="card">
-      <h3><span>Tactical Puzzles (${Object.keys(z.ok).length}/${PZ.length})</span><button data-a="puzzle" data-i="${nextPz>=0?nextPz:0}" class="pri" style="min-height:36px;padding:0 12px;font-size:12.5px">${nextPz>=0?"Next Unsolved":"Replay"}</button></h3>
-      <div class="item-list">
-        ${PZ.map((p,i)=>{
-          const solved=!!z.ok[i];
-          return `<button class="list-btn" data-a="puzzle" data-i="${i}">`+
-            `<span class="l-left"><span class="l-title">Puzzle ${i+1}: ${p.c}</span><span class="l-sub">${p.t}</span></span>`+
-            `<span class="badge ${solved?"done":""}">${solved?"Solved ✓":"Play"}</span>`+
+      <h3><span>Learning Hub (${dn}/${tot})</span>${nxL>=0?`<button data-a="lesson" data-i="${nxL}" class="pri" style="min-height:36px;padding:0 12px;font-size:12.5px">Continue</button>`:""}</h3>
+      ${mods.map(m=>
+        `<div class="mod-hdr">${m.name}</div><div class="item-list">`+
+        m.items.map(({l,i})=>{
+          const comp=l.s.filter((_,j)=>P.done[i+"-"+j]).length,all=comp===l.s.length;
+          return `<button class="list-btn" data-a="lesson" data-i="${i}">`+
+            `<span class="l-left"><span class="l-title">${i+1}. ${l.t}</span><span class="l-sub">${l.s.length} interactive step${l.s.length>1?"s":""}</span></span>`+
+            `<span class="badge ${all?"done":""}">${all?"Done ✓":`${comp}/${l.s.length}`}</span>`+
           `</button>`;
-        }).join("")}
-      </div>
+        }).join("")+
+        `</div>`
+      ).join("")}
     </div>
   </div>`;
 }
@@ -2674,10 +2767,10 @@ function renderMateModal(){
   if(S.mode==="bot"){
     if(S.mateWin===S.col){
       headline="Victory!";
-      sub=P.diff==="mittens"?MITTENS_LINES.lose:`You defeated ${currentBotMeta().name} as ${wn}!`;
+      sub=`You defeated ${currentBotMeta().name} as ${wn}!`;
     }else{
       headline="Checkmate";
-      sub=P.diff==="mittens"?MITTENS_LINES.win:`${currentBotMeta().name} won by checkmate.`;
+      sub=`${currentBotMeta().name} won by checkmate.`;
     }
   }
   $("#mate-modal").innerHTML=
@@ -2750,7 +2843,7 @@ function copyText(txt,label){
 document.addEventListener("click",e=>{
   const b=e.target.closest("[data-a]");if(!b)return;
   const a=b.dataset.a,d=b.dataset;
-  if(a==="vol")return;
+  if(a==="vol"||a==="bsz")return;
   SND.click();
   if(a==="toggle-menu"){S.menuOpen=!S.menuOpen;renderUIOnly()}
   else if(a==="tab"){S.tab=d.v;S.menuOpen=false;renderUIOnly();if(S.tab==="play")requestAnimationFrame(cacheBoardRect)}
@@ -2765,10 +2858,12 @@ document.addEventListener("click",e=>{
     else startBasic();
   }
   else if(a==="close-mate"){S.mateModalOpen=false;renderUIOnly()}
-  else if(a==="diff"){
-    P.diff=d.v;save();
-    if(S.mode==="bot"&&!S.over&&P.diff==="mittens"&&!S.msg)S.msg=MITTENS_LINES.start;
-    renderUIOnly();
+  else if(a==="diff"){P.diff=d.v;save();renderUIOnly()}
+  else if(a==="uisz"){
+    P.uiSize=d.v;
+    P.boardPct=d.v==="compact"?86:d.v==="large"?100:96;
+    save();applyUIScale();renderUIOnly();
+    requestAnimationFrame(cacheBoardRect);
   }
   else if(a==="beg"){P.beg=d.v==="1";save();renderUIOnly()}
   else if(a==="mute"){P.mute=!P.mute;save();renderUIOnly()}
@@ -2780,15 +2875,15 @@ document.addEventListener("click",e=>{
   else if(a==="drawer"){S.drawerOpen=!S.drawerOpen;renderUIOnly()}
   else if(a==="close-drawer"){S.drawerOpen=false;renderUIOnly()}
   else if(a==="lesson"){startLesson(+d.i,0)}
-  else if(a==="puzzle"){startPuzzle(+d.i)}
+  else if(a==="puzzle"){const idx=+d.i;if(isPuzzleUnlocked(idx))startPuzzle(idx)}
   else if(a==="next"){if(S.si<LS[S.li].s.length-1)S.si++;else{S.li=(S.li+1)%LS.length;S.si=0}startLesson()}
-  else if(a==="npz"){S.pi=(S.pi+1)%PZ.length;startPuzzle()}
+  else if(a==="npz"){const nx=(S.pi+1)%PZ.length;if(isPuzzleUnlocked(nx))startPuzzle(nx)}
   else if(a==="ppz"){S.pi=Math.max(0,S.pi-1);startPuzzle()}
   else if(a==="pro"){const p=S.pp;S.pp=null;if(p)doMove(p.f,p.t,d.p,p.fromDrag)}
   else if(a==="pcancel"){if(performance.now()-S.ppAt<250)return;S.pp=null;renderUIOnly()}
   else if(a==="dm"){S.dm=!S.dm;S.ds=null;renderUIOnly()}
-  else if(a==="dc"){S.dc=d.c;S.ds=null;renderUIOnly()}
-  else if(a==="cd"){S.dr={a:[],h:{}};S.ds=null;ov();renderUIOnly()}
+  else if(a==="dc"){S.dc=d.c;S.ds=null;ov();renderDrawBar()}
+  else if(a==="cd"){S.dr={a:[],h:{}};S.ds=null;ov();renderDrawBar()}
   else if(a==="set"){if(d.k==="spd")P.fx.spd=+d.v;else P.fx[d.k]=!P.fx[d.k];save();renderUIOnly()}
   else if(a==="theme"){P.theme=d.v;save();applyTheme();renderUIOnly()}
   else if(a==="cpfen")copyText(S.g.fen(),"FEN");
@@ -2870,8 +2965,8 @@ bdEl.addEventListener("pointerdown",e=>{
     }else if(S.sel){
       S.sel=null;S.legal=[];S.dr={a:[],h:{}};ov();
       syncGridHighlights();
-    }else if(S.dr.a.length||Object.keys(S.dr.h).length){
-      S.dr={a:[],h:{}};ov();
+    }else if(hasDrawMarks()){
+      S.dr={a:[],h:{}};S.ds=null;ov();renderDrawBar();
     }
   }
 });
@@ -2960,17 +3055,23 @@ document.addEventListener("keydown",e=>{
     else if(S.colorModalOpen){S.colorModalOpen=false;renderUIOnly()}
     else if(S.menuOpen){S.menuOpen=false;renderUIOnly()}
     else if(S.drawerOpen){S.drawerOpen=false;renderUIOnly()}
-    else{S.dr={a:[],h:{}};S.ds=null;ov()}
+    else{S.dr={a:[],h:{}};S.ds=null;ov();renderDrawBar()}
   }else if(e.key==="f"||e.key==="F"){S.flip=!S.flip;render()}
   else if(e.key==="ArrowLeft")undo();
   else if(e.key==="ArrowRight")redo();
 });
 
 document.addEventListener("input",e=>{
-  if(e.target.dataset.a==="vol"){
+  const a=e.target.dataset.a;
+  if(a==="vol"){
     P.vol=+e.target.value;save();
     const vv=$("#volv");if(vv)vv.textContent=Math.round(P.vol*100)+"%";
     tone(440,.05);
+  }else if(a==="bsz"){
+    P.boardPct=+e.target.value;save();
+    applyUIScale();
+    const bv=$("#bszv");if(bv)bv.textContent=P.boardPct+"%";
+    requestAnimationFrame(cacheBoardRect);
   }
 });
 
