@@ -517,6 +517,17 @@ main{
   touch-action:none;
   user-select:none;
   -webkit-user-select:none;
+  transform-origin:center center;
+  will-change:transform;
+  transition:transform .38s cubic-bezier(.22,1,.36,1);
+}
+#bw.board-flip-anim{
+  animation:boardAutoRotate .42s cubic-bezier(.22,1,.36,1);
+}
+@keyframes boardAutoRotate{
+  0%{transform:rotate(-180deg) scale(.96)}
+  55%{transform:rotate(-80deg) scale(.94)}
+  100%{transform:rotate(0deg) scale(1)}
 }
 #bd{
   display:grid;
@@ -630,7 +641,32 @@ main{
   padding:0;
   pointer-events:none;
   transform-origin:center center;
-  transition:transform var(--p-ms,160ms) cubic-bezier(.2,.8,.2,1);
+  will-change:transform;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  transition:transform var(--p-ms,220ms) cubic-bezier(.22,1,.36,1);
+}
+.pp.moving{
+  z-index:22;
+}
+.pp.moving svg{
+  filter:drop-shadow(0 6px 10px rgba(0,0,0,.32));
+}
+.pp.settle{
+  z-index:22;
+  transition:transform 90ms cubic-bezier(.22,1,.36,1);
+}
+.pp.captured{
+  pointer-events:none;
+  z-index:4;
+}
+.pp.captured svg{
+  opacity:0;
+  transform:scale(.64);
+  transition:opacity var(--cap-ms,180ms) ease-out,transform var(--cap-ms,180ms) ease-out;
+}
+.pp.face-rot.captured svg{
+  transform:rotate(180deg) scale(.64);
 }
 .pp.dragging{
   transition:none!important;
@@ -649,7 +685,7 @@ main{
   display:block;
   transform:scale(var(--piece-scale,1.2));
   transform-origin:center center;
-  transition:transform .12s ease;
+  transition:transform .12s ease,opacity .16s ease;
 }
 .pp.face-rot svg{
   transform:rotate(180deg) scale(var(--piece-scale,1.2));
@@ -3536,7 +3572,7 @@ function clearCheckWarn(){
 }
 
 const cur=()=>lStep(S.li,S.si);
-const dur=()=>P.fx.anim&&!P.fx.rm?[300,170,95][P.fx.spd]:0;
+const dur=()=>P.fx.anim&&!P.fx.rm?[340,220,120][P.fx.spd]:0;
 function kind(m,g){return g.in_checkmate()?"mate":g.in_check()?"chk":m.promotion?"promo":(m.piece==="k"&&/[kq]/.test(m.flags))?"castle":m.captured?"cap":"move"}
 function snd(k){SND[k]&&SND[k]()}
 function clrDraw(){if(P.fx.cl){S.dr={a:[],h:{}};S.ds=null}}
@@ -3595,12 +3631,40 @@ function isPseudoLegalMove(g,from,to){
 /* ---------- Persistent 64-Square Grid & Keyed Piece Layer (Zero Rebuilds) ---------- */
 const sqMap={};
 let gridBuiltFlip=null;
+const bwEl=$("#bw");
 const plEl=$("#pl");
 const bdEl=$("#bd");
 const PE={}; // keyed by square "e2" -> div.pp element
 let renderedFen="";
 let renderedFlip=null;
 let renderedFace=null;
+let boardRotTimer=0;
+function triggerBoardRotateAnim(){
+  if(!bwEl||P.fx.rm||!P.fx.anim)return;
+  if(boardRotTimer){clearTimeout(boardRotTimer);boardRotTimer=0}
+  bwEl.classList.remove("board-flip-anim");
+  void bwEl.offsetWidth;
+  bwEl.classList.add("board-flip-anim");
+  boardRotTimer=setTimeout(()=>{
+    boardRotTimer=0;
+    bwEl.classList.remove("board-flip-anim");
+    cacheBoardRect();
+  },440);
+}
+function stopBoardRotateAnim(){
+  if(boardRotTimer){clearTimeout(boardRotTimer);boardRotTimer=0}
+  if(bwEl&&bwEl.classList.contains("board-flip-anim")){
+    bwEl.classList.remove("board-flip-anim");
+    cacheBoardRect();
+  }
+}
+if(bwEl&&typeof bwEl.addEventListener==="function"){
+  bwEl.addEventListener("animationend",()=>{
+    if(boardRotTimer){clearTimeout(boardRotTimer);boardRotTimer=0}
+    bwEl.classList.remove("board-flip-anim");
+    cacheBoardRect();
+  });
+}
 
 function isFaceToFaceMode(){
   return (S.mode==="basic"&&S.basicP2==="face")||(S.mode==="sandbox"&&S.sbCfg.opp==="face");
@@ -3621,13 +3685,51 @@ function xySvg(sq){
   const f=sq.charCodeAt(0)-97,r=+sq[1]-1;
   return[(S.flip?7-f:f)*10+5,(S.flip?r:7-r)*10+5];
 }
-function placePiece(el,x,y,instant){
-  if(instant)el.classList.add("snap");
-  el.style.transform=`translate3d(${x*100}%,${y*100}%,0)`;
-  if(instant){
+function clearMoveAnim(el){
+  if(!el)return;
+  if(el._mvTimer){clearTimeout(el._mvTimer);el._mvTimer=0}
+  if(el._mvEnd){el.removeEventListener?.("transitionend",el._mvEnd);el._mvEnd=null}
+  el.classList.remove("moving","settle");
+  el.style.transitionDuration="";
+}
+function placePiece(el,x,y,mode,distSq){
+  if(!el)return;
+  clearMoveAnim(el);
+  const nextTf=`translate3d(${x*100}%,${y*100}%,0)`;
+  const baseMs=dur();
+  if(mode===true||!baseMs){
+    el.classList.add("snap");
+    el.style.transform=nextTf;
+    void el.offsetWidth;
+    el.classList.remove("snap");
+    return;
+  }
+  if(el.style.transform===nextTf)return;
+  if(el.classList.contains("snap")){
     void el.offsetWidth;
     el.classList.remove("snap");
   }
+  if(typeof window!=="undefined"&&typeof window.getComputedStyle==="function"){
+    try{void window.getComputedStyle(el).transform}catch(e){}
+  }
+  void el.offsetWidth;
+  if(mode==="settle"){
+    el.classList.add("settle");
+    el.style.transform=nextTf;
+    const done=()=>{clearMoveAnim(el)};
+    el._mvEnd=e=>{if(!e||e.propertyName==="transform")done()};
+    el.addEventListener?.("transitionend",el._mvEnd);
+    el._mvTimer=setTimeout(done,120);
+    return;
+  }
+  const ms=distSq?Math.min(baseMs+95,baseMs+Math.round(distSq*14)):baseMs;
+  el.classList.add("moving");
+  el.style.transitionDuration=ms+"ms";
+  el.style.transform=nextTf;
+  const done=()=>{clearMoveAnim(el)};
+  el._mvEnd=e=>{if(!e||e.propertyName==="transform")done()};
+  el.addEventListener?.("transitionend",el._mvEnd);
+  el._mvTimer=setTimeout(done,ms+60);
 }
 
 function buildGridIfNeeded(){
@@ -3714,7 +3816,7 @@ function syncPieces(anim){
 
   // Fast incremental move update (keeps all stationary pieces untouched!)
   if(!fullRebuild&&anim&&anim.m){
-    const m=anim.m,rev=!!anim.rev,instant=!!anim.instant;
+    const m=anim.m,rev=!!anim.rev,instant=!!anim.instant,settle=!!anim.settle;
     const fs=rev?m.to:m.from,ts=rev?m.from:m.to;
     const moving=PE[fs];
     if(moving){
@@ -3724,8 +3826,10 @@ function syncPieces(anim){
         if(victim){
           delete PE[capSq];
           if(P.fx.cap&&dur()>0){
-            victim.style.opacity="0";
-            setTimeout(()=>victim.remove(),140);
+            victim.style.setProperty("--cap-ms",Math.min(210,dur())+"ms");
+            void victim.offsetWidth;
+            victim.classList.add("captured");
+            setTimeout(()=>victim.remove(),210);
           }else victim.remove();
         }
       }
@@ -3740,7 +3844,9 @@ function syncPieces(anim){
       }
       moving.classList.toggle("face-rot",isFaceOppPiece(m.color));
       const[tx,ty]=pxCoord(ts);
-      placePiece(moving,tx,ty,instant);
+      const fc=fs.charCodeAt(0)-97,fr=+fs[1]-1,tc=ts.charCodeAt(0)-97,tr=+ts[1]-1;
+      const distSq=Math.hypot(tc-fc,tr-fr);
+      placePiece(moving,tx,ty,settle?"settle":instant,distSq);
 
       // Castling rook glide
       if(m.piece==="k"&&/[kq]/.test(m.flags)){
@@ -3751,14 +3857,22 @@ function syncPieces(anim){
         if(rook){
           delete PE[rf];PE[rt]=rook;
           const[rx,ry]=pxCoord(rt);
-          placePiece(rook,rx,ry,false);
+          const rDist=Math.abs((rt.charCodeAt(0)-97)-(rf.charCodeAt(0)-97));
+          placePiece(rook,rx,ry,false,rDist);
         }
       }
 
       // Restore captured piece on undo
       if(rev&&m.captured){
         const capSq=m.flags.includes("e")?(m.to[0]+m.from[1]):m.to;
-        PE[capSq]=makePieceEl(m.captured,m.color==="w"?"b":"w",capSq);
+        const restored=makePieceEl(m.captured,m.color==="w"?"b":"w",capSq);
+        if(dur()>0){
+          restored.style.opacity="0";
+          restored.style.transition="opacity 150ms ease";
+          void restored.offsetWidth;
+          restored.style.opacity="1";
+        }
+        PE[capSq]=restored;
       }
 
       updateCheckClass();
@@ -3877,6 +3991,7 @@ function cancelAI(){
 }
 function resetBoardState(){
   cancelAI();
+  stopBoardRotateAnim();
   clearCheckWarn();
   S.pp=null;S.dr={a:[],h:{}};S.ds=null;
   S.sel=null;S.legal=[];S.last=null;
@@ -4257,7 +4372,7 @@ function doMove(f,t,pr,fromDrag){
   const sk=kind(m,g),L=g.history().length;
   S.bad=false;
   if(S.mode==="bot"||S.mode==="coach")setMsg("");
-  let animObj={m,instant:!!fromDrag};
+  let animObj={m,settle:!!fromDrag};
 
   if(S.mode==="learn"){
     const s=cur();
@@ -4327,7 +4442,10 @@ function doMove(f,t,pr,fromDrag){
     }
   }else{
     endCheck();
-    if(isAutoFlipTurn()&&!S.over)S.flip=g.turn()==="b";
+    if(isAutoFlipTurn()&&!S.over){
+      const nextFlip=g.turn()==="b";
+      if(nextFlip!==S.flip){S.flip=nextFlip;triggerBoardRotateAnim()}
+    }
   }
 
   if(g.history().length===L){
@@ -4435,7 +4553,10 @@ function undo(){
     const m=g.undo();S.redo.push(m);
     lastAnim={m,rev:true};undone++;
   }
-  if(isAutoFlipTurn())S.flip=g.turn()==="b";
+  if(isAutoFlipTurn()){
+    const nextFlip=g.turn()==="b";
+    if(nextFlip!==S.flip){S.flip=nextFlip;triggerBoardRotateAnim()}
+  }
   S.solved=false;S.sel=null;S.legal=[];S.hint=null;S.hintArrow=null;S.hm="";S.hmSpec=null;S.bad=false;
   if(S.mode==="learn"){S.msgSpec={type:"lessonStep"};S.msg=cur().tx;}
   else if(S.mode==="puz"){S.msgSpec={type:"puzPrompt"};S.msg=pText(getTodayPuzzles()[S.pi]);}
@@ -4462,7 +4583,10 @@ function redo(){
     const m2=g.move({from:o2.from,to:o2.to,promotion:o2.promotion||"q"});
     if(m2){lastM=m2;redone++}
   }
-  if(isAutoFlipTurn())S.flip=g.turn()==="b";
+  if(isAutoFlipTurn()){
+    const nextFlip=g.turn()==="b";
+    if(nextFlip!==S.flip){S.flip=nextFlip;triggerBoardRotateAnim()}
+  }
   S.coachPending=null;S.coachArrows=[];S.hintArrow=null;S.hm="";S.hmSpec=null;
   S.last=[lastM.from,lastM.to];
   setExplain(lastM,g,"");
@@ -5140,232 +5264,117 @@ function copyText(txt,label){
   }catch(e){}
 }
 
-const pngPieceImgCache={};
-const PNG_FALLBACK_GLYPHS={
-  w:{k:"♔",q:"♕",r:"♖",b:"♗",n:"♘",p:"♙"},
-  b:{k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟"}
-};
-function loadPngPieceImg(type,color){
-  const key=color+type;
-  if(pngPieceImgCache[key])return pngPieceImgCache[key];
-  pngPieceImgCache[key]=new Promise(resolve=>{
-    const grp=document.getElementById("sp-"+key);
-    if(!grp){resolve(null);return}
-    const vb=PIECE_VB[type]||"4.5 4.5 36 36";
-    const markup=`<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="${vb}">${grp.innerHTML}</svg>`;
-    const img=new Image();
-    img.onload=()=>{
-      if(typeof img.decode==="function")img.decode().then(()=>resolve(img),()=>resolve(img));
-      else resolve(img);
-    };
-    img.onerror=()=>resolve(null);
-    img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(markup);
-  });
-  return pngPieceImgCache[key];
-}
-function preloadPngPieceImgs(){
-  const cols=["w","b"],types=["k","q","r","b","n","p"];
-  for(const c of cols)for(const tp of types)loadPngPieceImg(tp,c);
-}
+async function copyBoardToClipboard(opts = {}) {
+  const {
+    pieces     = {},
+    highlights = [],
+    arrows     = [],
+    size       = 720,
+    orientation = 'white',
+    watermark  = 'Rookie: Learn Chess',
+  } = opts;
 
-function canvasToPngBlob(canvas){
-  return new Promise((resolve,reject)=>{
-    if(typeof canvas.toBlob==="function"){
-      canvas.toBlob(blob=>{
-        if(blob){resolve(blob);return}
-        try{
-          const b64=canvas.toDataURL("image/png").split(",")[1];
-          const bin=atob(b64),u8=new Uint8Array(bin.length);
-          for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
-          resolve(new Blob([u8],{type:"image/png"}));
-        }catch(e){reject(new Error("canvas.toBlob returned null"))}
-      },"image/png");
-    }else{
-      try{
-        const b64=canvas.toDataURL("image/png").split(",")[1];
-        const bin=atob(b64),u8=new Uint8Array(bin.length);
-        for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
-        resolve(new Blob([u8],{type:"image/png"}));
-      }catch(e){reject(e)}
-    }
-  });
-}
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    throw new Error('Lingkungan tidak mendukung canvas/DOM.');
+  }
+  if (!navigator.clipboard || typeof navigator.clipboard.write !== 'function') {
+    throw new Error('Clipboard API tidak tersedia.');
+  }
+  if (typeof window.ClipboardItem !== 'function') {
+    throw new Error('ClipboardItem tidak didukung di WebView ini.');
+  }
 
-async function renderBoardPngBlob(){
-  const SIZE=1024,SQ=SIZE/8,SCALE=SIZE/80;
-  const canvas=document.createElement("canvas");
-  canvas.width=SIZE;canvas.height=SIZE;
-  const ctx=canvas.getContext("2d");
-  const cs=getComputedStyle(document.documentElement);
-  const ltCol=cs.getPropertyValue("--lt").trim()||"#ebecd0";
-  const dkCol=cs.getPropertyValue("--dk").trim()||"#739552";
+  const canvas = document.createElement('canvas');
+  canvas.width  = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Gagal membuat context 2D canvas.');
 
-  const g=S.g,bd=g.board();
-  const inChk=g.in_check(),inMate=g.in_checkmate();
-  const ckSq=(inChk||S.chkWarn)?findKingSq(g,g.turn()):null;
-  const legalSet=S.legal.length?new Set(S.legal):null;
+  const sq    = size / 8;
+  const files = 'abcdefgh';
+  const squareToPixel = (square) => {
+    if (typeof square !== 'string' || square.length < 2) return null;
+    const fileIdx = files.indexOf(square[0].toLowerCase());
+    const rank    = parseInt(square[1], 10);
+    if (fileIdx < 0 || !Number.isFinite(rank) || rank < 1 || rank > 8) return null;
+    let col = fileIdx, row = 8 - rank;
+    if (orientation === 'black') { col = 7 - col; row = 7 - row; }
+    return { x: col * sq, y: row * sq, cx: col * sq + sq / 2, cy: row * sq + sq / 2 };
+  };
 
-  // 1. Render board squares, highlights, and coordinate labels
-  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
-    const rr=S.flip?7-r:r,cc=S.flip?7-c:c;
-    const sq="abcdefgh"[cc]+(8-rr);
-    const x=c*SQ,y=r*SQ;
-    const isDk=(rr+cc)%2===1;
-    ctx.fillStyle=isDk?dkCol:ltCol;
-    ctx.fillRect(x,y,SQ,SQ);
-
-    if(P.fx.hl&&S.last&&(S.last[0]===sq||S.last[1]===sq)){
-      ctx.fillStyle="rgba(255,220,0,0.35)";ctx.fillRect(x,y,SQ,SQ);
-    }
-    if(P.fx.hl&&S.sel===sq){
-      ctx.fillStyle="rgba(255,235,0,0.56)";ctx.fillRect(x,y,SQ,SQ);
-    }
-    if(S.hint&&S.hint[0]===sq){
-      ctx.fillStyle="rgba(75,155,255,0.52)";ctx.fillRect(x,y,SQ,SQ);
-    }
-    if(S.hint&&S.hint.length>1&&S.hint[1]===sq){
-      ctx.fillStyle="rgba(45,204,120,0.56)";ctx.fillRect(x,y,SQ,SQ);
-    }
-    if((inChk&&sq===ckSq)||(inMate&&sq===ckSq)){
-      ctx.fillStyle=inMate?"rgba(220,38,38,0.78)":"rgba(239,68,68,0.46)";
-      ctx.fillRect(x,y,SQ,SQ);
-      ctx.strokeStyle="#ef4444";ctx.lineWidth=4;
-      ctx.strokeRect(x+2,y+2,SQ-4,SQ-4);
-    }
-    if(P.fx.hl&&S.dr.h[sq]){
-      ctx.save();
-      ctx.globalAlpha=0.5;
-      ctx.fillStyle=DC[S.dr.h[sq]]||S.dr.h[sq];
-      ctx.fillRect(x,y,SQ,SQ);
-      ctx.restore();
-    }
-    if(legalSet&&legalSet.has(sq)){
-      ctx.save();
-      if(bd[rr][cc]){
-        ctx.strokeStyle="rgba(0,0,0,0.28)";ctx.lineWidth=7;
-        ctx.beginPath();ctx.arc(x+SQ/2,y+SQ/2,SQ*0.42,0,Math.PI*2);ctx.stroke();
-      }else{
-        ctx.fillStyle="rgba(0,0,0,0.24)";
-        ctx.beginPath();ctx.arc(x+SQ/2,y+SQ/2,SQ*0.15,0,Math.PI*2);ctx.fill();
-      }
-      ctx.restore();
-    }
-
-    const lblCol=isDk?"rgba(255,255,255,0.82)":"rgba(28,32,22,0.74)";
-    ctx.fillStyle=lblCol;
-    ctx.font="800 18px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif";
-    if(c===0){
-      ctx.textAlign="left";ctx.textBaseline="top";
-      ctx.fillText(String(8-rr),x+7,y+6);
-    }
-    if(r===7){
-      if(c===7){
-        ctx.textAlign="left";ctx.textBaseline="bottom";
-        ctx.fillText("abcdefgh"[cc],x+7,y+SQ-6);
-      }else{
-        ctx.textAlign="right";ctx.textBaseline="bottom";
-        ctx.fillText("abcdefgh"[cc],x+SQ-7,y+SQ-6);
-      }
+  const LIGHT = '#f0d9b5', DARK = '#b58863';
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      ctx.fillStyle = ((r + c) & 1) ? DARK : LIGHT;
+      ctx.fillRect(c * sq, r * sq, sq, sq);
     }
   }
 
-  // 2. Render all active chess pieces in their exact current coordinates
-  const activePieces=[];
-  const imgsToLoad=[];
-  const seenKeys=new Set();
-  for(let rr=0;rr<8;rr++)for(let cc=0;cc<8;cc++){
-    const p=bd[rr][cc];if(!p)continue;
-    activePieces.push({rr,cc,type:p.type,color:p.color});
-    const k=p.color+p.type;
-    if(!seenKeys.has(k)){seenKeys.add(k);imgsToLoad.push(loadPngPieceImg(p.type,p.color).then(img=>[k,img]))}
-  }
-  const loadedPairs=await Promise.all(imgsToLoad);
-  const imgMap=Object.fromEntries(loadedPairs);
-  const pieceFrac=Math.min(0.96,0.74*(1+(P.pieceBoost||0)/100));
-  const drawSize=SQ*pieceFrac;
-  for(const ap of activePieces){
-    const img=imgMap[ap.color+ap.type];
-    const vx=(S.flip?7-ap.cc:ap.cc)*SQ;
-    const vy=(S.flip?7-ap.rr:ap.rr)*SQ;
-    if(img){
-      if(isFaceOppPiece(ap.color)){
-        ctx.save();
-        ctx.translate(vx+SQ/2,vy+SQ/2);
-        ctx.rotate(Math.PI);
-        ctx.drawImage(img,-drawSize/2,-drawSize/2,drawSize,drawSize);
-        ctx.restore();
-      }else{
-        ctx.drawImage(img,vx+(SQ-drawSize)/2,vy+(SQ-drawSize)/2,drawSize,drawSize);
-      }
-    }else{
-      ctx.save();
-      ctx.translate(vx+SQ/2,vy+SQ/2);
-      if(isFaceOppPiece(ap.color))ctx.rotate(Math.PI);
-      ctx.font=`${Math.round(drawSize*0.84)}px serif`;
-      ctx.textAlign="center";ctx.textBaseline="middle";
-      ctx.fillStyle=ap.color==="w"?"#fcfbf7":"#1a1917";
-      ctx.strokeStyle=ap.color==="w"?"#1a1917":"#fcfbf7";
-      ctx.lineWidth=3;
-      const glyph=(PNG_FALLBACK_GLYPHS[ap.color]||PNG_FALLBACK_GLYPHS.w)[ap.type]||"";
-      ctx.strokeText(glyph,0,2);
-      ctx.fillText(glyph,0,2);
-      ctx.restore();
-    }
+  ctx.fillStyle = 'rgba(255, 235, 59, 0.45)';
+  for (const h of highlights) {
+    const p = squareToPixel(h);
+    if (p) ctx.fillRect(p.x, p.y, sq, sq);
   }
 
-  // 3. Render active hint arrows and custom Draw Mode arrows/lines
-  const arrows=P.fx.arr?[...S.dr.a]:[];
-  if(P.fx.arr&&S.pv&&S.pv[0]!==S.pv[1])arrows.push({a:S.pv[0],b:S.pv[1],c:S.pv[2],pv:1});
-  if(S.mode==="coach"&&S.coachArrows.length)for(const a of S.coachArrows)arrows.push(a);
-  if(S.hintArrow&&(S.mode==="basic"||S.mode==="bot"||S.mode==="sandbox"))arrows.push(S.hintArrow);
-  for(const r of arrows){
-    const col=DC[r.c]||r.c;
-    const[sx1,sy1]=xySvg(r.a),[sx2,sy2]=xySvg(r.b);
-    const x1=sx1*SCALE,y1=sy1*SCALE,x2=sx2*SCALE,y2=sy2*SCALE;
-    const dx=sx2-sx1,dy=sy2-sy1,kn=Math.abs(dx*dy)===200;
-    const[scx,scy]=kn?(Math.abs(dx)>Math.abs(dy)?[sx2,sy1]:[sx1,sy2]):[sx1,sy1];
-    const cx=scx*SCALE,cy=scy*SCALE;
-    const len=Math.hypot(x2-cx,y2-cy);if(!len)continue;
-    const ux=(x2-cx)/len,uy=(y2-cy)/len;
-    const bx=x2-ux*(3.4*SCALE),by=y2-uy*(3.4*SCALE);
+  const GLYPHS = {
+    wK: '♔', wQ: '♕', wR: '♖', wB: '♗', wN: '♘', wP: '♙',
+    bK: '♚', bQ: '♛', bR: '♜', bB: '♝', bN: '♞', bP: '♟',
+  };
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = `${Math.floor(sq * 0.78)}px "Segoe UI Symbol","Noto Sans Symbols","Apple Symbols",sans-serif`;
+
+  for (const [square, code] of Object.entries(pieces)) {
+    const p = squareToPixel(square);
+    const glyph = GLYPHS[code];
+    if (!p || !glyph) continue;
+    const isWhite = code[0] === 'w';
+    ctx.lineWidth = Math.max(2, sq * 0.03);
+    ctx.strokeStyle = isWhite ? '#111111' : '#ffffff';
+    ctx.fillStyle = isWhite ? '#ffffff' : '#111111';
+    ctx.strokeText(glyph, p.cx, p.cy);
+    ctx.fillText(glyph, p.cx, p.cy);
+  }
+
+  const drawArrow = (from, to, color) => {
+    const a = squareToPixel(from), b = squareToPixel(to);
+    if (!a || !b) return;
+    const angle = Math.atan2(b.cy - a.cy, b.cx - a.cx);
+    const headLen = sq * 0.32, headWidth = sq * 0.34, lineW = Math.max(3, sq * 0.13);
+    const tipX = b.cx, tipY = b.cy;
+    const baseX = tipX - Math.cos(angle) * headLen, baseY = tipY - Math.sin(angle) * headLen;
     ctx.save();
-    ctx.globalAlpha=r.pv?0.55:(r.hint?0.92:(r.coach?0.82:0.86));
-    ctx.strokeStyle=col;ctx.fillStyle=col;
-    ctx.lineWidth=1.7*SCALE;
-    ctx.lineCap="round";ctx.lineJoin="round";
-    ctx.beginPath();
-    ctx.moveTo(x1,y1);
-    if(cx!==x1||cy!==y1)ctx.lineTo(cx,cy);
-    ctx.lineTo(bx,by);
-    ctx.stroke();
-    const hw=2.3*SCALE;
-    ctx.beginPath();
-    ctx.moveTo(x2,y2);
-    ctx.lineTo(bx-uy*hw,by+ux*hw);
-    ctx.lineTo(bx+uy*hw,by-ux*hw);
-    ctx.closePath();
-    ctx.fill();
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.lineWidth = lineW;
+    ctx.beginPath(); ctx.moveTo(a.cx, a.cy); ctx.lineTo(baseX, baseY); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(tipX, tipY);
+    ctx.lineTo(baseX + Math.cos(angle + Math.PI / 2) * headWidth / 2, baseY + Math.sin(angle + Math.PI / 2) * headWidth / 2);
+    ctx.lineTo(baseX + Math.cos(angle - Math.PI / 2) * headWidth / 2, baseY + Math.sin(angle - Math.PI / 2) * headWidth / 2);
+    ctx.closePath(); ctx.fill();
     ctx.restore();
+  };
+
+  for (const arr of arrows) {
+    if (!arr || !arr.from || !arr.to) continue;
+    drawArrow(arr.from, arr.to, arr.color || 'rgba(0, 150, 255, 0.8)');
   }
 
-  // 4. Programmatic semi-transparent watermark at bottom-right corner
-  const wmText="Rookie: Learn Chess";
+  const wmFont = Math.max(12, Math.floor(size * 0.028)), pad = Math.max(8, size * 0.015);
   ctx.save();
-  ctx.font="700 22px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif";
-  const tw=ctx.measureText(wmText).width;
-  const padX=14,pillW=tw+padX*2,pillH=36;
-  const px=SIZE-pillW-14,py=SIZE-pillH-14;
-  ctx.fillStyle="rgba(18,17,15,0.44)";
-  ctx.beginPath();
-  if(typeof ctx.roundRect==="function")ctx.roundRect(px,py,pillW,pillH,10);
-  else ctx.rect(px,py,pillW,pillH);
-  ctx.fill();
-  ctx.fillStyle="rgba(255,255,255,0.82)";
-  ctx.textAlign="right";ctx.textBaseline="middle";
-  ctx.fillText(wmText,SIZE-14-padX,py+pillH/2);
+  ctx.font = `600 ${wmFont}px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif`;
+  ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+  ctx.lineWidth = Math.max(2, wmFont * 0.18);
+  ctx.strokeStyle = 'rgba(0,0,0,0.55)'; ctx.strokeText(watermark, size - pad, size - pad);
+  ctx.fillStyle = 'rgba(255,255,255,0.95)'; ctx.fillText(watermark, size - pad, size - pad);
   ctx.restore();
 
-  return await canvasToPngBlob(canvas);
+  const blob = await new Promise((resolve, reject) => {
+    canvas.toBlob((b) => b ? resolve(b) : reject(new Error('Canvas blob failed.')), 'image/png');
+  });
+
+  const pngBlob = blob.type === 'image/png' ? blob : new Blob([blob], { type: 'image/png' });
+  await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
+  return pngBlob;
 }
 
 function markPngCopied(){
@@ -5377,34 +5386,38 @@ function markPngCopied(){
 }
 
 async function copyBoardPng(){
-  if(!navigator.clipboard||typeof navigator.clipboard.write!=="function"||typeof ClipboardItem==="undefined"){
-    showToast(t("copyPngUnsupported"));
-    return;
-  }
-  // Invoke navigator.clipboard.write synchronously within user gesture with Promise<Blob>
-  let syncItem=null;
-  let blobPromise=null;
   try{
-    blobPromise=renderBoardPngBlob();
-    syncItem=new ClipboardItem({"image/png":blobPromise});
-  }catch(_syncErr){
-    syncItem=null;
-  }
-  if(syncItem){
-    try{
-      await navigator.clipboard.write([syncItem]);
-      markPngCopied();
-      return;
-    }catch(_writeErr){
-      // Fall through to resolved-Blob write retry
+    const g=S.g,bd=g.board();
+    const pieces={};
+    for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+      const p=bd[r][c];
+      if(p)pieces["abcdefgh"[c]+(8-r)]=p.color+p.type.toUpperCase();
     }
-  }
-  try{
-    const blob=await (blobPromise||renderBoardPngBlob());
-    await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);
+    const hlSet=new Set();
+    if(P.fx.hl&&S.last){hlSet.add(S.last[0]);hlSet.add(S.last[1])}
+    if(P.fx.hl&&S.sel)hlSet.add(S.sel);
+    if(S.hint)for(const sq of S.hint)hlSet.add(sq);
+    if(P.fx.hl&&S.dr.h)for(const sq of Object.keys(S.dr.h))hlSet.add(sq);
+    if(g.in_check()||S.chkWarn){
+      const ck=findKingSq(g,g.turn());
+      if(ck)hlSet.add(ck);
+    }
+    const arrows=[];
+    if(P.fx.arr)for(const r of S.dr.a)arrows.push({from:r.a,to:r.b,color:DC[r.c]||r.c});
+    if(P.fx.arr&&S.pv&&S.pv[0]!==S.pv[1])arrows.push({from:S.pv[0],to:S.pv[1],color:DC[S.pv[2]]||S.pv[2]});
+    if(S.mode==="coach"&&S.coachArrows.length)for(const r of S.coachArrows)arrows.push({from:r.a,to:r.b,color:DC[r.c]||r.c});
+    if(S.hintArrow&&(S.mode==="basic"||S.mode==="bot"||S.mode==="sandbox"))arrows.push({from:S.hintArrow.a,to:S.hintArrow.b,color:DC[S.hintArrow.c]||S.hintArrow.c});
+
+    await copyBoardToClipboard({
+      pieces,
+      highlights:[...hlSet],
+      arrows,
+      orientation:S.flip?"black":"white",
+      watermark:"Rookie: Learn Chess"
+    });
     markPngCopied();
-  }catch(_err2){
-    showToast(t("copyPngFailed"));
+  }catch(err){
+    showToast((err&&err.message)||t("copyPngFailed"));
   }
 }
 
@@ -5481,19 +5494,19 @@ document.addEventListener("click",e=>{
   }
   else if(a==="beg"){P.beg=d.v==="1";save();refreshTranslatedState();renderUIOnly()}
   else if(a==="mute"){P.mute=!P.mute;save();renderUIOnly()}
-  else if(a==="flip"){S.flip=!S.flip;render()}
+  else if(a==="flip"){S.flip=!S.flip;triggerBoardRotateAnim();render()}
   else if(a==="undo")undo();
   else if(a==="redo")redo();
   else if(a==="hint")hint();
   else if(a==="restart")restartCurrent();
-  else if(a==="drawer"){S.drawerOpen=!S.drawerOpen;if(S.drawerOpen)preloadPngPieceImgs();renderUIOnly()}
+  else if(a==="drawer"){S.drawerOpen=!S.drawerOpen;renderUIOnly()}
   else if(a==="close-drawer"){S.drawerOpen=false;renderUIOnly()}
   else if(a==="lesson"){startLesson(+d.i,0)}
   else if(a==="puzzle"){const idx=+d.i;if(isPuzzleUnlocked(idx))startPuzzle(idx)}
   else if(a==="next"){if(S.si<LS[S.li].s.length-1)S.si++;else{S.li=(S.li+1)%LS.length;S.si=0}startLesson()}
   else if(a==="npz"){const nx=S.pi+1;if(nx<3&&isPuzzleUnlocked(nx))startPuzzle(nx)}
   else if(a==="ppz"){S.pi=Math.max(0,S.pi-1);startPuzzle()}
-  else if(a==="pro"){const p=S.pp;S.pp=null;if(p)doMove(p.f,p.t,d.p,p.fromDrag)}
+  else if(a==="pro"){const p=S.pp;S.pp=null;if(p)doMove(p.f,p.t,d.p,false)}
   else if(a==="pcancel"){if(performance.now()-S.ppAt<250)return;S.pp=null;renderUIOnly()}
   else if(a==="dm"){S.dm=!S.dm;S.ds=null;renderUIOnly()}
   else if(a==="dc"){S.dc=d.c;S.ds=null;ov();renderDrawBar()}
@@ -5542,12 +5555,12 @@ function endDragCleanup(){
 
 bdEl.addEventListener("pointerdown",e=>{
   if(e.button===2){
-    e.preventDefault();cacheBoardRect();
+    e.preventDefault();stopBoardRotateAnim();cacheBoardRect();
     rc={s:sqAtClient(e.clientX,e.clientY),c:e.shiftKey?"red":e.ctrlKey?"yellow":e.altKey?"blue":"green"};
     return;
   }
   if(e.button!==0||S.pp||S.menuOpen||S.drawerOpen||S.colorModalOpen||S.p2ModalOpen||S.sbSetupOpen||S.mateModalOpen)return;
-  cacheBoardRect();
+  stopBoardRotateAnim();cacheBoardRect();
   const sq=sqAtClient(e.clientX,e.clientY);if(!sq)return;
   if(S.dm){
     drag={mode:"draw",sq,x:e.clientX,y:e.clientY,moved:false,id:e.pointerId};
@@ -5571,6 +5584,7 @@ bdEl.addEventListener("pointerdown",e=>{
       syncGridHighlights();
       SND.click();
     }
+    if(PE[sq])clearMoveAnim(PE[sq]);
     drag={mode:"piece",sq,x:e.clientX,y:e.clientY,moved:false,canDrag:true,wasSel,el:PE[sq],id:e.pointerId};
     bdEl.setPointerCapture?.(e.pointerId);
   }else{
@@ -5622,7 +5636,7 @@ function handlePointerFinish(e,cancelled){
     if(d.el){
       d.el.classList.remove("dragging");
       const[x,y]=pxCoord(d.sq);
-      placePiece(d.el,x,y,true);
+      placePiece(d.el,x,y,false,1);
     }
     S.sel=null;S.legal=[];syncGridHighlights();ov();return;
   }
@@ -5642,14 +5656,13 @@ function handlePointerFinish(e,cancelled){
         doMove(d.sq,target,null,true);
       }
     }else{
+      const invalidShake=!!(target&&target!==d.sq&&reportInvalidAttempt(d.sq,target));
       if(d.el){
         d.el.classList.remove("dragging");
         const[x,y]=pxCoord(d.sq);
-        placePiece(d.el,x,y,true);
+        placePiece(d.el,x,y,invalidShake,1);
       }
-      if(target&&target!==d.sq){
-        if(reportInvalidAttempt(d.sq,target))shakeSq(d.sq);
-      }
+      if(invalidShake)shakeSq(d.sq);
       S.sel=null;S.legal=[];renderUIOnly();
     }
   }else{
@@ -5675,7 +5688,7 @@ document.addEventListener("keydown",e=>{
     else if(S.menuOpen){S.menuOpen=false;renderUIOnly()}
     else if(S.drawerOpen){S.drawerOpen=false;renderUIOnly()}
     else{S.dr={a:[],h:{}};S.ds=null;ov();renderDrawBar()}
-  }else if(e.key==="f"||e.key==="F"){S.flip=!S.flip;render()}
+  }else if(e.key==="f"||e.key==="F"){S.flip=!S.flip;triggerBoardRotateAnim();render()}
   else if(e.key==="ArrowLeft")undo();
   else if(e.key==="ArrowRight")redo();
 });
@@ -5711,7 +5724,6 @@ setInterval(()=>{
 },1000);
 
 render();
-setTimeout(preloadPngPieceImgs,180);
 })();
 </script>
 </body>
