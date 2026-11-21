@@ -1029,6 +1029,13 @@ code{
   gap:6px;
   border-radius:14px;
   background:var(--pn2);
+  color:var(--tx);
+}
+.color-opt.on{
+  background:var(--ac-soft);
+  color:var(--tx);
+  border-color:var(--ac);
+  box-shadow:inset 0 0 0 1px var(--ac);
 }
 .color-swatch{
   width:30px;
@@ -1185,7 +1192,7 @@ code{
   text-align:center;
 }
 .p2-opt.on{
-  background:var(--pn2);
+  background:var(--ac-soft);
   color:var(--tx);
   border-color:var(--ac);
   box-shadow:inset 0 0 0 1px var(--ac);
@@ -1638,8 +1645,8 @@ const I18N={
     newCoachGame:"New Coach Game",newBotMatch:"New Bot Match",newSandboxMatch:"New Sandbox Match",playAgain:"Play again?",
     restart:"Restart",undo:"Undo",redo:"Redo",draw:"Draw",flip:"Flip",hint:"Hint",moves:"Moves",
     clear:"Clear",done:"Done",
-    playVsBot:"Play vs Bot",pickSideSub:"Select Bot difficulty, then pick your side.",cancel:"Cancel",
-    p2Title:"2-Player Mode",p2Sub:"Choose how the pieces and board face each player.",
+    playVsBot:"Play vs Bot",pickSideSub:"Select Bot difficulty and your side, then tap Start Game.",startGame:"Start Game",cancel:"Cancel",
+    p2Title:"2-Player Mode",p2Sub:"Choose how the pieces and board face each player, then tap Start Game.",
     p2FaceTitle:"Face-to-Face",p2FaceSub:"Static board · opposing piece directions",
     p2SameTitle:"Same Direction",p2SameSub:"Board auto-flips 180° every turn",
     change2pMode:"Change 2P Mode",
@@ -1925,8 +1932,8 @@ const I18N={
     newCoachGame:"Main Coach Baru",newBotMatch:"Lawan Bot Baru",newSandboxMatch:"Main Sandbox Baru",playAgain:"Main lagi?",
     restart:"Ulang",undo:"Undo",redo:"Redo",draw:"Gambar",flip:"Balik",hint:"Petunjuk",moves:"Langkah",
     clear:"Hapus",done:"Selesai",
-    playVsBot:"Lawan Bot",pickSideSub:"Pilih level Bot, lalu pilih warna bidakmu.",cancel:"Batal",
-    p2Title:"Mode 2 Pemain",p2Sub:"Pilih arah bidak dan papan untuk kedua pemain.",
+    playVsBot:"Lawan Bot",pickSideSub:"Pilih level Bot dan warna bidakmu, lalu ketuk Mulai Main.",startGame:"Mulai Main",cancel:"Batal",
+    p2Title:"Mode 2 Pemain",p2Sub:"Pilih arah bidak dan papan untuk kedua pemain, lalu ketuk Mulai Main.",
     p2FaceTitle:"Berhadapan",p2FaceSub:"Papan diam · bidak saling berhadapan",
     p2SameTitle:"Searah",p2SameSub:"Papan berputar 180° tiap giliran",
     change2pMode:"Ganti Mode 2P",
@@ -3452,7 +3459,9 @@ const S={
   menuOpen:false,
   drawerOpen:false,
   colorModalOpen:false,
+  botColPick:"w",
   p2ModalOpen:false,
+  p2Pick:"same",
   sbSetupOpen:false,
   sbCfg:{
     board:defaultSbGrid(),
@@ -4883,16 +4892,18 @@ function renderColorModal(){
   const bg=$("#color-bg");
   bg.hidden=!S.colorModalOpen;
   if(!S.colorModalOpen)return;
+  const pick=S.botColPick||"w";
   $("#color-modal").innerHTML=
     `<div class="modal-emblem">${IC.queenLogo}</div>`+
     `<h3>${t("playVsBot")}</h3>`+
     `<div class="mu">${t("pickSideSub")}</div>`+
     renderBotModeButtons()+
     `<div class="color-choices">`+
-      `<button data-a="bot-col" data-c="w" class="color-opt"><span class="color-swatch w"></span><span>${colName("w")}</span></button>`+
-      `<button data-a="bot-col" data-c="r" class="color-opt"><span class="color-swatch r"></span><span>${colName("r")}</span></button>`+
-      `<button data-a="bot-col" data-c="b" class="color-opt"><span class="color-swatch b"></span><span>${colName("b")}</span></button>`+
+      `<button data-a="bot-col" data-c="w" class="color-opt${pick==="w"?" on":""}"><span class="color-swatch w"></span><span>${colName("w")}</span></button>`+
+      `<button data-a="bot-col" data-c="r" class="color-opt${pick==="r"?" on":""}"><span class="color-swatch r"></span><span>${colName("r")}</span></button>`+
+      `<button data-a="bot-col" data-c="b" class="color-opt${pick==="b"?" on":""}"><span class="color-swatch b"></span><span>${colName("b")}</span></button>`+
     `</div>`+
+    `<button data-a="bot-start" class="pri" style="width:100%">${t("startGame")}</button>`+
     `<button data-a="close-color" style="width:100%">${t("cancel")}</button>`;
 }
 
@@ -4949,22 +4960,24 @@ function renderP2Modal(){
   const bg=$("#p2-bg");
   bg.hidden=!S.p2ModalOpen;
   if(!S.p2ModalOpen)return;
+  const pick=S.p2Pick||S.basicP2||"same";
   $("#p2-modal").innerHTML=
     `<div class="modal-emblem">${IC.queenLogo}</div>`+
     `<h3>${t("p2Title")}</h3>`+
     `<div class="mu">${t("p2Sub")}</div>`+
     `<div class="p2-choices">`+
-      `<button data-a="start-basic" data-p2="face" class="p2-opt${S.basicP2==="face"?" on":""}">`+
+      `<button data-a="p2-pick" data-p2="face" class="p2-opt${pick==="face"?" on":""}">`+
         `<span class="p2-ico">${IC.faceToFace}</span>`+
         `<span class="p2-title">${t("p2FaceTitle")}</span>`+
         `<span class="p2-sub">${t("p2FaceSub")}</span>`+
       `</button>`+
-      `<button data-a="start-basic" data-p2="same" class="p2-opt${S.basicP2==="same"?" on":""}">`+
+      `<button data-a="p2-pick" data-p2="same" class="p2-opt${pick==="same"?" on":""}">`+
         `<span class="p2-ico">${IC.sameDir}</span>`+
         `<span class="p2-title">${t("p2SameTitle")}</span>`+
         `<span class="p2-sub">${t("p2SameSub")}</span>`+
       `</button>`+
     `</div>`+
+    `<button data-a="p2-start" class="pri" style="width:100%">${t("startGame")}</button>`+
     `<button data-a="close-p2" style="width:100%">${t("cancel")}</button>`;
 }
 
@@ -5128,12 +5141,16 @@ function copyText(txt,label){
 }
 
 const pngPieceImgCache={};
+const PNG_FALLBACK_GLYPHS={
+  w:{k:"♔",q:"♕",r:"♖",b:"♗",n:"♘",p:"♙"},
+  b:{k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟"}
+};
 function loadPngPieceImg(type,color){
   const key=color+type;
   if(pngPieceImgCache[key])return pngPieceImgCache[key];
-  pngPieceImgCache[key]=new Promise((resolve,reject)=>{
+  pngPieceImgCache[key]=new Promise(resolve=>{
     const grp=document.getElementById("sp-"+key);
-    if(!grp){reject(new Error("Missing sprite "+key));return}
+    if(!grp){resolve(null);return}
     const vb=PIECE_VB[type]||"4.5 4.5 36 36";
     const markup=`<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="${vb}">${grp.innerHTML}</svg>`;
     const img=new Image();
@@ -5141,10 +5158,37 @@ function loadPngPieceImg(type,color){
       if(typeof img.decode==="function")img.decode().then(()=>resolve(img),()=>resolve(img));
       else resolve(img);
     };
-    img.onerror=()=>reject(new Error("SVG load failed "+key));
+    img.onerror=()=>resolve(null);
     img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(markup);
   });
   return pngPieceImgCache[key];
+}
+function preloadPngPieceImgs(){
+  const cols=["w","b"],types=["k","q","r","b","n","p"];
+  for(const c of cols)for(const tp of types)loadPngPieceImg(tp,c);
+}
+
+function canvasToPngBlob(canvas){
+  return new Promise((resolve,reject)=>{
+    if(typeof canvas.toBlob==="function"){
+      canvas.toBlob(blob=>{
+        if(blob){resolve(blob);return}
+        try{
+          const b64=canvas.toDataURL("image/png").split(",")[1];
+          const bin=atob(b64),u8=new Uint8Array(bin.length);
+          for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+          resolve(new Blob([u8],{type:"image/png"}));
+        }catch(e){reject(new Error("canvas.toBlob returned null"))}
+      },"image/png");
+    }else{
+      try{
+        const b64=canvas.toDataURL("image/png").split(",")[1];
+        const bin=atob(b64),u8=new Uint8Array(bin.length);
+        for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+        resolve(new Blob([u8],{type:"image/png"}));
+      }catch(e){reject(e)}
+    }
+  });
 }
 
 async function renderBoardPngBlob(){
@@ -5215,8 +5259,13 @@ async function renderBoardPngBlob(){
       ctx.fillText(String(8-rr),x+7,y+6);
     }
     if(r===7){
-      ctx.textAlign="right";ctx.textBaseline="bottom";
-      ctx.fillText("abcdefgh"[cc],x+SQ-7,y+SQ-6);
+      if(c===7){
+        ctx.textAlign="left";ctx.textBaseline="bottom";
+        ctx.fillText("abcdefgh"[cc],x+7,y+SQ-6);
+      }else{
+        ctx.textAlign="right";ctx.textBaseline="bottom";
+        ctx.fillText("abcdefgh"[cc],x+SQ-7,y+SQ-6);
+      }
     }
   }
 
@@ -5235,17 +5284,32 @@ async function renderBoardPngBlob(){
   const pieceFrac=Math.min(0.96,0.74*(1+(P.pieceBoost||0)/100));
   const drawSize=SQ*pieceFrac;
   for(const ap of activePieces){
-    const img=imgMap[ap.color+ap.type];if(!img)continue;
+    const img=imgMap[ap.color+ap.type];
     const vx=(S.flip?7-ap.cc:ap.cc)*SQ;
     const vy=(S.flip?7-ap.rr:ap.rr)*SQ;
-    if(isFaceOppPiece(ap.color)){
+    if(img){
+      if(isFaceOppPiece(ap.color)){
+        ctx.save();
+        ctx.translate(vx+SQ/2,vy+SQ/2);
+        ctx.rotate(Math.PI);
+        ctx.drawImage(img,-drawSize/2,-drawSize/2,drawSize,drawSize);
+        ctx.restore();
+      }else{
+        ctx.drawImage(img,vx+(SQ-drawSize)/2,vy+(SQ-drawSize)/2,drawSize,drawSize);
+      }
+    }else{
       ctx.save();
       ctx.translate(vx+SQ/2,vy+SQ/2);
-      ctx.rotate(Math.PI);
-      ctx.drawImage(img,-drawSize/2,-drawSize/2,drawSize,drawSize);
+      if(isFaceOppPiece(ap.color))ctx.rotate(Math.PI);
+      ctx.font=`${Math.round(drawSize*0.84)}px serif`;
+      ctx.textAlign="center";ctx.textBaseline="middle";
+      ctx.fillStyle=ap.color==="w"?"#fcfbf7":"#1a1917";
+      ctx.strokeStyle=ap.color==="w"?"#1a1917":"#fcfbf7";
+      ctx.lineWidth=3;
+      const glyph=(PNG_FALLBACK_GLYPHS[ap.color]||PNG_FALLBACK_GLYPHS.w)[ap.type]||"";
+      ctx.strokeText(glyph,0,2);
+      ctx.fillText(glyph,0,2);
       ctx.restore();
-    }else{
-      ctx.drawImage(img,vx+(SQ-drawSize)/2,vy+(SQ-drawSize)/2,drawSize,drawSize);
     }
   }
 
@@ -5289,7 +5353,7 @@ async function renderBoardPngBlob(){
   ctx.save();
   ctx.font="700 22px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif";
   const tw=ctx.measureText(wmText).width;
-  const padX=14,padY=8,pillW=tw+padX*2,pillH=36;
+  const padX=14,pillW=tw+padX*2,pillH=36;
   const px=SIZE-pillW-14,py=SIZE-pillH-14;
   ctx.fillStyle="rgba(18,17,15,0.44)";
   ctx.beginPath();
@@ -5301,36 +5365,46 @@ async function renderBoardPngBlob(){
   ctx.fillText(wmText,SIZE-14-padX,py+pillH/2);
   ctx.restore();
 
-  return await new Promise((resolve,reject)=>{
-    canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("canvas.toBlob returned null")),"image/png");
-  });
+  return await canvasToPngBlob(canvas);
+}
+
+function markPngCopied(){
+  S.copiedLabel="PNG";
+  S.copied=t("copied",{label:"PNG"});
+  renderUIOnly();
+  showToast(S.copied);
+  setTimeout(()=>{if(S.copiedLabel==="PNG"){S.copied="";S.copiedLabel="";renderUIOnly()}},1600);
 }
 
 async function copyBoardPng(){
+  if(!navigator.clipboard||typeof navigator.clipboard.write!=="function"||typeof ClipboardItem==="undefined"){
+    showToast(t("copyPngUnsupported"));
+    return;
+  }
+  // Invoke navigator.clipboard.write synchronously within user gesture with Promise<Blob>
+  let syncItem=null;
+  let blobPromise=null;
   try{
-    if(!navigator.clipboard||typeof navigator.clipboard.write!=="function"||typeof ClipboardItem==="undefined"){
-      showToast(t("copyPngUnsupported"));
-      return;
-    }
-    const blob=await renderBoardPngBlob();
-    await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);
-    S.copiedLabel="PNG";
-    S.copied=t("copied",{label:"PNG"});
-    renderUIOnly();
-    showToast(S.copied);
-    setTimeout(()=>{if(S.copiedLabel==="PNG"){S.copied="";S.copiedLabel="";renderUIOnly()}},1600);
-  }catch(err){
+    blobPromise=renderBoardPngBlob();
+    syncItem=new ClipboardItem({"image/png":blobPromise});
+  }catch(_syncErr){
+    syncItem=null;
+  }
+  if(syncItem){
     try{
-      const blobPromise=renderBoardPngBlob();
-      await navigator.clipboard.write([new ClipboardItem({"image/png":blobPromise})]);
-      S.copiedLabel="PNG";
-      S.copied=t("copied",{label:"PNG"});
-      renderUIOnly();
-      showToast(S.copied);
-      setTimeout(()=>{if(S.copiedLabel==="PNG"){S.copied="";S.copiedLabel="";renderUIOnly()}},1600);
-    }catch(err2){
-      showToast(t("copyPngFailed"));
+      await navigator.clipboard.write([syncItem]);
+      markPngCopied();
+      return;
+    }catch(_writeErr){
+      // Fall through to resolved-Blob write retry
     }
+  }
+  try{
+    const blob=await (blobPromise||renderBoardPngBlob());
+    await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);
+    markPngCopied();
+  }catch(_err2){
+    showToast(t("copyPngFailed"));
   }
 }
 
@@ -5342,10 +5416,12 @@ document.addEventListener("click",e=>{
   if(a==="toggle-menu"){S.menuOpen=!S.menuOpen;renderUIOnly()}
   else if(a==="tab"){S.tab=d.v;S.menuOpen=false;renderUIOnly();if(S.tab==="play")requestAnimationFrame(cacheBoardRect)}
   else if(a==="go-me"){S.tab="me";S.menuOpen=false;renderUIOnly()}
-  else if(a==="mode-basic"){S.menuOpen=false;S.mateModalOpen=false;S.p2ModalOpen=true;renderUIOnly()}
+  else if(a==="mode-basic"){S.menuOpen=false;S.mateModalOpen=false;S.p2Pick=S.basicP2||"same";S.p2ModalOpen=true;renderUIOnly()}
+  else if(a==="p2-pick"){S.p2Pick=d.p2;renderUIOnly()}
+  else if(a==="p2-start"){startBasic(S.p2Pick||S.basicP2||"same")}
   else if(a==="start-basic"){startBasic(d.p2)}
   else if(a==="close-p2"){S.p2ModalOpen=false;renderUIOnly()}
-  else if(a==="mode-bot"){S.menuOpen=false;S.mateModalOpen=false;S.colorModalOpen=true;renderUIOnly()}
+  else if(a==="mode-bot"){S.menuOpen=false;S.mateModalOpen=false;S.botColPick=S.botColPick||"w";S.colorModalOpen=true;renderUIOnly()}
   else if(a==="mode-coach"){S.menuOpen=false;S.mateModalOpen=false;startCoach()}
   else if(a==="mode-sandbox"){S.menuOpen=false;S.mateModalOpen=false;S.sbSetupOpen=true;S.sbCfg.err="";renderUIOnly()}
   else if(a==="close-sb"){S.sbSetupOpen=false;renderUIOnly()}
@@ -5369,7 +5445,8 @@ document.addEventListener("click",e=>{
     const nv=window.prompt(t("enterPlayerName"),curN);
     if(nv!==null){P.name=nv.trim().slice(0,24);save();renderUIOnly()}
   }
-  else if(a==="bot-col"){startBot(d.c)}
+  else if(a==="bot-col"){S.botColPick=d.c;renderUIOnly()}
+  else if(a==="bot-start"){startBot(S.botColPick||"w")}
   else if(a==="close-color"){S.colorModalOpen=false;renderUIOnly()}
   else if(a==="coach-hint")coachHint();
   else if(a==="coach-undo")undo();
@@ -5409,7 +5486,7 @@ document.addEventListener("click",e=>{
   else if(a==="redo")redo();
   else if(a==="hint")hint();
   else if(a==="restart")restartCurrent();
-  else if(a==="drawer"){S.drawerOpen=!S.drawerOpen;renderUIOnly()}
+  else if(a==="drawer"){S.drawerOpen=!S.drawerOpen;if(S.drawerOpen)preloadPngPieceImgs();renderUIOnly()}
   else if(a==="close-drawer"){S.drawerOpen=false;renderUIOnly()}
   else if(a==="lesson"){startLesson(+d.i,0)}
   else if(a==="puzzle"){const idx=+d.i;if(isPuzzleUnlocked(idx))startPuzzle(idx)}
@@ -5634,6 +5711,7 @@ setInterval(()=>{
 },1000);
 
 render();
+setTimeout(preloadPngPieceImgs,180);
 })();
 </script>
 </body>
