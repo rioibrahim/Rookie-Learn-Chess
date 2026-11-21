@@ -519,15 +519,15 @@ main{
   -webkit-user-select:none;
   transform-origin:center center;
   will-change:transform;
-  transition:transform .38s cubic-bezier(.22,1,.36,1);
+  transition:transform .42s cubic-bezier(.22,1,.36,1);
 }
 #bw.board-flip-anim{
-  animation:boardAutoRotate .42s cubic-bezier(.22,1,.36,1);
+  animation:boardAutoRotate .62s cubic-bezier(.22,1,.36,1);
 }
 @keyframes boardAutoRotate{
-  0%{transform:rotate(-180deg) scale(.96)}
-  55%{transform:rotate(-80deg) scale(.94)}
-  100%{transform:rotate(0deg) scale(1)}
+  0%{transform:rotate(-180deg) scale(.96);opacity:.92}
+  45%{transform:rotate(-78deg) scale(.94);opacity:.97}
+  100%{transform:rotate(0deg) scale(1);opacity:1}
 }
 #bd{
   display:grid;
@@ -1410,6 +1410,16 @@ code{
   padding:8px 8px;
   font-size:12px;
 }
+.sb-opp-disabled{
+  opacity:.52;
+  border-style:dashed!important;
+  color:var(--mu)!important;
+}
+.sb-unavail-note{
+  font-size:11px;
+  color:var(--mu);
+  line-height:1.3;
+}
 @media (max-width:400px){
   .sb-global-grid,.sb-opp-grid{
     grid-template-columns:minmax(0,1fr);
@@ -1692,7 +1702,7 @@ const I18N={
     sbRoster:"Piece Roster (Tap Squares to Place)",sbErase:"Erase",sbBulkSide:"Target",sbBoth:"Both",sbPawnsTo:"Pawns →",sbBackTo:"Back Row →",
     sbHybridRules:"Custom Hybrid Movement",sbGlobalRules:"Rule Breakers & Opponent",
     sbIgnoreCheck:"Allow Illegal / Capture King",sbFriendlyFire:"Capture Own Pieces",
-    sbOppSame:"2P Same Dir",sbOppFace:"2P Face-to-Face",sbOppBot:"vs Sandbox Bot",
+    sbOppSame:"2P Same Dir",sbOppFace:"2P Face-to-Face",sbOppBot:"Bot (Unavailable)",sbBotUnavailable:"AI Bot is not available in Sandbox mode. Play 2-Player instead!",
     sbStartMatch:"Start Sandbox Match",sbNeedPiece:"Place at least 1 White and 1 Black piece first!",
     sbRuleKn:"+ Knight Jump",sbRuleDiag:"+ Diagonal",sbRuleOrtho:"+ Straight",sbRuleStep:"+ Side/Back",sbRuleLeap:"+ Leap",sbRuleQ:"+ Queen Slide",
     sbExtraAbility:"{count} hybrid rules",sbTurnBanner:"Sandbox active ({opp}) — tap Rules to customize.",
@@ -1703,7 +1713,7 @@ const I18N={
     restartGame:"Restart Game",changeBotColor:"Change Bot / Color",viewBoard:"View Board",
     moveHistoryTitle:"Move History & Coaching",lastMove:"Last Move",
     noMovesYet:"No moves played yet. Tap or drag a piece to start.",
-    copyFen:"Copy FEN",copyPgn:"Copy PGN",copyPng:"Copy PNG",copied:"{label} copied",
+    copyFen:"Copy FEN",copyPgn:"Copy PGN",copyPng:"Copy PNG",copied:"{label} copied",pngShareReady:"PNG ready to copy or share",
     copyPngUnsupported:"Image clipboard not supported on this device.",copyPngFailed:"Could not copy PNG to clipboard.",
     heroSub:"{dn} of {tot} lesson steps · {sc}/3 Today’s Dailies · Rating {r}",
     yourStats:"Your Statistics",puzzleRating:"Puzzle Rating",dailyStreak:"Daily Streak",accuracy:"Accuracy",botWdl:"Bot W / D / L",
@@ -1979,7 +1989,7 @@ const I18N={
     sbRoster:"Susunan Bidak (Ketuk Kotak)",sbErase:"Hapus",sbBulkSide:"Target",sbBoth:"Keduanya",sbPawnsTo:"Pion →",sbBackTo:"Baris Belakang →",
     sbHybridRules:"Gerak Hibrida Bebas",sbGlobalRules:"Bebas Aturan & Lawan",
     sbIgnoreCheck:"Bebas Skak / Makan Raja",sbFriendlyFire:"Makan Bidak Sendiri",
-    sbOppSame:"2P Searah",sbOppFace:"2P Berhadapan",sbOppBot:"vs Bot Sandbox",
+    sbOppSame:"2P Searah",sbOppFace:"2P Berhadapan",sbOppBot:"Bot (Tidak Tersedia)",sbBotUnavailable:"Mode Bot tidak tersedia di Sandbox. Gunakan mode 2 Pemain!",
     sbStartMatch:"Mulai Main Sandbox",sbNeedPiece:"Pasang minimal 1 bidak Putih dan 1 bidak Hitam dulu!",
     sbRuleKn:"+ Lompat Kuda",sbRuleDiag:"+ Diagonal",sbRuleOrtho:"+ Lurus",sbRuleStep:"+ Geser/Mundur",sbRuleLeap:"+ Lompati Bidak",sbRuleQ:"+ Gerak Menteri",
     sbExtraAbility:"{count} aturan hibrida",sbTurnBanner:"Mode Sandbox ({opp}) — ketuk Atur Papan untuk ubah.",
@@ -1990,7 +2000,7 @@ const I18N={
     restartGame:"Main Lagi",changeBotColor:"Ganti Bot / Warna",viewBoard:"Lihat Papan",
     moveHistoryTitle:"Riwayat Langkah & Pelatih",lastMove:"Langkah Terakhir",
     noMovesYet:"Belum ada langkah. Ketuk atau geser bidak untuk mulai.",
-    copyFen:"Salin FEN",copyPgn:"Salin PGN",copyPng:"Copy PNG",copied:"{label} disalin",
+    copyFen:"Salin FEN",copyPgn:"Salin PGN",copyPng:"Copy PNG",copied:"{label} disalin",pngShareReady:"PNG siap disalin atau dibagikan",
     copyPngUnsupported:"Salin gambar tidak didukung di perangkat ini.",copyPngFailed:"Gagal menyalin PNG ke clipboard.",
     heroSub:"{dn} dari {tot} langkah belajar · {sc}/3 Harian · Rating {r}",
     yourStats:"Statistik Kamu",puzzleRating:"Rating Teka-teki",dailyStreak:"Streak Harian",accuracy:"Akurasi",botWdl:"Bot M / S / K",
@@ -3487,9 +3497,11 @@ const S={
   mateModalOpen:false,
   chkWarn:false,
   busy:false,
+  flipBusy:false,
   tok:0,
   coachTok:0,
   aiTimer:0,
+  flipTimer:0,
   pp:null,         // promotion modal {f,t,c,fromDrag}
   ppAt:0,
   menuOpen:false,
@@ -3578,8 +3590,9 @@ function snd(k){SND[k]&&SND[k]()}
 function clrDraw(){if(P.fx.cl){S.dr={a:[],h:{}};S.ds=null}}
 function hasDrawMarks(){return !!(S.dr.a.length||Object.keys(S.dr.h).length||S.ds)}
 function sideOK(){
+  if(S.flipBusy)return false;
   if(S.mode==="bot"||S.mode==="coach")return !S.busy&&!S.over&&!S.coachPending&&S.g.turn()===S.col;
-  if(S.mode==="sandbox")return !S.busy&&!S.over&&(S.sbCfg.opp!=="bot"||S.g.turn()===S.col);
+  if(S.mode==="sandbox")return !S.busy&&!S.over;
   if(S.mode==="puz")return !S.solved&&!S.over&&!S.pzBusy;
   if(S.mode==="learn")return !S.solved&&!S.over;
   return !S.over;
@@ -3649,7 +3662,7 @@ function triggerBoardRotateAnim(){
     boardRotTimer=0;
     bwEl.classList.remove("board-flip-anim");
     cacheBoardRect();
-  },440);
+  },660);
 }
 function stopBoardRotateAnim(){
   if(boardRotTimer){clearTimeout(boardRotTimer);boardRotTimer=0}
@@ -3982,12 +3995,17 @@ function drawTap(sq){
 }
 
 /* ---------- Game Modes & Lifecycle ---------- */
+function cancelFlipTimer(){
+  if(S.flipTimer){clearTimeout(S.flipTimer);S.flipTimer=0}
+  S.flipBusy=false;
+}
 function cancelAI(){
   S.tok++;
   S.coachTok++;
   S.busy=false;
   S.pzBusy=false;
   if(S.aiTimer){clearTimeout(S.aiTimer);S.aiTimer=0}
+  cancelFlipTimer();
 }
 function resetBoardState(){
   cancelAI();
@@ -4046,6 +4064,7 @@ function startSandbox(){
     renderUIOnly();
     return;
   }
+  if(S.sbCfg.opp==="bot")S.sbCfg.opp="same";
   S.sbCfg.err="";
   S.mode="sandbox";S.tab="play";S.col="w";S.flip=false;
   S.sbSetupOpen=false;S.menuOpen=false;S.p2ModalOpen=false;S.colorModalOpen=false;
@@ -4170,26 +4189,12 @@ function findCoachThreat(){
 }
 
 function triggerSandboxBotMove(){
-  if(S.busy||S.mode!=="sandbox"||S.sbCfg.opp!=="bot"||S.over||S.g.turn()===S.col)return;
-  const tk=++S.tok,fen=S.g.fen();
-  S.busy=true;
-  renderUIOnly();
-  const wait=750+Math.round(Math.random()*650);
-  S.aiTimer=setTimeout(()=>{
-    S.aiTimer=0;
-    if(tk!==S.tok||S.mode!=="sandbox"||S.g.fen()!==fen)return;
-    const mv=sbPickBotMove(S.g);
-    S.busy=false;
-    if(!mv){render();return}
-    const m=S.g.move({from:mv.from,to:mv.to,promotion:mv.promotion||"q"});
-    if(!m){render();return}
-    S.last=[m.from,m.to];
-    S.bad=false;
-    setMsg("");
-    setExplain(m,S.g,"Bot: ");
-    snd(kind(m,S.g));clrDraw();endCheck();
-    render({m});
-  },wait);
+  S.busy=false;
+  if(S.mode==="sandbox"){
+    if(S.sbCfg.opp==="bot")S.sbCfg.opp="same";
+    showToast(t("sbBotUnavailable"));
+    renderUIOnly();
+  }
 }
 
 function triggerBotMove(){
@@ -4442,18 +4447,34 @@ function doMove(f,t,pr,fromDrag){
     }
   }else{
     endCheck();
-    if(isAutoFlipTurn()&&!S.over){
-      const nextFlip=g.turn()==="b";
-      if(nextFlip!==S.flip){S.flip=nextFlip;triggerBoardRotateAnim()}
-    }
   }
 
   if(g.history().length===L){
+    const pendingAutoFlip=isAutoFlipTurn()&&!S.over&&(g.turn()==="b")!==S.flip;
+    cancelFlipTimer();
     snd(sk);clrDraw();
     render(animObj);
+    if(pendingAutoFlip){
+      const tk=S.tok;
+      const baseMs=dur();
+      const distSq=Math.hypot(t.charCodeAt(0)-f.charCodeAt(0),(+t[1])-(+f[1]));
+      const slideMs=!baseMs?0:(fromDrag?95:Math.min(baseMs+95,baseMs+Math.round(distSq*14)));
+      const pauseMs=P.fx.rm?40:240;
+      S.flipBusy=true;
+      S.flipTimer=setTimeout(()=>{
+        S.flipTimer=0;
+        S.flipBusy=false;
+        if(tk!==S.tok||S.over||!isAutoFlipTurn())return;
+        const nextFlip=S.g.turn()==="b";
+        if(nextFlip!==S.flip){
+          S.flip=nextFlip;
+          triggerBoardRotateAnim();
+          render();
+        }
+      },slideMs+pauseMs);
+    }
     if(S.mode==="bot"&&!S.over)triggerBotMove();
     else if(S.mode==="coach"&&!S.over)evaluateCoachMove(fenBefore,m);
-    else if(S.mode==="sandbox"&&S.sbCfg.opp==="bot"&&!S.over)triggerSandboxBotMove();
   }else{
     render();
     shakeSq(f);
@@ -4544,7 +4565,7 @@ function undo(){
   S.coachPending=null;S.coachArrows=[];S.coachTone="";
   const g=S.g;
   if(!g.history().length)return;
-  const vsAiTurn=(S.mode==="bot"||S.mode==="coach"||(S.mode==="sandbox"&&S.sbCfg.opp==="bot"))&&g.turn()===S.col&&g.history().length>=2;
+  const vsAiTurn=(S.mode==="bot"||S.mode==="coach")&&g.turn()===S.col&&g.history().length>=2;
   let n=vsAiTurn?2:1;
   if(S.mode==="puz"&&S.pzStep===1&&g.history().length>=2){n=2;S.pzStep=0}
   S.over="";S.overSpec=null;
@@ -4572,12 +4593,13 @@ function undo(){
 
 function redo(){
   if(S.busy||S.pzBusy)cancelAI();
+  cancelFlipTimer();
   clearCheckWarn();
   const g=S.g,o=S.redo.pop();if(!o)return;
   const m=g.move({from:o.from,to:o.to,promotion:o.promotion||"q"});
   if(!m)return;
   let lastM=m,redone=1;
-  const isVsAi=(S.mode==="bot"||S.mode==="coach"||(S.mode==="sandbox"&&S.sbCfg.opp==="bot"));
+  const isVsAi=(S.mode==="bot"||S.mode==="coach");
   if(isVsAi&&!g.game_over()&&g.turn()!==S.col&&S.redo.length){
     const o2=S.redo.pop();
     const m2=g.move({from:o2.from,to:o2.to,promotion:o2.promotion||"q"});
@@ -4594,8 +4616,7 @@ function redo(){
   endCheck();
   snd(kind(lastM,g));clrDraw();
   render(redone===1?{m:lastM}:null);
-  if(S.mode==="sandbox"&&S.sbCfg.opp==="bot"&&!S.over&&g.turn()!==S.col)triggerSandboxBotMove();
-  else if((S.mode==="bot"||S.mode==="coach")&&!S.over&&g.turn()!==S.col)triggerBotMove();
+  if((S.mode==="bot"||S.mode==="coach")&&!S.over&&g.turn()!==S.col)triggerBotMove();
 }
 
 function coachHint(){
@@ -4771,7 +4792,6 @@ function renderHeaderAndMenu(){
         `<button data-a="mode-basic" class="${S.mode==="basic"?"on":""}">${t("play2p")}</button>`+
         `<button data-a="mode-bot" class="${S.mode==="bot"?"on":""}">${t("playBot")}</button>`+
       `</div></div>`+
-      `<div class="menu-sec"><div class="menu-lbl">${t("botMode")}</div>${renderBotModeButtons()}</div>`+
       `<div class="menu-sec"><div class="menu-lbl">${t("pieceSize")}</div>`+
         `<div class="seg-4">${[[0,"0%"],[10,"+10%"],[20,"+20%"],[30,"+30%"]].map(([v,n])=>`<button data-a="psz" data-v="${v}" class="${P.pieceBoost===v?"on":""}">${n}</button>`).join("")}</div>`+
         `<div class="vol-wrap"><span class="mu">${t("scale")}</span><input type="range" min="-10" max="35" step="5" value="${P.pieceBoost}" data-a="psz" aria-label="${t("pieceSize")}"><span id="pszv" class="vol-val">${P.pieceBoost>0?"+"+P.pieceBoost:P.pieceBoost}%</span></div>`+
@@ -5127,6 +5147,7 @@ function renderSandboxModal(){
     const pc=cfg.board[row][col];
     boardHtml+=`<button data-a="sb-sq" data-r="${row}" data-c="${col}" class="sb-sq ${(row+col)%2?"d":"l"}" aria-label="${rcToSq(row,col)}">${pc?pieceUse(pc.type,pc.color):""}</button>`;
   }
+  if(cfg.opp==="bot")cfg.opp="same";
   $("#sb-modal").innerHTML=
     `<div class="sb-hdr"><h3>${t("sbTitle")}</h3><button data-a="close-sb" class="icon-btn" aria-label="${t("cancel")}">${IC.close}</button></div>`+
     `<div class="mu" style="margin-top:-6px">${t("sbSub")}</div>`+
@@ -5184,8 +5205,9 @@ function renderSandboxModal(){
       `<div class="sb-opp-grid">`+
         `<button data-a="sb-opp" data-v="same" class="${cfg.opp==="same"?"on":""}">${t("sbOppSame")}</button>`+
         `<button data-a="sb-opp" data-v="face" class="${cfg.opp==="face"?"on":""}">${t("sbOppFace")}</button>`+
-        `<button data-a="sb-opp" data-v="bot" class="${cfg.opp==="bot"?"on":""}">${t("sbOppBot")}</button>`+
+        `<button data-a="sb-opp" data-v="bot" class="sb-opp-disabled" aria-disabled="true">${t("sbOppBot")}</button>`+
       `</div>`+
+      `<div class="sb-unavail-note">${t("sbBotUnavailable")}</div>`+
     `</div>`+
 
     `${cfg.err?`<div class="sb-err">${cfg.err}</div>`:""}`+
@@ -5275,20 +5297,14 @@ async function copyBoardToClipboard(opts = {}) {
   } = opts;
 
   if (typeof window === 'undefined' || typeof document === 'undefined') {
-    throw new Error('Lingkungan tidak mendukung canvas/DOM.');
-  }
-  if (!navigator.clipboard || typeof navigator.clipboard.write !== 'function') {
-    throw new Error('Clipboard API tidak tersedia.');
-  }
-  if (typeof window.ClipboardItem !== 'function') {
-    throw new Error('ClipboardItem tidak didukung di WebView ini.');
+    throw new Error('Canvas/DOM environment is unavailable.');
   }
 
   const canvas = document.createElement('canvas');
   canvas.width  = size;
   canvas.height = size;
   const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Gagal membuat context 2D canvas.');
+  if (!ctx) throw new Error('Failed to create 2D canvas context.');
 
   const sq    = size / 8;
   const files = 'abcdefgh';
@@ -5373,13 +5389,40 @@ async function copyBoardToClipboard(opts = {}) {
   });
 
   const pngBlob = blob.type === 'image/png' ? blob : new Blob([blob], { type: 'image/png' });
-  await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
-  return pngBlob;
+
+  // Primary: Direct Clipboard API image write
+  if (navigator.clipboard && typeof navigator.clipboard.write === 'function' && typeof window.ClipboardItem === 'function') {
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
+      return { method: 'clipboard', blob: pngBlob };
+    } catch (_clipErr) {
+      // Fall through to Web Share API fallback on Android WebView restrictions
+    }
+  }
+
+  // Fallback: Native Web Share API (Android Share Sheet)
+  if (typeof navigator.share === 'function' && typeof File === 'function') {
+    const file = new File([pngBlob], 'rookie-chess.png', { type: 'image/png' });
+    const canShareFiles = typeof navigator.canShare !== 'function' || navigator.canShare({ files: [file] });
+    if (canShareFiles) {
+      try {
+        await navigator.share({ files: [file], title: watermark || 'Rookie: Learn Chess' });
+        return { method: 'share', blob: pngBlob };
+      } catch (shareErr) {
+        if (shareErr && shareErr.name === 'AbortError') {
+          return { method: 'cancelled', blob: pngBlob };
+        }
+        throw shareErr;
+      }
+    }
+  }
+
+  throw new Error(t('copyPngUnsupported'));
 }
 
-function markPngCopied(){
+function markPngStatus(msgText){
   S.copiedLabel="PNG";
-  S.copied=t("copied",{label:"PNG"});
+  S.copied=msgText;
   renderUIOnly();
   showToast(S.copied);
   setTimeout(()=>{if(S.copiedLabel==="PNG"){S.copied="";S.copiedLabel="";renderUIOnly()}},1600);
@@ -5408,14 +5451,15 @@ async function copyBoardPng(){
     if(S.mode==="coach"&&S.coachArrows.length)for(const r of S.coachArrows)arrows.push({from:r.a,to:r.b,color:DC[r.c]||r.c});
     if(S.hintArrow&&(S.mode==="basic"||S.mode==="bot"||S.mode==="sandbox"))arrows.push({from:S.hintArrow.a,to:S.hintArrow.b,color:DC[S.hintArrow.c]||S.hintArrow.c});
 
-    await copyBoardToClipboard({
+    const res=await copyBoardToClipboard({
       pieces,
       highlights:[...hlSet],
       arrows,
       orientation:S.flip?"black":"white",
       watermark:"Rookie: Learn Chess"
     });
-    markPngCopied();
+    if(res&&res.method==="clipboard")markPngStatus(t("copied",{label:"PNG"}));
+    else if(res&&res.method==="share")markPngStatus(t("pngShareReady"));
   }catch(err){
     showToast((err&&err.message)||t("copyPngFailed"));
   }
@@ -5451,7 +5495,10 @@ document.addEventListener("click",e=>{
   else if(a==="sb-bulk"){sbBulkReplace(d.tgt,d.pt)}
   else if(a==="sb-rule"){S.sbCfg.rules[d.pc][d.k]=!S.sbCfg.rules[d.pc][d.k];renderUIOnly()}
   else if(a==="sb-grule"){S.sbCfg.rules[d.k]=!S.sbCfg.rules[d.k];renderUIOnly()}
-  else if(a==="sb-opp"){S.sbCfg.opp=d.v;renderUIOnly()}
+  else if(a==="sb-opp"){
+    if(d.v==="bot"){showToast(t("sbBotUnavailable"));return}
+    S.sbCfg.opp=d.v;renderUIOnly();
+  }
   else if(a==="sb-start"){startSandbox()}
   else if(a==="rename-player"){
     const curN=P.name||t("defaultPlayerName");
@@ -5494,7 +5541,7 @@ document.addEventListener("click",e=>{
   }
   else if(a==="beg"){P.beg=d.v==="1";save();refreshTranslatedState();renderUIOnly()}
   else if(a==="mute"){P.mute=!P.mute;save();renderUIOnly()}
-  else if(a==="flip"){S.flip=!S.flip;triggerBoardRotateAnim();render()}
+  else if(a==="flip"){cancelFlipTimer();S.flip=!S.flip;triggerBoardRotateAnim();render()}
   else if(a==="undo")undo();
   else if(a==="redo")redo();
   else if(a==="hint")hint();
@@ -5574,7 +5621,7 @@ bdEl.addEventListener("pointerdown",e=>{
     return;
   }
   const p=S.g.get(sq);
-  const canDrag=!!(p&&p.color===S.g.turn()&&((S.mode!=="bot"&&S.mode!=="coach"&&!(S.mode==="sandbox"&&S.sbCfg.opp==="bot"))||p.color===S.col));
+  const canDrag=!!(p&&p.color===S.g.turn()&&((S.mode!=="bot"&&S.mode!=="coach")||p.color===S.col));
   if(canDrag){
     const wasSel=S.sel===sq;
     if(!wasSel){
