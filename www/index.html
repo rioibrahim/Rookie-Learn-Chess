@@ -1638,7 +1638,13 @@ if(!VALID_DIFFS.has(P.diff))P.diff="easy";
 if(P.lang!=="en"&&P.lang!=="id")P.lang="en";
 if(!["compact","normal","large"].includes(P.uiSize))P.uiSize="normal";
 {const pb=Number(P.pieceBoost);P.pieceBoost=Number.isFinite(pb)?Math.max(-10,Math.min(35,pb)):20;}
+const MATCH_KEY="rookie_match_v1";
 const save=()=>{try{localStorage.setItem("rookie",JSON.stringify(P))}catch(e){}};
+let _saveTimer=0;
+function scheduleSave(){
+  if(_saveTimer)clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(()=>{_saveTimer=0;save()},180);
+}
 const applyTheme=()=>{
   const r=document.documentElement;
   if(P.theme==="dark"||P.theme==="light")r.setAttribute("data-theme",P.theme);
@@ -3265,10 +3271,14 @@ function sbFindKings(board,color){
   return res;
 }
 
-function createSandboxGame(startBoard,rules){
+function createSandboxGame(startBoard,rules,initState){
   let bd=cloneSbGrid(startBoard);
   const rl=cloneSbRules(rules);
-  let turn="w",ep=null,half=0,full=1,kingCapWinner="",noPieceWinner="";
+  let turn=(initState&&initState.turn==="b")?"b":"w";
+  let ep=(initState&&initState.ep&&initState.ep!=="-")?initState.ep:null;
+  let half=(initState&&Number.isFinite(+initState.half))?Math.max(0,+initState.half):0;
+  let full=(initState&&Number.isFinite(+initState.full))?Math.max(1,+initState.full):1;
+  let kingCapWinner="",noPieceWinner="";
   const hist=[];
 
   function countPieces(c){
@@ -3835,6 +3845,9 @@ function syncGridHighlights(){
     const isH2=S.hint&&S.hint.length>1&&S.hint[1]===sq;
     const isMv=legalSet&&legalSet.has(sq);
     const hasPiece=isMv&&!!PE[sq];
+    const mask=(isLast?1:0)|(isSel?2:0)|(isChk?4:0)|(isWarn?8:0)|(isMateKing?16:0)|(isH1?32:0)|(isH2?64:0)|((isMv&&!hasPiece)?128:0)|((isMv&&hasPiece)?256:0);
+    if(el._cm===mask)continue;
+    el._cm=mask;
     el.classList.toggle("last",!!isLast);
     el.classList.toggle("sel",!!isSel);
     el.classList.toggle("chk",!!isChk);
@@ -3962,15 +3975,22 @@ function syncPieces(anim){
 
 function updateCheckClass(){
   const g=S.g,inChk=g.in_check(),inMate=g.in_checkmate(),turn=g.turn();
+  const tk=turn+"k";
   for(const sq in PE){
     const el=PE[sq];
-    const isTargetKing=el.dataset.pc===turn+"k";
-    el.classList.toggle("chk",inChk&&isTargetKing);
-    el.classList.toggle("mate-king",inMate&&isTargetKing);
+    const isTargetKing=el.dataset.pc===tk;
+    const chk=inChk&&isTargetKing,mk=inMate&&isTargetKing;
+    if(el._chk!==chk){el._chk=chk;el.classList.toggle("chk",chk)}
+    if(el._mk!==mk){el._mk=mk;el.classList.toggle("mate-king",mk)}
   }
 }
 
 /* ---------- Drawing Overlay & Dynamic Clear Sync ---------- */
+let _ovCache="",_ovRaf=0;
+function scheduleOv(){
+  if(_ovRaf)return;
+  _ovRaf=requestAnimationFrame(()=>{_ovRaf=0;ov()});
+}
 function ov(){
   const e=$("#ov");if(!e)return;
   let h="";const D=S.dr;
@@ -3998,6 +4018,8 @@ function ov(){
       h+=`<g fill="${col}" stroke="${col}" opacity="${r.pv?.55:(r.hint?.92:(r.coach?.82:.86))}"><polyline points="${x1},${y1} ${cx},${cy} ${bx},${by}" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><polygon stroke="none" points="${x2},${y2} ${bx-uy*2.3},${by+ux*2.3} ${bx+uy*2.3},${by-ux*2.3}"/></g>`;
     }
   }
+  if(h===_ovCache)return;
+  _ovCache=h;
   e.innerHTML=h;
 }
 function renderDrawBar(){
@@ -4061,6 +4083,92 @@ function resetBoardState(){
   S.mateWin="";S.mateReason="";S.mateModalOpen=false;
   S.coachArrows=[];S.coachPending=null;S.coachPreFen="";
 }
+function saveMatchState(){
+  try{
+    if(!S.g)return;
+    if(S.mode!=="basic"&&S.mode!=="bot"&&S.mode!=="coach"&&S.mode!=="sandbox")return;
+    const payload={
+      v:1,
+      mode:S.mode,
+      fen:S.g.fen(),
+      turn:S.g.turn(),
+      pgn:typeof S.g.pgn==="function"?S.g.pgn():"",
+      col:S.col,
+      basicP2:S.basicP2,
+      flip:S.flip,
+      diff:P.diff,
+      last:S.last,
+      over:S.over,
+      overSpec:S.overSpec,
+      mateWin:S.mateWin,
+      mateReason:S.mateReason,
+      exSpec:S.exSpec,
+      coachKey:S.coachKey,
+      coachArgs:S.coachArgs,
+      coachTone:S.coachTone,
+      ts:Date.now()
+    };
+    if(S.mode==="sandbox"){
+      payload.sbBoard=S.g.board().map(row=>row.map(p=>p?{type:p.type,color:p.color}:null));
+      payload.sbRules=cloneSbRules(S.sbCfg.rules);
+      payload.sbOpp=S.sbCfg.opp==="bot"?"same":S.sbCfg.opp;
+    }
+    localStorage.setItem(MATCH_KEY,JSON.stringify(payload));
+  }catch(e){}
+}
+function restoreMatchState(){
+  try{
+    const raw=localStorage.getItem(MATCH_KEY);
+    if(!raw)return false;
+    const d=JSON.parse(raw);
+    if(!d||!d.mode||!d.fen)return false;
+    if(d.mode==="sandbox"&&Array.isArray(d.sbBoard)&&d.sbBoard.length===8){
+      S.mode="sandbox";
+      S.sbCfg.rules=cloneSbRules(d.sbRules||defaultSbRules());
+      S.sbCfg.opp=(d.sbOpp==="face")?"face":"same";
+      S.col="w";
+      S.flip=!!d.flip;
+      const fp=String(d.fen).split(" ");
+      S.g=createSandboxGame(d.sbBoard,S.sbCfg.rules,{turn:d.turn||fp[1],ep:fp[3],half:fp[4],full:fp[5]});
+    }else if(d.mode==="basic"||d.mode==="bot"||d.mode==="coach"){
+      const g=new Chess();
+      let loaded=false;
+      if(d.pgn&&typeof g.load_pgn==="function"){
+        try{loaded=g.load_pgn(d.pgn)&&g.fen()===d.fen}catch(e){loaded=false}
+      }
+      if(!loaded){
+        const ok=typeof g.load==="function"?g.load(d.fen):false;
+        if(!ok){
+          const g2=new Chess(d.fen);
+          if(!g2||!g2.fen())return false;
+          S.g=g2;
+        }else S.g=g;
+      }else S.g=g;
+      S.mode=d.mode;
+      S.col=(d.col==="b"||d.col==="w")?d.col:"w";
+      if(d.basicP2==="face"||d.basicP2==="same")S.basicP2=d.basicP2;
+      if(d.diff&&VALID_DIFFS.has(d.diff))P.diff=d.diff;
+      S.flip=typeof d.flip==="boolean"?d.flip:(S.mode==="bot"?S.col==="b":(isAutoFlipTurn()?S.g.turn()==="b":false));
+    }else{
+      return false;
+    }
+    S.last=Array.isArray(d.last)&&d.last.length===2?d.last:null;
+    S.over=typeof d.over==="string"?d.over:"";
+    S.overSpec=d.overSpec||null;
+    S.mateWin=d.mateWin||"";
+    S.mateReason=d.mateReason||"";
+    S.mateModalOpen=false;
+    if(d.exSpec&&d.exSpec.m)S.exSpec=d.exSpec;
+    if(S.mode==="coach"&&d.coachKey){
+      S.coachTone=d.coachTone||"";
+      setCoach(d.coachKey,d.coachArgs||null,true);
+    }
+    refreshTranslatedState();
+    return true;
+  }catch(e){
+    return false;
+  }
+}
 function loadFen(fen){
   resetBoardState();
   S.g=new Chess(fen);
@@ -4070,6 +4178,7 @@ function startBasic(p2Mode){
   S.mode="basic";S.tab="play";S.flip=false;
   S.p2ModalOpen=false;S.menuOpen=false;
   loadFen(new Chess().fen());S.msg="";
+  saveMatchState();
   render();
 }
 function startBot(colorChoice){
@@ -4079,6 +4188,7 @@ function startBot(colorChoice){
   S.colorModalOpen=false;S.menuOpen=false;
   loadFen(new Chess().fen());
   S.msg="";
+  saveMatchState();
   render();
   if(c==="b")triggerBotMove();
 }
@@ -4089,6 +4199,7 @@ function startCoach(){
   S.msg="";
   setCoach("coachWelcome");
   S.coachTone="";S.coachHintUsed=false;
+  saveMatchState();
   render();
 }
 function hasBothColors(grid){
@@ -4112,6 +4223,7 @@ function startSandbox(){
   resetBoardState();
   S.g=createSandboxGame(S.sbCfg.board,S.sbCfg.rules);
   S.msg="";
+  saveMatchState();
   render();
 }
 function applySandboxPreset(name){
@@ -4285,6 +4397,7 @@ function triggerBotMove(){
         }
       }
       snd(kind(m,S.g));clrDraw();endCheck();
+      saveMatchState();
       render({m});
     },wait);
   };
@@ -4494,6 +4607,7 @@ function doMove(f,t,pr,fromDrag){
     const pendingAutoFlip=isAutoFlipTurn()&&!S.over&&(g.turn()==="b")!==S.flip;
     cancelFlipTimer();
     snd(sk);clrDraw();
+    saveMatchState();
     render(animObj);
     if(pendingAutoFlip){
       const tk=S.tok;
@@ -4626,6 +4740,7 @@ function undo(){
   S.last=h?[h.from,h.to]:null;
   setExplain(h,g,"");
   SND.click();
+  saveMatchState();
   render(undone===1?lastAnim:null);
 }
 
@@ -4650,6 +4765,7 @@ function redo(){
   if(S.mode==="learn"||S.mode==="puz")S.solved=true;
   endCheck();
   snd(kind(lastM,g));clrDraw();
+  saveMatchState();
   render(redone===1?{m:lastM}:null);
   if((S.mode==="bot"||S.mode==="coach")&&!S.over&&g.turn()!==S.col)triggerBotMove();
 }
@@ -4802,8 +4918,14 @@ function renderBotModeButtons(){
   `</div>`;
 }
 
+function setHtmlIfChanged(el,html){
+  if(!el||el._hc===html)return;
+  el._hc=html;
+  el.innerHTML=html;
+}
+
 function renderHeaderAndMenu(){
-  $("#hdr").innerHTML=
+  setHtmlIfChanged($("#hdr"),
     `<div class="brand-group">`+
       `<span class="app-badge" aria-hidden="true">${IC.queenLogo}</span>`+
       `<div class="brand-meta"><span class="brand-title">Rookie: Learn Chess</span><span class="brand-sub">${modeLabel()}</span></div>`+
@@ -4811,7 +4933,8 @@ function renderHeaderAndMenu(){
     `<div class="hdr-actions">`+
       `<button data-a="mute" class="icon-btn ${P.mute?"":"on"}" aria-label="${P.mute?t("unmute"):t("mute")}">${P.mute?IC.volOff:IC.volOn}</button>`+
       `<button data-a="toggle-menu" class="menu-btn" aria-expanded="${S.menuOpen}"><span>${t("options")}</span>${IC.chev}</button>`+
-    `</div>`;
+    `</div>`
+  );
 
   const bg=$("#menu-backdrop"),pop=$("#menu-pop");
   bg.hidden=!S.menuOpen;
@@ -4907,9 +5030,10 @@ function renderStatusAndBanner(){
     stText=`${t("levelLabel",{lvl:S.pi+1,diff:pDiff(p),cat:pCat(p)})}`;
     stSub=S.solved?t("solved"):(turnW?t("white"):t("black"));
   }
-  $("#status-bar").innerHTML=
+  setHtmlIfChanged($("#status-bar"),
     `<div class="status-main"><span class="turn-dot ${turnW?"w":"b"} ${S.busy?"thinking":""}"></span><span class="status-txt">${stText}</span></div>`+
-    `${stSub?`<span class="status-sub">${stSub}</span>`:""}`;
+    `${stSub?`<span class="status-sub">${stSub}</span>`:""}`
+  );
 
   renderCoachBox();
 
@@ -4918,7 +5042,8 @@ function renderStatusAndBanner(){
   const text=S.hm&&S.h?S.hm:(S.over&&(S.mode==="bot"||S.mode==="coach"||S.mode==="sandbox")&&!S.msg?`${S.over}. ${t("playAgain")}`:S.msg);
   if(!showLearnPuz&&!text){ban.hidden=true;return}
   ban.hidden=false;
-  ban.className=(S.hm&&S.h)?"hint":(S.bad?"bad":"");
+  const bCls=(S.hm&&S.h)?"hint":(S.bad?"bad":"");
+  if(ban.className!==bCls)ban.className=bCls;
   let acts="";
   if(S.mode==="learn"){
     acts+=`<button data-a="next" class="${S.solved?"pri":""}" ${S.solved?"":"disabled"}>${t("nextStep")}</button>`+
@@ -4937,19 +5062,20 @@ function renderStatusAndBanner(){
     acts+=`<button data-a="restart" class="pri">${S.mode==="coach"?t("newCoachGame"):(S.mode==="sandbox"?t("newSandboxMatch"):t("newBotMatch"))}</button>`;
     if(S.mode==="sandbox")acts+=`<button data-a="mode-sandbox">${t("editSandboxRules")}</button>`;
   }
-  ban.innerHTML=`<div class="banner-top"><span>${text}</span></div>${acts?`<div class="banner-actions">${acts}</div>`:""}`;
+  setHtmlIfChanged(ban,`<div class="banner-top"><span>${text}</span></div>${acts?`<div class="banner-actions">${acts}</div>`:""}`);
 }
 
 function renderActionBar(){
   const mv=S.g.history();
-  $("#bctl").innerHTML=
+  setHtmlIfChanged($("#bctl"),
     `<button data-a="restart" aria-label="${t("restart")}">${IC.restart}<span>${t("restart")}</span></button>`+
     `<button data-a="undo" aria-label="${t("undo")}" ${mv.length?"":"disabled"}>${IC.undo}<span>${t("undo")}</span></button>`+
     `<button data-a="redo" aria-label="${t("redo")}" ${S.redo.length?"":"disabled"}>${IC.redo}<span>${t("redo")}</span></button>`+
     `<button data-a="dm" class="${S.dm?"on":""}" aria-label="${t("draw")}">${IC.draw}<span>${t("draw")}</span></button>`+
     `<button data-a="flip" aria-label="${t("flip")}">${IC.flip}<span>${t("flip")}</span></button>`+
     `<button data-a="hint" aria-label="${t("hint")}" ${S.over?"disabled":""}>${IC.hint}<span>${t("hint")}</span></button>`+
-    `<button data-a="drawer" class="${S.drawerOpen?"on":""}" aria-label="${t("moves")}">${IC.list}<span>${t("moves")}${mv.length?` (${mv.length})`:""}</span></button>`;
+    `<button data-a="drawer" class="${S.drawerOpen?"on":""}" aria-label="${t("moves")}">${IC.list}<span>${t("moves")}${mv.length?` (${mv.length})`:""}</span></button>`
+  );
   renderDrawBar();
 }
 
@@ -5248,6 +5374,11 @@ function renderSandboxModal(){
     `<button data-a="sb-start" class="pri" style="width:100%;min-height:46px">${IC.sandbox}<span>${t("sbStartMatch")}</span></button>`;
 }
 
+let _uiRaf=0;
+function scheduleUIOnly(){
+  if(_uiRaf)return;
+  _uiRaf=requestAnimationFrame(()=>{_uiRaf=0;renderUIOnly()});
+}
 function renderUIOnly(){
   document.body.classList.toggle("rm",!!P.fx.rm);
   const isPlay=S.tab==="play";
@@ -5263,9 +5394,10 @@ function renderUIOnly(){
   }else{
     renderMeView();
   }
-  $("#botbar").innerHTML=
+  setHtmlIfChanged($("#botbar"),
     `<button data-a="tab" data-v="play" class="${isPlay?"on":""}">${IC.play}<span>${t("play")}</span></button>`+
-    `<button data-a="tab" data-v="me" class="${!isPlay?"on":""}">${IC.me}<span>${t("me")}</span></button>`;
+    `<button data-a="tab" data-v="me" class="${!isPlay?"on":""}">${IC.me}<span>${t("me")}</span></button>`
+  );
   renderDrawer();
   renderColorModal();
   renderP2Modal();
@@ -5281,15 +5413,19 @@ function render(anim){
 }
 
 /* ---------- Unified 60fps Drag-and-Drop + Tap + Keyboard ---------- */
-let bdRect=null;
+let bdRect=null,_rectRaf=0;
 function cacheBoardRect(){
   const r=bdEl.getBoundingClientRect();
   if(r.width>0)bdRect=r;
 }
-if(window.ResizeObserver){
-  new ResizeObserver(()=>cacheBoardRect()).observe(bdEl);
+function scheduleBoardRect(){
+  if(_rectRaf)return;
+  _rectRaf=requestAnimationFrame(()=>{_rectRaf=0;cacheBoardRect()});
 }
-window.addEventListener("resize",cacheBoardRect,{passive:true});
+if(window.ResizeObserver){
+  new ResizeObserver(()=>scheduleBoardRect()).observe(bdEl);
+}
+window.addEventListener("resize",scheduleBoardRect,{passive:true});
 
 function sqAtClient(x,y){
   const r=bdRect||bdEl.getBoundingClientRect();
@@ -5309,6 +5445,7 @@ function showToast(msg){
   toastTimer=setTimeout(()=>{toastTimer=0;el.hidden=true},2200);
 }
 
+let copyTxtTimer=0;
 function copyText(txt,label){
   try{
     if(navigator.clipboard?.writeText)navigator.clipboard.writeText(txt);
@@ -5316,7 +5453,8 @@ function copyText(txt,label){
     S.copiedLabel=label;
     S.copied=t("copied",{label});renderUIOnly();
     showToast(S.copied);
-    setTimeout(()=>{if(S.copiedLabel===label){S.copied="";S.copiedLabel="";renderUIOnly()}},1500);
+    if(copyTxtTimer)clearTimeout(copyTxtTimer);
+    copyTxtTimer=setTimeout(()=>{copyTxtTimer=0;if(S.copiedLabel===label){S.copied="";S.copiedLabel="";renderUIOnly()}},1500);
   }catch(e){}
 }
 
@@ -5334,135 +5472,153 @@ async function copyBoardToClipboard(opts = {}) {
     throw new Error('Canvas/DOM environment is unavailable.');
   }
 
-  const canvas = document.createElement('canvas');
+  let canvas = document.createElement('canvas');
   canvas.width  = size;
   canvas.height = size;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Failed to create 2D canvas context.');
-
-  const sq    = size / 8;
-  const files = 'abcdefgh';
-  const squareToPixel = (square) => {
-    if (typeof square !== 'string' || square.length < 2) return null;
-    const fileIdx = files.indexOf(square[0].toLowerCase());
-    const rank    = parseInt(square[1], 10);
-    if (fileIdx < 0 || !Number.isFinite(rank) || rank < 1 || rank > 8) return null;
-    let col = fileIdx, row = 8 - rank;
-    if (orientation === 'black') { col = 7 - col; row = 7 - row; }
-    return { x: col * sq, y: row * sq, cx: col * sq + sq / 2, cy: row * sq + sq / 2 };
-  };
-
-  const LIGHT = '#f0d9b5', DARK = '#b58863';
-  for (let r = 0; r < 8; r++) {
-    for (let c = 0; c < 8; c++) {
-      ctx.fillStyle = ((r + c) & 1) ? DARK : LIGHT;
-      ctx.fillRect(c * sq, r * sq, sq, sq);
-    }
+  let ctx = canvas.getContext('2d');
+  if (!ctx) {
+    canvas.width = 0; canvas.height = 0; canvas = null;
+    throw new Error('Failed to create 2D canvas context.');
   }
 
-  ctx.fillStyle = 'rgba(255, 235, 59, 0.45)';
-  for (const h of highlights) {
-    const p = squareToPixel(h);
-    if (p) ctx.fillRect(p.x, p.y, sq, sq);
-  }
+  let blob = null, pngBlob = null, shareFile = null;
+  try {
+    const sq    = size / 8;
+    const files = 'abcdefgh';
+    const squareToPixel = (square) => {
+      if (typeof square !== 'string' || square.length < 2) return null;
+      const fileIdx = files.indexOf(square[0].toLowerCase());
+      const rank    = parseInt(square[1], 10);
+      if (fileIdx < 0 || !Number.isFinite(rank) || rank < 1 || rank > 8) return null;
+      let col = fileIdx, row = 8 - rank;
+      if (orientation === 'black') { col = 7 - col; row = 7 - row; }
+      return { x: col * sq, y: row * sq, cx: col * sq + sq / 2, cy: row * sq + sq / 2 };
+    };
 
-  const GLYPHS = {
-    wK: '♔', wQ: '♕', wR: '♖', wB: '♗', wN: '♘', wP: '♙',
-    bK: '♚', bQ: '♛', bR: '♜', bB: '♝', bN: '♞', bP: '♟',
-  };
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.font = `${Math.floor(sq * 0.78)}px "Segoe UI Symbol","Noto Sans Symbols","Apple Symbols",sans-serif`;
-
-  for (const [square, code] of Object.entries(pieces)) {
-    const p = squareToPixel(square);
-    const glyph = GLYPHS[code];
-    if (!p || !glyph) continue;
-    const isWhite = code[0] === 'w';
-    ctx.lineWidth = Math.max(2, sq * 0.03);
-    ctx.strokeStyle = isWhite ? '#111111' : '#ffffff';
-    ctx.fillStyle = isWhite ? '#ffffff' : '#111111';
-    ctx.strokeText(glyph, p.cx, p.cy);
-    ctx.fillText(glyph, p.cx, p.cy);
-  }
-
-  const drawArrow = (from, to, color) => {
-    const a = squareToPixel(from), b = squareToPixel(to);
-    if (!a || !b) return;
-    const angle = Math.atan2(b.cy - a.cy, b.cx - a.cx);
-    const headLen = sq * 0.32, headWidth = sq * 0.34, lineW = Math.max(3, sq * 0.13);
-    const tipX = b.cx, tipY = b.cy;
-    const baseX = tipX - Math.cos(angle) * headLen, baseY = tipY - Math.sin(angle) * headLen;
-    ctx.save();
-    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    ctx.lineWidth = lineW;
-    ctx.beginPath(); ctx.moveTo(a.cx, a.cy); ctx.lineTo(baseX, baseY); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(tipX, tipY);
-    ctx.lineTo(baseX + Math.cos(angle + Math.PI / 2) * headWidth / 2, baseY + Math.sin(angle + Math.PI / 2) * headWidth / 2);
-    ctx.lineTo(baseX + Math.cos(angle - Math.PI / 2) * headWidth / 2, baseY + Math.sin(angle - Math.PI / 2) * headWidth / 2);
-    ctx.closePath(); ctx.fill();
-    ctx.restore();
-  };
-
-  for (const arr of arrows) {
-    if (!arr || !arr.from || !arr.to) continue;
-    drawArrow(arr.from, arr.to, arr.color || 'rgba(0, 150, 255, 0.8)');
-  }
-
-  const wmFont = Math.max(12, Math.floor(size * 0.028)), pad = Math.max(8, size * 0.015);
-  ctx.save();
-  ctx.font = `600 ${wmFont}px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif`;
-  ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
-  ctx.lineWidth = Math.max(2, wmFont * 0.18);
-  ctx.strokeStyle = 'rgba(0,0,0,0.55)'; ctx.strokeText(watermark, size - pad, size - pad);
-  ctx.fillStyle = 'rgba(255,255,255,0.95)'; ctx.fillText(watermark, size - pad, size - pad);
-  ctx.restore();
-
-  const blob = await new Promise((resolve, reject) => {
-    canvas.toBlob((b) => b ? resolve(b) : reject(new Error('Canvas blob failed.')), 'image/png');
-  });
-
-  const pngBlob = blob.type === 'image/png' ? blob : new Blob([blob], { type: 'image/png' });
-
-  // Primary: Direct Clipboard API image write
-  if (navigator.clipboard && typeof navigator.clipboard.write === 'function' && typeof window.ClipboardItem === 'function') {
-    try {
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
-      return { method: 'clipboard', blob: pngBlob };
-    } catch (_clipErr) {
-      // Fall through to Web Share API fallback on Android WebView restrictions
-    }
-  }
-
-  // Fallback: Native Web Share API (Android Share Sheet)
-  if (typeof navigator.share === 'function' && typeof File === 'function') {
-    const file = new File([pngBlob], 'rookie-chess.png', { type: 'image/png' });
-    const canShareFiles = typeof navigator.canShare !== 'function' || navigator.canShare({ files: [file] });
-    if (canShareFiles) {
-      try {
-        await navigator.share({ files: [file], title: watermark || 'Rookie: Learn Chess' });
-        return { method: 'share', blob: pngBlob };
-      } catch (shareErr) {
-        if (shareErr && shareErr.name === 'AbortError') {
-          return { method: 'cancelled', blob: pngBlob };
-        }
-        throw shareErr;
+    const LIGHT = '#f0d9b5', DARK = '#b58863';
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        ctx.fillStyle = ((r + c) & 1) ? DARK : LIGHT;
+        ctx.fillRect(c * sq, r * sq, sq, sq);
       }
     }
-  }
 
-  throw new Error(t('copyPngUnsupported'));
+    ctx.fillStyle = 'rgba(255, 235, 59, 0.45)';
+    for (const h of highlights) {
+      const p = squareToPixel(h);
+      if (p) ctx.fillRect(p.x, p.y, sq, sq);
+    }
+
+    const GLYPHS = {
+      wK: '♔', wQ: '♕', wR: '♖', wB: '♗', wN: '♘', wP: '♙',
+      bK: '♚', bQ: '♛', bR: '♜', bB: '♝', bN: '♞', bP: '♟',
+    };
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `${Math.floor(sq * 0.78)}px "Segoe UI Symbol","Noto Sans Symbols","Apple Symbols",sans-serif`;
+
+    for (const [square, code] of Object.entries(pieces)) {
+      const p = squareToPixel(square);
+      const glyph = GLYPHS[code];
+      if (!p || !glyph) continue;
+      const isWhite = code[0] === 'w';
+      ctx.lineWidth = Math.max(2, sq * 0.03);
+      ctx.strokeStyle = isWhite ? '#111111' : '#ffffff';
+      ctx.fillStyle = isWhite ? '#ffffff' : '#111111';
+      ctx.strokeText(glyph, p.cx, p.cy);
+      ctx.fillText(glyph, p.cx, p.cy);
+    }
+
+    const drawArrow = (from, to, color) => {
+      const a = squareToPixel(from), b = squareToPixel(to);
+      if (!a || !b) return;
+      const angle = Math.atan2(b.cy - a.cy, b.cx - a.cx);
+      const headLen = sq * 0.32, headWidth = sq * 0.34, lineW = Math.max(3, sq * 0.13);
+      const tipX = b.cx, tipY = b.cy;
+      const baseX = tipX - Math.cos(angle) * headLen, baseY = tipY - Math.sin(angle) * headLen;
+      ctx.save();
+      ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.lineWidth = lineW;
+      ctx.beginPath(); ctx.moveTo(a.cx, a.cy); ctx.lineTo(baseX, baseY); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(tipX, tipY);
+      ctx.lineTo(baseX + Math.cos(angle + Math.PI / 2) * headWidth / 2, baseY + Math.sin(angle + Math.PI / 2) * headWidth / 2);
+      ctx.lineTo(baseX + Math.cos(angle - Math.PI / 2) * headWidth / 2, baseY + Math.sin(angle - Math.PI / 2) * headWidth / 2);
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
+    };
+
+    for (const arr of arrows) {
+      if (!arr || !arr.from || !arr.to) continue;
+      drawArrow(arr.from, arr.to, arr.color || 'rgba(0, 150, 255, 0.8)');
+    }
+
+    const wmFont = Math.max(12, Math.floor(size * 0.028)), pad = Math.max(8, size * 0.015);
+    ctx.save();
+    ctx.font = `600 ${wmFont}px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif`;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+    ctx.lineWidth = Math.max(2, wmFont * 0.18);
+    ctx.strokeStyle = 'rgba(0,0,0,0.55)'; ctx.strokeText(watermark, size - pad, size - pad);
+    ctx.fillStyle = 'rgba(255,255,255,0.95)'; ctx.fillText(watermark, size - pad, size - pad);
+    ctx.restore();
+
+    blob = await new Promise((resolve, reject) => {
+      canvas.toBlob((b) => b ? resolve(b) : reject(new Error('Canvas blob failed.')), 'image/png');
+    });
+
+    // Release canvas bitmap memory immediately after encoding PNG blob
+    canvas.width = 0; canvas.height = 0;
+    ctx = null; canvas = null;
+
+    pngBlob = blob.type === 'image/png' ? blob : new Blob([blob], { type: 'image/png' });
+    blob = null;
+
+    // Primary: Direct Clipboard API image write
+    if (navigator.clipboard && typeof navigator.clipboard.write === 'function' && typeof window.ClipboardItem === 'function') {
+      try {
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
+        return { method: 'clipboard', blob: pngBlob };
+      } catch (_clipErr) {
+        // Fall through to Web Share API fallback on Android WebView restrictions
+      }
+    }
+
+    // Fallback: Native Web Share API (Android Share Sheet)
+    if (typeof navigator.share === 'function' && typeof File === 'function') {
+      shareFile = new File([pngBlob], 'rookie-chess.png', { type: 'image/png' });
+      const canShareFiles = typeof navigator.canShare !== 'function' || navigator.canShare({ files: [shareFile] });
+      if (canShareFiles) {
+        try {
+          await navigator.share({ files: [shareFile], title: watermark || 'Rookie: Learn Chess' });
+          return { method: 'share', blob: pngBlob };
+        } catch (shareErr) {
+          if (shareErr && shareErr.name === 'AbortError') {
+            return { method: 'cancelled', blob: pngBlob };
+          }
+          throw shareErr;
+        }
+      }
+    }
+
+    throw new Error(t('copyPngUnsupported'));
+  } finally {
+    if (canvas) { canvas.width = 0; canvas.height = 0; }
+    ctx = null; canvas = null; blob = null; shareFile = null; pngBlob = null;
+  }
 }
 
+let pngStatusTimer=0,_pngBusy=false;
 function markPngStatus(msgText){
   S.copiedLabel="PNG";
   S.copied=msgText;
   renderUIOnly();
   showToast(S.copied);
-  setTimeout(()=>{if(S.copiedLabel==="PNG"){S.copied="";S.copiedLabel="";renderUIOnly()}},1600);
+  if(pngStatusTimer)clearTimeout(pngStatusTimer);
+  pngStatusTimer=setTimeout(()=>{pngStatusTimer=0;if(S.copiedLabel==="PNG"){S.copied="";S.copiedLabel="";renderUIOnly()}},1600);
 }
 
 async function copyBoardPng(){
+  if(_pngBusy)return;
+  _pngBusy=true;
   try{
     const g=S.g,bd=g.board();
     const pieces={};
@@ -5496,6 +5652,8 @@ async function copyBoardPng(){
     else if(res&&res.method==="share")markPngStatus(t("pngShareReady"));
   }catch(err){
     showToast((err&&err.message)||t("copyPngFailed"));
+  }finally{
+    _pngBusy=false;
   }
 }
 
@@ -5685,12 +5843,12 @@ bdEl.addEventListener("pointerdown",e=>{
 });
 
 document.addEventListener("pointermove",e=>{
-  if(rc){const t=sqAtClient(e.clientX,e.clientY);S.pv=rc.s&&t?[rc.s,t,rc.c]:null;ov();return}
+  if(rc){const t=sqAtClient(e.clientX,e.clientY);S.pv=rc.s&&t?[rc.s,t,rc.c]:null;scheduleOv();return}
   if(!drag||e.pointerId!==drag.id)return;
   const dist=Math.hypot(e.clientX-drag.x,e.clientY-drag.y);
   if(drag.mode==="draw"){
     if(dist>8)drag.moved=true;
-    if(drag.moved){const t=sqAtClient(e.clientX,e.clientY);S.pv=t?[drag.sq,t,S.dc]:null;ov()}
+    if(drag.moved){const t=sqAtClient(e.clientX,e.clientY);S.pv=t?[drag.sq,t,S.dc]:null;scheduleOv()}
     return;
   }
   if(!drag.canDrag||!drag.el)return;
@@ -5758,6 +5916,8 @@ function handlePointerFinish(e,cancelled){
 document.addEventListener("pointerup",e=>handlePointerFinish(e,false));
 document.addEventListener("pointercancel",e=>handlePointerFinish(e,true));
 window.addEventListener("blur",endDragCleanup);
+window.addEventListener("pagehide",()=>{save();saveMatchState()});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){save();saveMatchState()}});
 
 document.addEventListener("keydown",e=>{
   if(/INPUT|TEXTAREA/.test(e.target.tagName))return;
@@ -5775,17 +5935,28 @@ document.addEventListener("keydown",e=>{
   else if(e.key==="ArrowRight")redo();
 });
 
+let _sliderRaf=0;
 document.addEventListener("input",e=>{
   const a=e.target.dataset.a;
   if(a==="vol"){
-    P.vol=+e.target.value;save();
-    const vv=$("#volv");if(vv)vv.textContent=Math.round(P.vol*100)+"%";
+    P.vol=+e.target.value;scheduleSave();
+    if(!_sliderRaf){
+      _sliderRaf=requestAnimationFrame(()=>{
+        _sliderRaf=0;
+        const vv=$("#volv");if(vv)vv.textContent=Math.round(P.vol*100)+"%";
+      });
+    }
     tone(440,.05);
   }else if(a==="psz"){
-    P.pieceBoost=+e.target.value;save();
+    P.pieceBoost=+e.target.value;scheduleSave();
     applyUIScale();
-    const pv=$("#pszv");if(pv)pv.textContent=(P.pieceBoost>0?"+"+P.pieceBoost:P.pieceBoost)+"%";
-    document.querySelectorAll('#menu-pop button[data-a="psz"]').forEach(btn=>btn.classList.toggle("on",+btn.dataset.v===P.pieceBoost));
+    if(!_sliderRaf){
+      _sliderRaf=requestAnimationFrame(()=>{
+        _sliderRaf=0;
+        const pv=$("#pszv");if(pv)pv.textContent=(P.pieceBoost>0?"+"+P.pieceBoost:P.pieceBoost)+"%";
+        document.querySelectorAll('#menu-pop button[data-a="psz"]').forEach(btn=>btn.classList.toggle("on",+btn.dataset.v===P.pieceBoost));
+      });
+    }
   }
 });
 
@@ -5799,13 +5970,17 @@ setInterval(()=>{
     else renderUIOnly();
     return;
   }
-  const cd=formatMidnightCountdown();
+  if(S.tab!=="me"&&S.mode!=="puz")return;
   const dEl=$("#daily-cd"),bEl=$("#banner-cd");
+  if(!dEl&&!bEl)return;
+  const cd=formatMidnightCountdown();
   if(dEl)dEl.textContent=cd;
   if(bEl)bEl.textContent=cd;
 },1000);
 
+const _resumed=restoreMatchState();
 render();
+if(_resumed&&!S.over&&(S.mode==="bot"||S.mode==="coach")&&S.g.turn()!==S.col)triggerBotMove();
 })();
 </script>
 </body>
