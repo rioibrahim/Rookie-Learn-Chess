@@ -1602,6 +1602,118 @@ code{
   background:var(--pn2)!important;
 }
 
+/* Post-Game Replay & Smart Match Analyzer Panel */
+#replay-panel{
+  flex:0 0 auto;
+  background:var(--pn);
+  border:1px solid var(--bd);
+  border-radius:14px;
+  padding:10px 11px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.rp-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.rp-title-grp{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-width:0;
+  flex:1 1 auto;
+}
+.rp-step{
+  font-size:12.5px;
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.rp-mv{
+  font-size:12px;
+  font-weight:700;
+  color:var(--mu);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.rp-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:3px 9px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.02em;
+  flex:0 0 auto;
+}
+.rp-badge.genius{background:rgba(245,158,11,.18);color:#f59e0b;border:1px solid rgba(245,158,11,.45)}
+.rp-badge.brilliant{background:rgba(20,184,166,.18);color:#14b8a6;border:1px solid rgba(20,184,166,.45)}
+.rp-badge.blunder{background:rgba(239,68,68,.18);color:#ef4444;border:1px solid rgba(239,68,68,.45)}
+.rp-badge.badTrade{background:rgba(249,115,22,.18);color:#f97316;border:1px solid rgba(249,115,22,.45)}
+.rp-badge.fairTrade{background:rgba(34,197,94,.16);color:#22c55e;border:1px solid rgba(34,197,94,.4)}
+.rp-badge.quiet{background:var(--pn2);color:var(--mu);border:1px solid var(--bd)}
+.rp-msg{
+  font-size:12.5px;
+  line-height:1.38;
+  font-weight:600;
+  padding:8px 10px;
+  border-radius:10px;
+  background:var(--pn2);
+  border-left:3.5px solid var(--bd);
+}
+.rp-msg.genius{border-left-color:#f59e0b;background:rgba(245,158,11,.11)}
+.rp-msg.brilliant{border-left-color:#14b8a6;background:rgba(20,184,166,.11)}
+.rp-msg.blunder{border-left-color:#ef4444;background:rgba(239,68,68,.12)}
+.rp-msg.badTrade{border-left-color:#f97316;background:rgba(249,115,22,.11)}
+.rp-msg.fairTrade{border-left-color:#22c55e;background:rgba(34,197,94,.1)}
+.rp-msg.quiet{color:var(--mu);font-weight:500;font-size:12px}
+.rp-pills{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  overflow-x:auto;
+  scrollbar-width:none;
+  padding-bottom:1px;
+}
+.rp-pills::-webkit-scrollbar{display:none}
+.rp-pill{
+  min-height:28px!important;
+  padding:0 9px!important;
+  font-size:11px!important;
+  border-radius:999px!important;
+  flex:0 0 auto;
+}
+.rp-pill.on{
+  background:var(--ac);
+  color:var(--acon);
+  border-color:var(--ac);
+}
+.rp-nav{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr)) auto;
+  gap:5px;
+  align-items:center;
+}
+.rp-nav button{
+  min-height:42px;
+  padding:0 6px;
+  font-size:13px;
+  font-weight:800;
+  border-radius:10px;
+}
+.rp-nav button.rp-exit{
+  padding:0 11px;
+  font-size:12px;
+}
+:root[data-ui="compact"] #replay-panel{padding:7px 9px;gap:6px}
+:root[data-ui="compact"] .rp-nav button{min-height:36px;font-size:12px}
+
 @media (max-height:520px) and (min-width:560px){
   #play-view{
     display:grid;
@@ -1613,7 +1725,7 @@ code{
   #bwrap{grid-area:board}
   #status-bar{grid-area:status}
   #cap-tray{grid-area:caps}
-  #banner{grid-area:banner}
+  #banner,#replay-panel{grid-area:banner}
   #bctl{grid-area:actions;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start}
 }
 </style>
@@ -1730,6 +1842,7 @@ code{
       </div>
     </div>
     <div id="cap-tray" aria-label="Captured pieces"></div>
+    <div id="replay-panel" role="region" aria-label="Post-game replay analyzer" hidden></div>
     <div id="coach-prompt" hidden></div>
     <div id="draw-bar" hidden></div>
     <div id="bctl"></div>
@@ -1914,6 +2027,14 @@ const I18N={
     mateSub:"{winner} wins by checkmate.",mateWinSub:"You defeated {bot} as {winner}!",mateLoseSub:"{bot} won by checkmate.",
     sbKingCapSub:"{winner} captured the enemy King!",sbNoMovesSub:"{winner} wins — opponent has no moves.",
     restartGame:"Restart Game",changeBotColor:"Change Bot / Color",viewBoard:"View Board",
+    replayMatch:"Replay Match",replayTitle:"Replay Analyzer",replayExit:"Exit",
+    replayPlay:"Play",replayPause:"Pause",replayNextNotable:"Next Key",
+    replayStartPos:"Start Position",replayMoveLabel:"Move {n}/{tot}",
+    replayQuiet:"Quiet Move",replayQuietNote:"Quiet development move — skipped by Smart Analyzer.",
+    replayNoNotable:"No sharp blunders or sacrifices detected — solid game!",
+    replayNotableCount:"{count} key moments",
+    replayGeniusBadge:"Genius Gambit",replayBrilliantBadge:"Brilliant",
+    replayBlunderBadge:"Blunder",replayBadTradeBadge:"Bad Trade (-1)",replayFairTradeBadge:"Fair Trade",
     moveHistoryTitle:"Move History & Coaching",lastMove:"Last Move",
     noMovesYet:"No moves played yet. Tap or drag a piece to start.",
     copyFen:"Copy FEN",copyPgn:"Copy PGN",copyPng:"Copy PNG",copied:"{label} copied",pngShareReady:"PNG ready to copy or share",
@@ -2204,6 +2325,14 @@ const I18N={
     mateSub:"{winner} menang lewat skakmat.",mateWinSub:"Kamu mengalahkan {bot} sebagai {winner}!",mateLoseSub:"{bot} menang lewat skakmat.",
     sbKingCapSub:"{winner} berhasil menangkap Raja lawan!",sbNoMovesSub:"{winner} menang — lawan kehabisan langkah.",
     restartGame:"Main Lagi",changeBotColor:"Ganti Bot / Warna",viewBoard:"Lihat Papan",
+    replayMatch:"Tayang Ulang",replayTitle:"Analisis Replay",replayExit:"Keluar",
+    replayPlay:"Putar",replayPause:"Jeda",replayNextNotable:"Momen Penting",
+    replayStartPos:"Posisi Awal",replayMoveLabel:"Langkah {n}/{tot}",
+    replayQuiet:"Langkah Biasa",replayQuietNote:"Langkah biasa tanpa tangkapan atau taktik — dilewati Smart Analyzer.",
+    replayNoNotable:"Permainan rapi tanpa blunder besar atau pengorbanan!",
+    replayNotableCount:"{count} momen penting",
+    replayGeniusBadge:"Jenius / Gambit",replayBrilliantBadge:"Brilian",
+    replayBlunderBadge:"Blunder",replayBadTradeBadge:"Tukar Rugi (-1)",replayFairTradeBadge:"Tukar Adil",
     moveHistoryTitle:"Riwayat Langkah & Pelatih",lastMove:"Langkah Terakhir",
     noMovesYet:"Belum ada langkah. Ketuk atau geser bidak untuk mulai.",
     copyFen:"Salin FEN",copyPgn:"Salin PGN",copyPng:"Copy PNG",copied:"{label} disalin",pngShareReady:"PNG siap disalin atau dibagikan",
@@ -2537,8 +2666,15 @@ const TTS_PIECES={
   en:{k:"King",q:"Queen",r:"Rook",b:"Bishop",n:"Knight",p:"Pawn"},
   id:{k:"Raja",q:"Menteri",r:"Benteng",b:"Gajah",n:"Kuda",p:"Pion"}
 };
-function speakMove(m){
-  if(!P.tts||!m||!m.piece||!m.to)return;
+function ttsPieceWord(type){
+  const prefix=P.lang==="id"?"id":"en";
+  return (TTS_PIECES[prefix]&&TTS_PIECES[prefix][type])||TTS_PIECES.en[type]||"";
+}
+function cancelSpeech(){
+  try{if(window.speechSynthesis&&typeof window.speechSynthesis.cancel==="function")window.speechSynthesis.cancel()}catch(e){}
+}
+function speakText(text,opts={}){
+  if(!P.tts||!text)return;
   try{
     const synth=window.speechSynthesis;
     const Utter=window.SpeechSynthesisUtterance;
@@ -2546,12 +2682,10 @@ function speakMove(m){
     const isId=P.lang==="id";
     const prefix=isId?"id":"en";
     const targetLang=isId?"id-ID":"en-US";
-    const pieceWord=(TTS_PIECES[prefix]&&TTS_PIECES[prefix][m.piece])||TTS_PIECES.en[m.piece]||"";
-    if(!pieceWord)return;
-    const u=new Utter(`${pieceWord} ${m.to}`);
+    const u=new Utter(String(text));
     u.lang=targetLang;
-    u.rate=1.0;
-    u.pitch=1.0;
+    u.rate=opts.rate||1.0;
+    u.pitch=opts.pitch||1.0;
     u.volume=Math.max(.2,Math.min(1,Number(P.vol)||.85));
     if(typeof synth.getVoices==="function"){
       const vs=synth.getVoices()||[];
@@ -2564,6 +2698,12 @@ function speakMove(m){
     synth.cancel();
     synth.speak(u);
   }catch(e){}
+}
+function speakMove(m){
+  if(!P.tts||!m||!m.piece||!m.to)return;
+  const pieceWord=ttsPieceWord(m.piece);
+  if(!pieceWord)return;
+  speakText(`${pieceWord} ${m.to}`);
 }
 
 /* ---------- In-Depth Multi-Module Learning Hub (10 Lessons, 23 Interactive Steps) ---------- */
@@ -3664,6 +3804,7 @@ function createSandboxGame(startBoard,rules,initState){
     move,
     undo,
     history:opts=>(opts&&opts.verbose)?hist.map(x=>Object.assign({},x.mv)):hist.map(x=>x.mv.san),
+    getStartSnap:()=>hist.length?{bd:cloneSbGrid(hist[0].snap.bd),turn:hist[0].snap.turn,ep:hist[0].snap.ep,half:hist[0].snap.half,full:hist[0].snap.full}:{bd:cloneSbGrid(bd),turn,ep,half,full},
     pgn:()=>{
       const parts=[];
       for(let i=0;i<hist.length;i+=2)parts.push(`${i/2+1}. ${hist[i].mv.san}${hist[i+1]?" "+hist[i+1].mv.san:""}`);
@@ -3782,7 +3923,9 @@ const S={
   coachPreFen:"",
   copied:"",
   copiedLabel:"",
-  restoredCaps:null
+  restoredCaps:null,
+  replay:null,
+  replayTimer:0
 };
 
 function setMsg(key,vars){
@@ -3837,7 +3980,7 @@ function snd(k){SND[k]&&SND[k]()}
 function clrDraw(){if(P.fx.cl){S.dr={a:[],h:{}};S.ds=null}}
 function hasDrawMarks(){return !!(S.dr.a.length||Object.keys(S.dr.h).length||S.ds)}
 function sideOK(){
-  if(S.flipBusy)return false;
+  if(S.flipBusy||S.replay)return false;
   if(S.mode==="bot"||S.mode==="coach")return !S.busy&&!S.over&&!S.coachPending&&S.g.turn()===S.col;
   if(S.mode==="sandbox")return !S.busy&&!S.over;
   if(S.mode==="puz")return !S.solved&&!S.over&&!S.pzBusy;
@@ -4277,11 +4420,15 @@ function ov(){
       h+=`<circle cx="${x}" cy="${y}" r="4.2" fill="none" stroke="${DC[S.dc]}" stroke-width=".85" stroke-dasharray="1.6 1.2"/>`;
     }
   }
-  if(P.fx.arr||S.mode==="coach"||S.hintArrow){
+  if(P.fx.arr||S.mode==="coach"||S.hintArrow||S.replay){
     const L=P.fx.arr?[...D.a]:[];
     if(P.fx.arr&&S.pv&&S.pv[0]!==S.pv[1])L.push({a:S.pv[0],b:S.pv[1],c:S.pv[2],pv:1});
     if(S.mode==="coach"&&S.coachArrows.length)for(const a of S.coachArrows)L.push(a);
     if(S.hintArrow&&(S.mode==="basic"||S.mode==="bot"||S.mode==="sandbox"))L.push(S.hintArrow);
+    if(S.replay){
+      const curF=S.replay.frames[S.replay.idx];
+      if(curF&&curF.event&&curF.event.arrow)L.push(curF.event.arrow);
+    }
     for(const r of L){
       const col=DC[r.c]||r.c;
       const[x1,y1]=xySvg(r.a),[x2,y2]=xySvg(r.b),dx=x2-x1,dy=y2-y1,kn=Math.abs(dx*dy)===200;
@@ -4344,6 +4491,8 @@ function cancelAI(){
   cancelFlipTimer();
 }
 function resetBoardState(){
+  stopReplayAuto();
+  S.replay=null;
   cancelAI();
   stopBoardRotateAnim();
   clearCheckWarn();
@@ -4357,6 +4506,10 @@ function resetBoardState(){
   S.coachArrows=[];S.coachPending=null;S.coachPreFen="";
 }
 function computeCapturedState(){
+  if(S.replay&&S.replay.frames[S.replay.idx]){
+    const rc=S.replay.frames[S.replay.idx].caps;
+    if(rc)return rc;
+  }
   const hist=S.g&&typeof S.g.history==="function"?S.g.history({verbose:true}):[];
   const hasVerbose=Array.isArray(hist)&&hist.length>0&&typeof hist[0]==="object";
   if(!hasVerbose&&S.restoredCaps){
@@ -4383,7 +4536,7 @@ function computeCapturedState(){
 }
 function saveMatchState(){
   try{
-    if(!S.g)return;
+    if(!S.g||S.replay)return;
     if(S.mode!=="basic"&&S.mode!=="bot"&&S.mode!=="coach"&&S.mode!=="sandbox")return;
     const payload={
       v:1,
@@ -4587,12 +4740,503 @@ function startPuzzle(pi){
   render();
 }
 function restartCurrent(){
+  if(S.replay)exitReplayMode(true);
   if(S.mode==="learn")startLesson();
   else if(S.mode==="puz")startPuzzle();
   else if(S.mode==="bot"){S.colorModalOpen=true;render()}
   else if(S.mode==="coach")startCoach();
   else if(S.mode==="sandbox")startSandbox();
   else startBasic();
+}
+
+/* ---------- Post-Game Replay & Smart Match Analyzer (Bilingual TTS) ---------- */
+const RP_CP={p:100,n:320,b:330,r:500,q:900,k:5000};
+const RP_PT={p:1,n:3,b:3,r:5,q:9,k:0};
+function evalBoardCpW(bd){
+  let s=0;
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    const x=bd[r][c];if(!x)continue;
+    let v=RP_CP[x.type]||0;
+    if(x.type==="p")v+=(x.color==="w"?6-r:r-1)*6;
+    if(c>1&&c<6&&r>1&&r<6&&"pnb".includes(x.type))v+=10;
+    s+=x.color==="w"?v:-v;
+  }
+  return s;
+}
+function cloneAnalyzerGame(frame){
+  if(frame.sbSnap){
+    return createSandboxGame(frame.sbSnap.bd,frame.sbRules,{turn:frame.sbSnap.turn,ep:frame.sbSnap.ep,half:frame.sbSnap.half,full:frame.sbSnap.full});
+  }
+  return new Chess(frame.fen);
+}
+function captureRecaptureNet(g,m){
+  const capVal=m.captured?(RP_CP[m.captured]||0):0;
+  const moverVal=RP_CP[m.piece]||0;
+  const res=g.move({from:m.from,to:m.to,promotion:m.promotion||"q"});
+  if(!res)return 0;
+  let oppBestGain=0;
+  if(g.in_checkmate&&g.in_checkmate()){g.undo();return -9000}
+  const oppCaps=g.moves({verbose:true}).filter(om=>om.captured&&om.to===m.to);
+  if(oppCaps.length){
+    let minAtk=Infinity;
+    for(const om of oppCaps){const av=RP_CP[om.piece]||0;if(av<minAtk)minAtk=av}
+    const r2=g.move({from:oppCaps[0].from,to:oppCaps[0].to,promotion:oppCaps[0].promotion||"q"});
+    let reCap=0;
+    if(r2){
+      const myRe=g.moves({verbose:true}).filter(rm=>rm.captured&&rm.to===m.to);
+      if(myRe.length&&minAtk<Infinity)reCap=minAtk;
+      g.undo();
+    }
+    oppBestGain=Math.max(0,moverVal-reCap);
+  }
+  g.undo();
+  return capVal-oppBestGain;
+}
+function maxHangingLossAfter(frame,side){
+  const g=cloneAnalyzerGame(frame);
+  if(g.turn()===side)return 0;
+  const caps=g.moves({verbose:true}).filter(om=>om.captured);
+  let maxLoss=0;
+  for(const om of caps){
+    const victim=RP_CP[om.captured]||0;
+    const atk=RP_CP[om.piece]||0;
+    const r=g.move({from:om.from,to:om.to,promotion:om.promotion||"q"});
+    if(!r)continue;
+    if(g.in_checkmate&&g.in_checkmate()){g.undo();return 5000}
+    const defended=g.moves({verbose:true}).some(rm=>rm.captured&&rm.to===om.to);
+    g.undo();
+    const loss=defended?Math.max(0,victim-atk):victim;
+    if(loss>maxLoss)maxLoss=loss;
+  }
+  return maxLoss;
+}
+function detectBrilliantQuiet(prevFrame,curFrame,m,plyIdx){
+  if(!m||m.captured||curFrame.inMate)return null;
+  if(plyIdx<=3&&m.piece==="p")return null;
+  // Ensure the quiet move didn't just hang itself uncompensated
+  const squareThreat=(()=>{
+    const g=cloneAnalyzerGame(curFrame);
+    const caps=g.moves({verbose:true}).filter(om=>om.captured&&om.to===m.to);
+    if(!caps.length)return 0;
+    let minAtk=Infinity;
+    for(const om of caps){const av=RP_CP[om.piece]||0;if(av<minAtk)minAtk=av}
+    const r=g.move({from:caps[0].from,to:caps[0].to,promotion:caps[0].promotion||"q"});
+    if(!r)return 0;
+    const re=g.moves({verbose:true}).some(rm=>rm.captured&&rm.to===m.to);
+    g.undo();
+    const mv=RP_CP[m.piece]||0;
+    return re?Math.max(0,mv-minAtk):mv;
+  })();
+
+  // Check 1: Quiet Fork (piece attacks >= 2 high-value or undefended enemy pieces from m.to)
+  if(m.piece!=="k"){
+    const fp=curFrame.fen.split(" ");
+    if(!curFrame.sbSnap){
+      fp[1]=m.color;fp[3]="-";
+      try{
+        const gFork=new Chess(fp.join(" "));
+        const targets=gFork.moves({verbose:true}).filter(fm=>fm.from===m.to&&fm.captured&&fm.captured!=="p");
+        const uniq=new Map();
+        for(const tg of targets)if(!uniq.has(tg.to))uniq.set(tg.to,tg.captured);
+        let strongTargets=0;
+        for(const tp of uniq.values()){
+          if((RP_CP[tp]||0)>(RP_CP[m.piece]||0)||(RP_CP[tp]||0)>=500)strongTargets++;
+        }
+        if(strongTargets>=2||(uniq.size>=2&&squareThreat<=0)){
+          return {kind:"brilliant",piece:m.piece,to:m.to,reasonKey:"fork",arrow:{a:m.from,b:m.to,c:"#14b8a6",replay:1}};
+        }
+      }catch(e){}
+    }
+  }
+  // Check 2: Immediate Mate Threat created quietly
+  if(!curFrame.sbSnap&&!curFrame.inCheck){
+    const fp=curFrame.fen.split(" ");
+    fp[1]=m.color;fp[3]="-";
+    try{
+      const gMt=new Chess(fp.join(" "));
+      const legal=gMt.moves({verbose:true});
+      for(const lm of legal){
+        gMt.move(lm);
+        const mk=gMt.in_checkmate();
+        gMt.undo();
+        if(mk&&squareThreat<=100){
+          return {kind:"brilliant",piece:m.piece,to:m.to,reasonKey:"mateThreat",arrow:{a:m.from,b:m.to,c:"#14b8a6",replay:1}};
+        }
+      }
+    }catch(e){}
+  }
+  // Check 3: Sharp Quiet Tactical Check setting up winning pressure
+  if(curFrame.inCheck&&m.piece!=="p"&&m.piece!=="k"&&plyIdx>=5&&squareThreat<=50){
+    const oppHang=maxHangingLossAfter(prevFrame,m.color);
+    if(oppHang===0)return {kind:"brilliant",piece:m.piece,to:m.to,reasonKey:"strategy",arrow:{a:m.from,b:m.to,c:"#14b8a6",replay:1}};
+  }
+  return null;
+}
+function analyzeReplayFrames(frames){
+  const N=frames.length-1;
+  const events=new Array(frames.length).fill(null);
+  const consumed=new Set();
+  if(N<=0)return events;
+
+  // Pass 1: Genius Sacrifices / Gambits / Multi-Piece Exchanges (e.g. Alien Gambit or Rook sac for Queen+Knight)
+  for(let i=1;i<=N;i++){
+    if(consumed.has(i))continue;
+    const m=frames[i].move,side=m.color;
+    const sacCp=RP_CP[m.piece]||0,capCp=m.captured?(RP_CP[m.captured]||0):0;
+    const isAlienF7=(m.piece==="n"&&(m.to==="f7"||m.to==="f2")&&i<=14);
+    const nextM=(i+1<=N)?frames[i+1].move:null;
+    const nextRecaptured=!!(nextM&&nextM.captured&&nextM.to===m.to);
+    const sacrificedIntoAttack=(sacCp>=300&&(nextRecaptured||isAlienF7)&&capCp<sacCp);
+    const sacrificedOnSquare=(sacCp>=300&&nextRecaptured&&capCp<sacCp);
+
+    if(sacrificedIntoAttack||sacrificedOnSquare){
+      const won=[],lost=[];
+      let bestPayoffIdx=i,payoffNet=0,mateWon=false;
+      const maxJ=Math.min(N,i+6);
+      for(let j=i;j<=maxJ;j++){
+        const mj=frames[j].move;
+        if(mj.color===side){
+          if(mj.captured)won.push(mj.captured);
+          if(frames[j].inMate){mateWon=true;bestPayoffIdx=j;break}
+        }else{
+          if(mj.captured)lost.push(mj.captured);
+        }
+        const net=(frames[j].evalCpW-frames[i-1].evalCpW)*(side==="w"?1:-1);
+        const majorWon=won.filter(t=>(RP_PT[t]||0)>=3);
+        const ptsNet=won.reduce((a,t)=>a+(RP_PT[t]||0),0)-lost.reduce((a,t)=>a+(RP_PT[t]||0),0);
+        if(j>=i+2&&(mateWon||(ptsNet>=0&&net>=-20&&(majorWon.length>=2||(won.includes("q")&&net>=0)||net>=220))||(isAlienF7&&net>=80))){
+          bestPayoffIdx=j;payoffNet=net;
+          if((majorWon.length>=2&&ptsNet>=0)||mateWon)break;
+        }
+      }
+      const wonMajor=won.filter(t=>(RP_PT[t]||0)>=3).sort((a,b)=>(RP_PT[b]||0)-(RP_PT[a]||0));
+      const finalPtsNet=won.reduce((a,t)=>a+(RP_PT[t]||0),0)-lost.reduce((a,t)=>a+(RP_PT[t]||0),0);
+      if(bestPayoffIdx>i&&(mateWon||(finalPtsNet>=0&&payoffNet>=-20&&(wonMajor.length>=2||payoffNet>=250))||(isAlienF7&&payoffNet>=80))){
+        events[i]={
+          kind:"genius",
+          sacPiece:m.piece,
+          wonPieces:wonMajor.slice(0,2),
+          alien:true,
+          arrow:{a:m.from,b:m.to,c:"#f59e0b",replay:1}
+        };
+        for(let k=i;k<=bestPayoffIdx;k++)consumed.add(k);
+      }
+    }
+  }
+
+  // Pass 2: Fair Trades, Bad Trades (-1 pt), & Blunders
+  for(let i=1;i<=N;i++){
+    if(events[i]||consumed.has(i))continue;
+    const m=frames[i].move,side=m.color;
+    const nextM=(i+1<=N)?frames[i+1].move:null;
+
+    // Multi-ply / reciprocal capture exchange (2..4 consecutive captures, e.g. same square or immediate tactical trade)
+    if(m.captured&&nextM&&nextM.captured&&!consumed.has(i+1)&&(nextM.to===m.to||nextM.color!==side)){
+      let endJ=i+1;
+      let wonPts=(RP_PT[m.captured]||0),lostPts=(RP_PT[nextM.captured]||0);
+      let firstWon=m.captured,firstLost=nextM.captured;
+      // Extend exchange if captures continue immediately on the same tactical square/sequence
+      for(let k=i+2;k<=Math.min(N,i+3);k++){
+        if(consumed.has(k))break;
+        const mk=frames[k].move;
+        if(!mk.captured)break;
+        if(mk.to!==m.to&&mk.to!==frames[k-1].move.to)break;
+        endJ=k;
+        if(mk.color===side)wonPts+=(RP_PT[mk.captured]||0);
+        else lostPts+=(RP_PT[mk.captured]||0);
+      }
+      const netPts=wonPts-lostPts;
+      if(netPts===0&&wonPts>0){
+        const endM=frames[endJ].move;
+        events[endJ]={kind:"fairTrade",p1:firstWon,p2:firstLost,arrow:{a:endM.from,b:endM.to,c:"#22c55e",replay:1}};
+        for(let k=i;k<=endJ;k++)consumed.add(k);
+        continue;
+      }
+      if(netPts===-1){
+        events[i]={kind:"badTrade",piece:m.piece,arrow:{a:m.from,b:m.to,c:"#f97316",replay:1}};
+        for(let k=i;k<=endJ;k++)consumed.add(k);
+        continue;
+      }
+      if(netPts<=-2){
+        events[i]={kind:"blunder",piece:m.piece,sub:"loss",arrow:{a:m.from,b:m.to,c:"#ef4444",replay:1}};
+        for(let k=i;k<=endJ;k++)consumed.add(k);
+        continue;
+      }
+    }
+
+    // Check immediate hanging/loss threat created by move m
+    if(!frames[i].inMate){
+      const prevHang=maxHangingLossAfter(frames[i-1],side);
+      const afterHang=maxHangingLossAfter(frames[i],side);
+      const capPts=m.captured?(RP_CP[m.captured]||0):0;
+      const netGainCp=capPts-afterHang;
+      if(m.captured&&afterHang>0){
+        if(netGainCp<=-75&&netGainCp>=-170){
+          events[i]={kind:"badTrade",piece:m.piece,arrow:{a:m.from,b:m.to,c:"#f97316",replay:1}};
+          consumed.add(i);continue;
+        }
+        if(netGainCp<=-175){
+          events[i]={kind:"blunder",piece:m.piece,sub:"loss",arrow:{a:m.from,b:m.to,c:"#ef4444",replay:1}};
+          consumed.add(i);continue;
+        }
+      }
+      if(!m.captured&&(afterHang>=260&&afterHang>prevHang+150)){
+        events[i]={kind:"blunder",piece:m.piece,sub:"hang",arrow:{a:m.from,b:m.to,c:"#ef4444",replay:1}};
+        consumed.add(i);continue;
+      }
+      // Opponent escaped checkmate next move because mover blundered into mate-in-1
+      if(nextM&&i+1<=N&&frames[i+1].inMate){
+        events[i]={kind:"blunder",piece:m.piece,sub:"mate",arrow:{a:m.from,b:m.to,c:"#ef4444",replay:1}};
+        consumed.add(i);continue;
+      }
+    }
+  }
+
+  // Pass 3: Brilliant Quiet Moves (Strict Smart Filtering — skip ordinary quiet moves)
+  for(let i=1;i<=N;i++){
+    if(events[i]||consumed.has(i))continue;
+    const br=detectBrilliantQuiet(frames[i-1],frames[i],frames[i].move,i);
+    if(br)events[i]=br;
+  }
+  return events;
+}
+function formatReplayEvent(ev){
+  if(!ev)return null;
+  const isId=P.lang==="id";
+  if(ev.kind==="genius"){
+    const sac=ttsPieceWord(ev.sacPiece);
+    const hasTwo=Array.isArray(ev.wonPieces)&&ev.wonPieces.length>=2;
+    if(hasTwo){
+      const w1=ttsPieceWord(ev.wonPieces[0]),w2=ttsPieceWord(ev.wonPieces[1]);
+      return{
+        cls:"genius",
+        badge:t("replayGeniusBadge"),
+        text:isId
+          ?`Sungguh jenius! Kamu baru saja melakukan Alien Gambit dengan mengorbankan ${sac} untuk merebut ${w1} dan ${w2} lawan!`
+          :`Pure genius! You just pulled off the Alien Gambit — sacrificing your ${sac} to capture the opponent's ${w1} and ${w2}!`
+      };
+    }
+    return{
+      cls:"genius",
+      badge:t("replayGeniusBadge"),
+      text:isId
+        ?`Sungguh jenius! Kamu baru saja melakukan Alien Gambit dengan mengorbankan ${sac} untuk serangan mematikan!`
+        :`Pure genius! You just unleashed the Alien Gambit by sacrificing your ${sac} for a decisive attack!`
+    };
+  }
+  if(ev.kind==="badTrade"){
+    return{
+      cls:"badTrade",
+      badge:t("replayBadTradeBadge"),
+      text:isId
+        ?"Wah, pertukaran ini salah, kamu minus satu poin!"
+        :"Whoa, bad trade here — you are minus one point!"
+    };
+  }
+  if(ev.kind==="blunder"){
+    const pc=ttsPieceWord(ev.piece);
+    return{
+      cls:"blunder",
+      badge:t("replayBlunderBadge"),
+      text:isId
+        ?`Gerakan blunder! ${pc} ini kehilangan keunggulan penting.`
+        :`Blunder move! That ${pc} gives away crucial material.`
+    };
+  }
+  if(ev.kind==="fairTrade"){
+    const p1=ttsPieceWord(ev.p1),p2=ttsPieceWord(ev.p2);
+    return{
+      cls:"fairTrade",
+      badge:t("replayFairTradeBadge"),
+      text:isId
+        ?(p1===p2?`Pertukaran poin yang adil (${p1} vs ${p2}).`:`Pertukaran poin yang adil antara ${p1} dan ${p2}.`)
+        :`Fair point trade — equal ${p1} for ${p2} exchange.`
+    };
+  }
+  if(ev.kind==="brilliant"){
+    const pc=ttsPieceWord(ev.piece),sq=ev.to;
+    const reason=isId
+      ?(ev.reasonKey==="fork"?"mengancam dua perwira lawan sekaligus":(ev.reasonKey==="mateThreat"?"membuka ancaman skakmat yang mematikan":"menciptakan tekanan strategis yang sangat kuat"))
+      :(ev.reasonKey==="fork"?"forks two enemy pieces simultaneously":(ev.reasonKey==="mateThreat"?"creates a deadly checkmate threat":"sets up powerful strategic pressure"));
+    return{
+      cls:"brilliant",
+      badge:t("replayBrilliantBadge"),
+      text:isId
+        ?`Langkah brilian yang tenang! ${pc} ke ${sq} ${reason}.`
+        :`Brilliant quiet move! ${pc} to ${sq} ${reason}.`
+    };
+  }
+  return null;
+}
+function stopReplayAuto(){
+  if(S.replayTimer){clearTimeout(S.replayTimer);S.replayTimer=0}
+  if(S.replay)S.replay.playing=false;
+}
+function speakReplayEvent(ev){
+  if(!ev){cancelSpeech();return}
+  const fmt=formatReplayEvent(ev);
+  if(fmt&&fmt.text)speakText(fmt.text);
+  else cancelSpeech();
+}
+function enterReplayMode(){
+  if(!S.g)return;
+  const origMoves=S.g.history({verbose:true});
+  if(!origMoves||!origMoves.length)return;
+  cancelAI();
+  clearCaptureShatters();
+  stopReplayAuto();
+  cancelSpeech();
+  S.mateModalOpen=false;S.drawerOpen=false;S.menuOpen=false;
+  const orig={
+    g:S.g,mode:S.mode,col:S.col,flip:S.flip,last:S.last,
+    over:S.over,overSpec:S.overSpec,mateWin:S.mateWin,mateReason:S.mateReason
+  };
+  let rg;
+  const isSb=!!S.g.isSandbox;
+  if(isSb){
+    const ss=S.g.getStartSnap?S.g.getStartSnap():{bd:S.sbCfg.board,turn:"w",ep:null,half:0,full:1};
+    rg=createSandboxGame(ss.bd,S.g.rules,{turn:ss.turn,ep:ss.ep,half:ss.half,full:ss.full});
+  }else{
+    rg=new Chess();
+  }
+  const makeSnap=(plyMove,capsState)=>({
+    fen:rg.fen(),
+    move:plyMove,
+    board:rg.board(),
+    evalCpW:evalBoardCpW(rg.board()),
+    inCheck:rg.in_check(),
+    inMate:rg.in_checkmate(),
+    caps:{w:capsState.w.slice(),b:capsState.b.slice(),lastGlobalPly:capsState.lastGlobalPly},
+    sbSnap:isSb?{bd:cloneSbGrid(rg.board()),turn:rg.turn(),ep:null,half:0,full:1}:null,
+    sbRules:isSb?S.g.rules:null,
+    event:null
+  });
+  const capsTrack={w:[],b:[],lastGlobalPly:-1};
+  const frames=[makeSnap(null,capsTrack)];
+  for(let i=0;i<origMoves.length;i++){
+    const m=origMoves[i];
+    const mv=rg.move({from:m.from,to:m.to,promotion:m.promotion||"q"});
+    if(!mv)break;
+    if(mv.captured){
+      const capCol=mv.capturedColor||(mv.color==="w"?"b":"w");
+      const side=mv.color==="b"?"b":"w";
+      capsTrack[side].push({type:mv.captured,color:capCol,ply:i});
+      capsTrack.lastGlobalPly=i;
+    }
+    frames.push(makeSnap(mv,capsTrack));
+  }
+  const events=analyzeReplayFrames(frames);
+  const notableIndices=[];
+  for(let i=0;i<frames.length;i++){
+    frames[i].event=events[i];
+    if(events[i])notableIndices.push(i);
+  }
+  S.replay={orig,frames,idx:0,playing:false,notableIndices};
+  stepReplay(0,false);
+}
+function stepReplay(targetIdx,shouldSpeak=true){
+  if(!S.replay)return;
+  const rp=S.replay;
+  const prevIdx=rp.idx;
+  const nextIdx=Math.max(0,Math.min(rp.frames.length-1,targetIdx));
+  rp.idx=nextIdx;
+  const f=rp.frames[nextIdx];
+  S.g=cloneAnalyzerGame(f);
+  S.sel=null;S.legal=[];
+  S.last=f.move?[f.move.from,f.move.to]:null;
+  S.ex=f.move?buildExplainText(f.move,f.inMate,f.inCheck,""):"";
+  let anim=null;
+  if(nextIdx===prevIdx+1&&f.move)anim={m:f.move,rev:false};
+  else if(nextIdx===prevIdx-1&&rp.frames[prevIdx]&&rp.frames[prevIdx].move)anim={m:rp.frames[prevIdx].move,rev:true};
+  render(anim);
+  if(shouldSpeak)speakReplayEvent(f.event);
+  else cancelSpeech();
+}
+function jumpNextNotable(){
+  if(!S.replay)return;
+  stopReplayAuto();
+  const rp=S.replay;
+  if(!rp.notableIndices.length)return;
+  const nxt=rp.notableIndices.find(idx=>idx>rp.idx);
+  stepReplay(nxt!==undefined?nxt:rp.notableIndices[0],true);
+}
+function toggleReplayAuto(){
+  if(!S.replay)return;
+  if(S.replay.playing){
+    stopReplayAuto();
+    cancelSpeech();
+    renderUIOnly();
+    return;
+  }
+  if(S.replay.idx>=S.replay.frames.length-1)stepReplay(0,false);
+  S.replay.playing=true;
+  renderUIOnly();
+  const advance=()=>{
+    if(!S.replay||!S.replay.playing)return;
+    if(S.replay.idx>=S.replay.frames.length-1){
+      stopReplayAuto();
+      renderUIOnly();
+      return;
+    }
+    stepReplay(S.replay.idx+1,true);
+    const curEv=S.replay.frames[S.replay.idx].event;
+    const waitMs=curEv?2600:950;
+    S.replayTimer=setTimeout(advance,waitMs);
+  };
+  S.replayTimer=setTimeout(advance,650);
+}
+function exitReplayMode(skipRender){
+  if(!S.replay)return;
+  stopReplayAuto();
+  cancelSpeech();
+  const o=S.replay.orig;
+  S.replay=null;
+  S.g=o.g;S.mode=o.mode;S.col=o.col;S.flip=o.flip;
+  S.last=o.last;S.over=o.over;S.overSpec=o.overSpec;
+  S.mateWin=o.mateWin;S.mateReason=o.mateReason;
+  S.sel=null;S.legal=[];
+  if(!skipRender)render();
+}
+function renderReplayPanel(){
+  const rpEl=$("#replay-panel");
+  if(!rpEl)return;
+  if(!S.replay){rpEl.hidden=true;return}
+  rpEl.hidden=false;
+  const rp=S.replay,tot=rp.frames.length-1,curF=rp.frames[rp.idx];
+  const evInfo=formatReplayEvent(curF&&curF.event);
+  const badgeCls=evInfo?evInfo.cls:"quiet";
+  const badgeTxt=evInfo?evInfo.badge:t("replayQuiet");
+  const msgTxt=evInfo
+    ?evInfo.text
+    :(rp.idx===0?(rp.notableIndices.length?t("replayNotableCount",{count:rp.notableIndices.length}):t("replayNoNotable")):t("replayQuietNote"));
+  const mv=curF&&curF.move;
+  const mvHdr=mv
+    ?`${t("replayMoveLabel",{n:rp.idx,tot})} · ${mv.from}→${mv.to}`
+    :t("replayStartPos");
+  const pillsHtml=rp.notableIndices.length
+    ?`<div class="rp-pills">${rp.notableIndices.map(ni=>{
+        const nf=rp.frames[ni];
+        const info=formatReplayEvent(nf.event);
+        const active=ni===rp.idx?"on":"";
+        return `<button data-a="replay-goto" data-v="${ni}" class="rp-pill ${active}">${ni}. ${info?info.badge:""}</button>`;
+      }).join("")}</div>`
+    :"";
+  setHtmlIfChanged(rpEl,
+    `<div class="rp-top">`+
+      `<div class="rp-title-grp"><span class="rp-step">${mvHdr}</span></div>`+
+      `<span class="rp-badge ${badgeCls}">${badgeTxt}</span>`+
+    `</div>`+
+    `<div class="rp-msg ${badgeCls}">${msgTxt}</div>`+
+    pillsHtml+
+    `<div class="rp-nav">`+
+      `<button data-a="replay-first" aria-label="First" ${rp.idx===0?"disabled":""}>|&lt;</button>`+
+      `<button data-a="replay-prev" aria-label="Previous" ${rp.idx===0?"disabled":""}>&lt;</button>`+
+      `<button data-a="replay-toggle" class="${rp.playing?"pri":""}">${rp.playing?t("replayPause"):t("replayPlay")}</button>`+
+      `<button data-a="replay-next" aria-label="Next" ${rp.idx>=tot?"disabled":""}>&gt;</button>`+
+      `<button data-a="replay-last" aria-label="Last" ${rp.idx>=tot?"disabled":""}>&gt;|</button>`+
+      `<button data-a="replay-exit" class="rp-exit">${t("replayExit")}</button>`+
+    `</div>`
+  );
 }
 
 /* ---------- Non-Blocking Bot / Coach AI Workers ---------- */
@@ -5200,6 +5844,7 @@ function refreshTranslatedState(){
 /* ---------- View Rendering (Separated from Piece Layer) ---------- */
 function currentBotMeta(){return BOT_MODES.find(b=>b.id===P.diff)||BOT_MODES[0]}
 function modeLabel(){
+  if(S.replay)return `${t("replayTitle")} (${S.replay.idx}/${S.replay.frames.length-1})`;
   if(S.mode==="bot"){
     const bm=currentBotMeta();
     const badge=bm.red?`<span class="mittens-pill" style="padding:1px 6px;font-size:10px">Mittens</span>`:botName(bm);
@@ -5350,8 +5995,9 @@ function renderStatusAndBanner(){
   renderCoachBox();
 
   const ban=$("#banner");
+  if(S.replay){ban.hidden=true;return}
   const showLearnPuz=S.mode==="learn"||S.mode==="puz";
-  const text=S.hm&&S.h?S.hm:(S.over&&(S.mode==="bot"||S.mode==="coach"||S.mode==="sandbox")&&!S.msg?`${S.over}. ${t("playAgain")}`:S.msg);
+  const text=S.hm&&S.h?S.hm:(S.over&&(S.mode==="bot"||S.mode==="coach"||S.mode==="sandbox")&&!S.msg?`${S.over}. ${t("playAgain")}`:(S.over&&S.mode==="basic"&&S.g.history().length?S.over:S.msg));
   if(!showLearnPuz&&!text){ban.hidden=true;return}
   ban.hidden=false;
   const bCls=(S.hm&&S.h)?"hint":(S.bad?"bad":"");
@@ -5370,8 +6016,9 @@ function renderStatusAndBanner(){
       acts+=`<button data-a="npz" class="${S.solved?"pri":""}" ${canNext?"":"disabled"}>${t("nextLevel",{lvl:nxt+1})}</button>`;
     }
     acts+=`<button data-a="go-me">${t("allDailies")}</button>`;
-  }else if(S.over&&(S.mode==="bot"||S.mode==="coach"||S.mode==="sandbox")){
-    acts+=`<button data-a="restart" class="pri">${S.mode==="coach"?t("newCoachGame"):(S.mode==="sandbox"?t("newSandboxMatch"):t("newBotMatch"))}</button>`;
+  }else if(S.over&&(S.mode==="basic"||S.mode==="bot"||S.mode==="coach"||S.mode==="sandbox")){
+    if(S.g.history().length>0)acts+=`<button data-a="start-replay" class="pri">${t("replayMatch")}</button>`;
+    acts+=`<button data-a="restart" class="${S.g.history().length>0?"":"pri"}">${S.mode==="coach"?t("newCoachGame"):(S.mode==="sandbox"?t("newSandboxMatch"):(S.mode==="basic"?t("restartGame"):t("newBotMatch")))}</button>`;
     if(S.mode==="sandbox")acts+=`<button data-a="mode-sandbox">${t("editSandboxRules")}</button>`;
   }
   setHtmlIfChanged(ban,`<div class="banner-top"><span>${text}</span></div>${acts?`<div class="banner-actions">${acts}</div>`:""}`);
@@ -5404,14 +6051,14 @@ function renderCapturedTray(){
 }
 
 function renderActionBar(){
-  const mv=S.g.history();
+  const mv=S.g.history(),disRep=!!S.replay;
   setHtmlIfChanged($("#bctl"),
     `<button data-a="restart" aria-label="${t("restart")}">${IC.restart}<span>${t("restart")}</span></button>`+
-    `<button data-a="undo" aria-label="${t("undo")}" ${mv.length?"":"disabled"}>${IC.undo}<span>${t("undo")}</span></button>`+
-    `<button data-a="redo" aria-label="${t("redo")}" ${S.redo.length?"":"disabled"}>${IC.redo}<span>${t("redo")}</span></button>`+
+    `<button data-a="undo" aria-label="${t("undo")}" ${mv.length&&!disRep?"":"disabled"}>${IC.undo}<span>${t("undo")}</span></button>`+
+    `<button data-a="redo" aria-label="${t("redo")}" ${S.redo.length&&!disRep?"":"disabled"}>${IC.redo}<span>${t("redo")}</span></button>`+
     `<button data-a="dm" class="${S.dm?"on":""}" aria-label="${t("draw")}">${IC.draw}<span>${t("draw")}</span></button>`+
     `<button data-a="flip" aria-label="${t("flip")}">${IC.flip}<span>${t("flip")}</span></button>`+
-    `<button data-a="hint" aria-label="${t("hint")}" ${S.over?"disabled":""}>${IC.hint}<span>${t("hint")}</span></button>`+
+    `<button data-a="hint" aria-label="${t("hint")}" ${S.over||disRep?"disabled":""}>${IC.hint}<span>${t("hint")}</span></button>`+
     `<button data-a="drawer" class="${S.drawerOpen?"on":""}" aria-label="${t("moves")}">${IC.list}<span>${t("moves")}${mv.length?` (${mv.length})`:""}</span></button>`
   );
   renderDrawBar();
@@ -5533,6 +6180,7 @@ function renderDrawer(){
     `<div class="drawer-body">`+
       `${S.ex?`<div class="card" style="padding:12px"><div class="mu" style="font-weight:700;margin-bottom:4px">${t("lastMove")}</div><div>${S.ex}</div></div>`:""}`+
       `${mv.length?`<div class="moves-grid">${rows}</div>`:`<div class="mu">${t("noMovesYet")}</div>`}`+
+      `${(S.over&&mv.length&&!S.replay&&(S.mode==="basic"||S.mode==="bot"||S.mode==="coach"||S.mode==="sandbox"))?`<button data-a="start-replay" class="pri" style="width:100%">${t("replayMatch")}</button>`:""}`+
       `<div style="display:flex;gap:8px;flex-wrap:wrap"><button data-a="cpfen">${t("copyFen")}</button><button data-a="cppgn" ${mv.length?"":"disabled"}>${t("copyPgn")}</button><button data-a="cppng">${t("copyPng")}</button>${S.copied?`<span class="mu" style="align-self:center;color:var(--ac);font-weight:700">${S.copied}</span>`:""}</div>`+
       `<code>${S.g.fen()}</code>`+
     `</div>`;
@@ -5599,7 +6247,8 @@ function renderMateModal(){
     `<div class="modal-emblem mate-glow">${IC.queenLogo}</div>`+
     `<h3>${headline}</h3>`+
     `<div class="mu">${sub}</div>`+
-    `<button data-a="mate-restart" class="pri" style="width:100%">${t("restartGame")}</button>`+
+    `${S.g.history().length>0?`<button data-a="start-replay" class="pri" style="width:100%">${t("replayMatch")}</button>`:""}`+
+    `<button data-a="mate-restart" class="${S.g.history().length>0?"":"pri"}" style="width:100%">${t("restartGame")}</button>`+
     `${S.mode==="bot"?`<button data-a="mode-bot" style="width:100%">${t("changeBotColor")}</button>`:""}`+
     `${S.mode==="basic"?`<button data-a="mode-basic" style="width:100%">${t("change2pMode")}</button>`:""}`+
     `${S.mode==="sandbox"?`<button data-a="mode-sandbox" style="width:100%">${t("editSandboxRules")}</button>`:""}`+
@@ -5735,6 +6384,7 @@ function renderUIOnly(){
     renderStatusAndBanner();
     syncGridHighlights();
     renderCapturedTray();
+    renderReplayPanel();
     renderActionBar();
     ov();
   }else{
@@ -6143,6 +6793,14 @@ document.addEventListener("click",e=>{
   else if(a==="cpfen")copyText(S.g.fen(),"FEN");
   else if(a==="cppgn")copyText(S.g.pgn(),"PGN");
   else if(a==="cppng")copyBoardPng();
+  else if(a==="start-replay")enterReplayMode();
+  else if(a==="replay-first"){if(S.replay){stopReplayAuto();stepReplay(0,false)}}
+  else if(a==="replay-prev"){if(S.replay){stopReplayAuto();stepReplay(S.replay.idx-1,true)}}
+  else if(a==="replay-next"){if(S.replay){stopReplayAuto();stepReplay(S.replay.idx+1,true)}}
+  else if(a==="replay-last"){if(S.replay){stopReplayAuto();stepReplay(S.replay.frames.length-1,true)}}
+  else if(a==="replay-goto"){if(S.replay){stopReplayAuto();stepReplay(+d.v,true)}}
+  else if(a==="replay-toggle")toggleReplayAuto();
+  else if(a==="replay-exit")exitReplayMode();
 });
 
 $("#menu-backdrop").addEventListener("click",()=>{S.menuOpen=false;renderUIOnly()});
@@ -6319,8 +6977,8 @@ document.addEventListener("keydown",e=>{
     else if(S.drawerOpen){S.drawerOpen=false;renderUIOnly()}
     else{S.dr={a:[],h:{}};S.ds=null;ov();renderDrawBar()}
   }else if(e.key==="f"||e.key==="F"){cancelFlipTimer();triggerBoardRotateAnim(!S.flip)}
-  else if(e.key==="ArrowLeft")undo();
-  else if(e.key==="ArrowRight")redo();
+  else if(e.key==="ArrowLeft"){if(S.replay){stopReplayAuto();stepReplay(S.replay.idx-1,true)}else undo()}
+  else if(e.key==="ArrowRight"){if(S.replay){stopReplayAuto();stepReplay(S.replay.idx+1,true)}else redo()}
 });
 
 let _sliderRaf=0;
