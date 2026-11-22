@@ -769,16 +769,21 @@ main{
   text-overflow:ellipsis;
 }
 
-/* Side-by-Side Captured Pieces Boxes Below Board */
+/* Contextual Captured Pieces Graveyards (Top Facing & Bottom Active) */
+#cap-top,
 #cap-tray{
   flex:0 0 auto;
   display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-columns:minmax(0,1fr);
   gap:6px;
   width:100%;
 }
+#cap-top[hidden],#cap-tray[hidden]{display:none}
+#cap-top .cap-box{
+  transform:rotate(180deg);
+}
 .cap-box{
-  min-height:36px;
+  min-height:34px;
   padding:4px 8px;
   border-radius:10px;
   background:var(--pn);
@@ -1379,13 +1384,13 @@ code{
   background:var(--pn2);
 }
 
-/* 2-Player Orientation Modal */
-.p2-choices{
+/* 2-Player Orientation & PGN Export Modals */
+.p2-choices,.pgn-choices{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
   gap:10px;
 }
-.p2-opt{
+.p2-opt,.pgn-opt{
   min-height:112px;
   padding:14px 10px;
   flex-direction:column;
@@ -1396,7 +1401,7 @@ code{
   white-space:normal;
   text-align:center;
 }
-.p2-opt.on{
+.p2-opt.on,.pgn-opt.on{
   background:var(--ac-soft);
   color:var(--tx);
   border-color:var(--ac);
@@ -1415,6 +1420,25 @@ code{
 .p2-ico svg{width:28px;height:28px}
 .p2-title{font-size:14px;font-weight:800}
 .p2-sub{font-size:11.5px;color:var(--mu);font-weight:500;line-height:1.25}
+.pgn-preview-wrap{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  text-align:left;
+}
+.pgn-preview-lbl{
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  color:var(--mu);
+}
+code.pgn-preview{
+  max-height:76px;
+  overflow-y:auto;
+  font-size:11.5px;
+  line-height:1.4;
+}
 
 /* Sandbox Pre-Game Setup Modal */
 .modal-card.sb-card{
@@ -1718,12 +1742,13 @@ code{
   #play-view{
     display:grid;
     grid-template-columns:minmax(0,1fr) 240px;
-    grid-template-rows:auto auto auto minmax(0,1fr);
-    grid-template-areas:"board status" "board caps" "board banner" "board actions";
+    grid-template-rows:auto auto auto auto minmax(0,1fr);
+    grid-template-areas:"board status" "board captop" "board caps" "board banner" "board actions";
     gap:6px 12px;
   }
   #bwrap{grid-area:board}
   #status-bar{grid-area:status}
+  #cap-top{grid-area:captop}
   #cap-tray{grid-area:caps}
   #banner,#replay-panel{grid-area:banner}
   #bctl{grid-area:actions;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start}
@@ -1834,6 +1859,7 @@ code{
     <div id="status-bar"></div>
     <div id="banner" hidden></div>
     <div id="coach-box" hidden></div>
+    <div id="cap-top" aria-label="Top player captured pieces" hidden></div>
     <div id="bwrap">
       <div id="bw">
         <div id="bd"></div>
@@ -1873,6 +1899,10 @@ code{
 
 <div id="sb-bg" class="modal-bg" hidden>
   <div id="sb-modal" class="modal-card sb-card" role="dialog" aria-label="Sandbox Setup"></div>
+</div>
+
+<div id="pgn-bg" class="modal-bg" hidden>
+  <div id="pgn-modal" class="modal-card" role="dialog" aria-label="Export PGN Format"></div>
 </div>
 
 <div id="toast" role="status" aria-live="polite" hidden></div>
@@ -2010,9 +2040,10 @@ const I18N={
     restart:"Restart",undo:"Undo",redo:"Redo",draw:"Draw",flip:"Flip",hint:"Hint",moves:"Moves",
     clear:"Clear",done:"Done",
     playVsBot:"Play vs Bot",pickSideSub:"Select Bot difficulty and your side, then tap Start Game.",startGame:"Start Game",cancel:"Cancel",
-    p2Title:"2-Player Mode",p2Sub:"Choose how the pieces and board face each player, then tap Start Game.",
-    p2FaceTitle:"Face-to-Face",p2FaceSub:"Static board · opposing piece directions",
-    p2SameTitle:"Same Direction",p2SameSub:"Board auto-flips 180° every turn",
+    p2Title:"2-Player Mode",p2Sub:"Choose how the board and captured graveyards behave for both players.",
+    p2FaceTitle:"Face-to-Face",p2FaceSub:"Rotates board 180° per turn · dual top/bottom graveyards",
+    p2SameTitle:"Same Direction",p2SameSub:"Fixed board view · single shifting graveyard box",
+    p2SelectBtn:"Confirm Orientation",
     change2pMode:"Change 2P Mode",
     sandboxRulesBtn:"Rules & Setup",editSandboxRules:"Edit Sandbox Rules",
     sbTitle:"Sandbox: Custom Rules",sbSub:"Customize pieces on the board and mix hybrid movement rules.",
@@ -2040,7 +2071,11 @@ const I18N={
     moveHistoryTitle:"Move History & Coaching",lastMove:"Last Move",
     noMovesYet:"No moves played yet. Tap or drag a piece to start.",
     copyFen:"Copy FEN",copyPgn:"Copy PGN",copyPng:"Copy PNG",copied:"{label} copied",pngShareReady:"PNG ready to copy or share",
-    copyPngUnsupported:"Image clipboard not supported on this device.",copyPngFailed:"Could not copy PNG to clipboard.",
+    copyPngUnsupported:"Image clipboard not supported on this device.",copyPngFailed:"Could not copy PNG to clipboard.",copyFailed:"Could not copy to clipboard.",
+    pgnModalTitle:"Export PGN Format",pgnModalSub:"Choose your preferred notation style before copying to clipboard.",
+    pgnClassicTitle:"Classic",pgnClassicSub:"Standard algebraic (e.g., Rg1, Nf3)",
+    pgnModernTitle:"Modern (Beginner)",pgnModernSub:"Square + piece name (e.g., g1(Rook), f3(Knight))",
+    pgnCopyBtn:"Copy PGN",pgnPreviewLbl:"Preview",
     heroSub:"{dn} of {tot} lesson steps · {sc}/3 Today’s Dailies · Rating {r}",
     yourStats:"Your Statistics",puzzleRating:"Puzzle Rating",dailyStreak:"Daily Streak",accuracy:"Accuracy",botWdl:"Bot W / D / L",
     dailyPuzzles:"Daily Puzzles · {day} ({sc}/3)",playLv:"Play Lv.{lvl}",lockedToday:"Locked Today",
@@ -2308,9 +2343,10 @@ const I18N={
     restart:"Ulang",undo:"Undo",redo:"Redo",draw:"Gambar",flip:"Balik",hint:"Petunjuk",moves:"Langkah",
     clear:"Hapus",done:"Selesai",
     playVsBot:"Lawan Bot",pickSideSub:"Pilih level Bot dan warna bidakmu, lalu ketuk Mulai Main.",startGame:"Mulai Main",cancel:"Batal",
-    p2Title:"Mode 2 Pemain",p2Sub:"Pilih arah bidak dan papan untuk kedua pemain, lalu ketuk Mulai Main.",
-    p2FaceTitle:"Berhadapan",p2FaceSub:"Papan diam · bidak saling berhadapan",
-    p2SameTitle:"Searah",p2SameSub:"Papan berputar 180° tiap giliran",
+    p2Title:"Mode 2 Pemain",p2Sub:"Pilih perilaku papan dan kotak bidak termakan untuk kedua pemain.",
+    p2FaceTitle:"Berhadapan",p2FaceSub:"Papan berputar 180° tiap giliran · kotak atas & bawah",
+    p2SameTitle:"Searah",p2SameSub:"Papan diam · 1 kotak bidak aktif berganti tiap giliran",
+    p2SelectBtn:"Pilih Orientasi",
     change2pMode:"Ganti Mode 2P",
     sandboxRulesBtn:"Atur Papan",editSandboxRules:"Edit Aturan Sandbox",
     sbTitle:"Sandbox: Aturan Bebas",sbSub:"Atur bidak awal di papan dan gabungkan gerakan hibrida bebas aturan.",
@@ -2338,7 +2374,11 @@ const I18N={
     moveHistoryTitle:"Riwayat Langkah & Pelatih",lastMove:"Langkah Terakhir",
     noMovesYet:"Belum ada langkah. Ketuk atau geser bidak untuk mulai.",
     copyFen:"Salin FEN",copyPgn:"Salin PGN",copyPng:"Copy PNG",copied:"{label} disalin",pngShareReady:"PNG siap disalin atau dibagikan",
-    copyPngUnsupported:"Salin gambar tidak didukung di perangkat ini.",copyPngFailed:"Gagal menyalin PNG ke clipboard.",
+    copyPngUnsupported:"Salin gambar tidak didukung di perangkat ini.",copyPngFailed:"Gagal menyalin PNG ke clipboard.",copyFailed:"Gagal menyalin ke clipboard.",
+    pgnModalTitle:"Ekspor Format PGN",pgnModalSub:"Pilih gaya notasi yang diinginkan sebelum disalin ke clipboard.",
+    pgnClassicTitle:"Klasik",pgnClassicSub:"Aljabar standar (mis. Rg1, Nf3)",
+    pgnModernTitle:"Modern (Pemula)",pgnModernSub:"Kotak + nama bidak (mis. g1(Rook), f3(Knight))",
+    pgnCopyBtn:"Salin PGN",pgnPreviewLbl:"Pratinjau",
     heroSub:"{dn} dari {tot} langkah belajar · {sc}/3 Harian · Rating {r}",
     yourStats:"Statistik Kamu",puzzleRating:"Rating Teka-teki",dailyStreak:"Streak Harian",accuracy:"Akurasi",botWdl:"Bot M / S / K",
     dailyPuzzles:"Teka-teki Harian · {day} ({sc}/3)",playLv:"Main Lv.{lvl}",lockedToday:"Selesai Hari Ini",
@@ -4021,7 +4061,11 @@ const S={
   colorModalOpen:false,
   botColPick:"w",
   p2ModalOpen:false,
-  p2Pick:"same",
+  p2Pick:"face",
+  p2Target:"basic",
+  pgnModalOpen:false,
+  pgnFormat:"classic",
+  sbOppPicked:false,
   sbSetupOpen:false,
   sbCfg:{
     board:defaultSbGrid(),
@@ -4223,15 +4267,17 @@ function stopBoardRotateAnim(){
   S.flipBusy=false;
 }
 
-function isFaceToFaceMode(){
+function isDualFaceGraveyard(){
   return (S.mode==="basic"&&S.basicP2==="face")||(S.mode==="sandbox"&&S.sbCfg.opp==="face");
 }
-function isAutoFlipTurn(){
-  return (S.mode==="basic"&&S.basicP2==="same")||(S.mode==="sandbox"&&S.sbCfg.opp==="same");
+function isFaceToFaceMode(){
+  return false;
 }
-function isFaceOppPiece(color){
-  if(!isFaceToFaceMode())return false;
-  return color===(S.flip?"w":"b");
+function isAutoFlipTurn(){
+  return (S.mode==="basic"&&S.basicP2==="face")||(S.mode==="sandbox"&&S.sbCfg.opp==="face");
+}
+function isFaceOppPiece(){
+  return false;
 }
 
 function pxCoord(sq){
@@ -4802,7 +4848,7 @@ function startSandbox(){
   if(S.sbCfg.opp==="bot")S.sbCfg.opp="same";
   S.sbCfg.err="";
   S.mode="sandbox";S.tab="play";S.col="w";S.flip=false;
-  S.sbSetupOpen=false;S.menuOpen=false;S.p2ModalOpen=false;S.colorModalOpen=false;
+  S.sbSetupOpen=false;S.menuOpen=false;S.p2ModalOpen=false;S.colorModalOpen=false;S.pgnModalOpen=false;
   S.restoredCaps=null;
   clearCaptureShatters();
   resetBoardState();
@@ -6161,16 +6207,10 @@ function renderStatusAndBanner(){
 
 const CAP_ORDER={q:0,r:1,b:2,n:3,p:4,k:5};
 function renderCapturedTray(){
-  const tray=$("#cap-tray");
+  const topTray=$("#cap-top"),tray=$("#cap-tray");
   if(!tray)return;
   const caps=computeCapturedState();
-  const isVsAi=S.mode==="bot"||S.mode==="coach";
-  const leftSide=isVsAi?S.col:"w";
-  const rightSide=leftSide==="w"?"b":"w";
-  const leftLbl=isVsAi?t("capYou"):t("capWhite");
-  const rightLbl=isVsAi?(S.mode==="coach"?t("coachGemini"):t("capOpp")):t("capBlack");
   const sumPts=arr=>arr.reduce((a,c)=>a+(ID_VAL[c.type]||0),0);
-  const leftPts=sumPts(caps[leftSide]),rightPts=sumPts(caps[rightSide]);
   const buildBox=(side,lbl,adv)=>{
     const list=caps[side].slice().sort((a,b)=>(CAP_ORDER[a.type]??9)-(CAP_ORDER[b.type]??9));
     const latestSidePly=caps[side].reduce((mx,c)=>Math.max(mx,c.ply??-1),-1);
@@ -6179,10 +6219,49 @@ function renderCapturedTray(){
       :`<span class="cap-empty">${t("capNone")}</span>`;
     return `<div class="cap-box"><span class="cap-meta"><span class="cap-dot ${side}"></span><span>${lbl}</span>${adv>0?`<span class="cap-adv">+${adv}</span>`:""}</span><div class="cap-list">${itemsHtml}</div></div>`;
   };
-  setHtmlIfChanged(tray,
-    buildBox(leftSide,leftLbl,leftPts-rightPts)+
-    buildBox(rightSide,rightLbl,rightPts-leftPts)
-  );
+
+  if(isDualFaceGraveyard()){
+    const topSide=S.flip?"w":"b";
+    const botSide=topSide==="w"?"b":"w";
+    const topLbl=topSide==="w"?t("capWhite"):t("capBlack");
+    const botLbl=botSide==="w"?t("capWhite"):t("capBlack");
+    const topPts=sumPts(caps[topSide]),botPts=sumPts(caps[botSide]);
+    if(topTray){
+      topTray.hidden=false;
+      setHtmlIfChanged(topTray,buildBox(topSide,topLbl,topPts-botPts));
+    }
+    tray.hidden=false;
+    setHtmlIfChanged(tray,buildBox(botSide,botLbl,botPts-topPts));
+    return;
+  }
+
+  if(topTray){
+    topTray.hidden=true;
+    setHtmlIfChanged(topTray,"");
+  }
+  tray.hidden=false;
+
+  if(S.mode==="bot"||S.mode==="coach"){
+    const playerSide=S.col==="b"?"b":"w";
+    const oppSide=playerSide==="w"?"b":"w";
+    const lbl=P.name||t("capYou");
+    const adv=sumPts(caps[playerSide])-sumPts(caps[oppSide]);
+    setHtmlIfChanged(tray,buildBox(playerSide,lbl,adv));
+    return;
+  }
+
+  if(S.mode==="basic"||S.mode==="sandbox"){
+    const activeSide=S.g.turn()==="b"?"b":"w";
+    const oppSide=activeSide==="w"?"b":"w";
+    const lbl=activeSide==="w"?t("capWhite"):t("capBlack");
+    const adv=sumPts(caps[activeSide])-sumPts(caps[oppSide]);
+    setHtmlIfChanged(tray,buildBox(activeSide,lbl,adv));
+    return;
+  }
+
+  const pSide=S.flip?"b":"w";
+  const oSide=pSide==="w"?"b":"w";
+  setHtmlIfChanged(tray,buildBox(pSide,pSide==="w"?t("capWhite"):t("capBlack"),sumPts(caps[pSide])-sumPts(caps[oSide])));
 }
 
 function renderActionBar(){
@@ -6394,7 +6473,8 @@ function renderP2Modal(){
   const bg=$("#p2-bg");
   bg.hidden=!S.p2ModalOpen;
   if(!S.p2ModalOpen)return;
-  const pick=S.p2Pick||S.basicP2||"same";
+  const pick=S.p2Pick||(S.p2Target==="basic"?S.basicP2:S.sbCfg.opp)||"face";
+  const btnLbl=S.p2Target==="sandbox-pick"?t("p2SelectBtn"):t("startGame");
   $("#p2-modal").innerHTML=
     `<div class="modal-emblem">${IC.queenLogo}</div>`+
     `<h3>${t("p2Title")}</h3>`+
@@ -6411,14 +6491,70 @@ function renderP2Modal(){
         `<span class="p2-sub">${t("p2SameSub")}</span>`+
       `</button>`+
     `</div>`+
-    `<button data-a="p2-start" class="pri" style="width:100%">${t("startGame")}</button>`+
+    `<button data-a="p2-start" class="pri" style="width:100%">${btnLbl}</button>`+
     `<button data-a="close-p2" style="width:100%">${t("cancel")}</button>`;
+}
+
+const PGN_MODERN_NAMES={p:"Pawn",n:"Knight",b:"Bishop",r:"Rook",q:"Queen",k:"King"};
+function formatModernMoveToken(m){
+  if(!m||typeof m!=="object")return String(m||"");
+  const pname=PGN_MODERN_NAMES[m.piece]||"Piece";
+  const promo=m.promotion?`=${PGN_MODERN_NAMES[m.promotion]||m.promotion.toUpperCase()}`:"";
+  const chk=(m.san&&m.san.endsWith("#"))?"#":((m.san&&m.san.endsWith("+"))?"+":"");
+  return `${m.to}(${pname})${promo}${chk}`;
+}
+function formatPgnExport(style){
+  const g=S.g;if(!g)return "";
+  const hist=g.history({verbose:true});
+  if(style==="modern"){
+    const parts=[];
+    for(let i=0;i<hist.length;i+=2){
+      const wTok=formatModernMoveToken(hist[i]);
+      const bTok=hist[i+1]?" "+formatModernMoveToken(hist[i+1]):"";
+      parts.push(`${i/2+1}. ${wTok}${bTok}`);
+    }
+    return parts.join(" ");
+  }
+  const raw=typeof g.pgn==="function"?g.pgn():"";
+  if(raw)return raw;
+  const parts=[];
+  for(let i=0;i<hist.length;i+=2){
+    const wTok=hist[i].san||"";
+    const bTok=hist[i+1]?" "+(hist[i+1].san||""):"";
+    parts.push(`${i/2+1}. ${wTok}${bTok}`);
+  }
+  return parts.join(" ");
+}
+function renderPgnModal(){
+  const bg=$("#pgn-bg");
+  if(!bg)return;
+  bg.hidden=!S.pgnModalOpen;
+  if(!S.pgnModalOpen)return;
+  const fmt=S.pgnFormat==="modern"?"modern":"classic";
+  const preview=formatPgnExport(fmt)||t("noMovesYet");
+  $("#pgn-modal").innerHTML=
+    `<div class="modal-emblem">${IC.list}</div>`+
+    `<h3>${t("pgnModalTitle")}</h3>`+
+    `<div class="mu">${t("pgnModalSub")}</div>`+
+    `<div class="pgn-choices">`+
+      `<button data-a="pgn-pick" data-fmt="classic" class="pgn-opt${fmt==="classic"?" on":""}">`+
+        `<span class="p2-title">${t("pgnClassicTitle")}</span>`+
+        `<span class="p2-sub">${t("pgnClassicSub")}</span>`+
+      `</button>`+
+      `<button data-a="pgn-pick" data-fmt="modern" class="pgn-opt${fmt==="modern"?" on":""}">`+
+        `<span class="p2-title">${t("pgnModernTitle")}</span>`+
+        `<span class="p2-sub">${t("pgnModernSub")}</span>`+
+      `</button>`+
+    `</div>`+
+    `<div class="pgn-preview-wrap"><div class="pgn-preview-lbl">${t("pgnPreviewLbl")}</div><code class="pgn-preview">${preview}</code></div>`+
+    `<button data-a="pgn-copy" class="pri" style="width:100%">${t("pgnCopyBtn")}</button>`+
+    `<button data-a="close-pgn" style="width:100%">${t("cancel")}</button>`;
 }
 
 function renderSandboxModal(){
   const bg=$("#sb-bg");
-  bg.hidden=!S.sbSetupOpen;
-  if(!S.sbSetupOpen)return;
+  bg.hidden=!S.sbSetupOpen||S.p2ModalOpen;
+  if(!S.sbSetupOpen||S.p2ModalOpen)return;
   const cfg=S.sbCfg,r=cfg.rules,br=cfg.brush;
   const palPieces=[
     ["w","q"],["w","r"],["w","b"],["w","n"],["w","p"],["w","k"],
@@ -6493,7 +6629,7 @@ function renderSandboxModal(){
         `<button data-a="sb-grule" data-k="friendlyFire" class="${r.friendlyFire?"on":""}">${t("sbFriendlyFire")}</button>`+
       `</div>`+
       `<div class="sb-opp-grid">`+
-        `<button data-a="sb-opp" data-v="2p" class="${cfg.opp!=="bot"?"on":""}">${t("play2p")}</button>`+
+        `<button data-a="sb-opp" data-v="2p" class="${cfg.opp!=="bot"?"on":""}">${t("play2p")} · ${cfg.opp==="face"?t("p2FaceTitle"):t("p2SameTitle")}</button>`+
         `<button data-a="sb-opp" data-v="bot" class="sb-opp-disabled" aria-disabled="true">${t("sbOppBot")}</button>`+
       `</div>`+
       `<div class="sb-unavail-note">${t("sbBotUnavailable")}</div>`+
@@ -6532,6 +6668,7 @@ function renderUIOnly(){
   renderDrawer();
   renderColorModal();
   renderP2Modal();
+  renderPgnModal();
   renderSandboxModal();
   renderPromoModal();
   renderMateModal();
@@ -6577,16 +6714,42 @@ function showToast(msg){
 }
 
 let copyTxtTimer=0;
+function markTextCopied(label){
+  S.copiedLabel=label;
+  S.copied=t("copied",{label});renderUIOnly();
+  showToast(S.copied);
+  if(copyTxtTimer)clearTimeout(copyTxtTimer);
+  copyTxtTimer=setTimeout(()=>{copyTxtTimer=0;if(S.copiedLabel===label){S.copied="";S.copiedLabel="";renderUIOnly()}},1500);
+}
+function fallbackExecCopy(txt){
+  const el=document.createElement("textarea");
+  el.value=txt;
+  el.setAttribute("readonly","");
+  el.style.position="fixed";
+  el.style.opacity="0";
+  document.body.appendChild(el);
+  el.select();
+  const ok=document.execCommand("copy");
+  el.remove();
+  return !!ok;
+}
 function copyText(txt,label){
   try{
-    if(navigator.clipboard?.writeText)navigator.clipboard.writeText(txt);
-    else{const el=document.createElement("textarea");el.value=txt;document.body.appendChild(el);el.select();document.execCommand("copy");el.remove()}
-    S.copiedLabel=label;
-    S.copied=t("copied",{label});renderUIOnly();
-    showToast(S.copied);
-    if(copyTxtTimer)clearTimeout(copyTxtTimer);
-    copyTxtTimer=setTimeout(()=>{copyTxtTimer=0;if(S.copiedLabel===label){S.copied="";S.copiedLabel="";renderUIOnly()}},1500);
-  }catch(e){}
+    if(navigator.clipboard?.writeText){
+      const pr=navigator.clipboard.writeText(txt);
+      if(pr&&typeof pr.then==="function"){
+        pr.then(()=>markTextCopied(label)).catch(()=>{
+          if(fallbackExecCopy(txt))markTextCopied(label);
+          else showToast(t("copyFailed"));
+        });
+        return;
+      }
+      markTextCopied(label);
+      return;
+    }
+    if(fallbackExecCopy(txt))markTextCopied(label);
+    else showToast(t("copyFailed"));
+  }catch(e){showToast(t("copyFailed"))}
 }
 
 async function copyBoardToClipboard(opts = {}) {
@@ -6837,14 +7000,19 @@ document.addEventListener("click",e=>{
   if(a==="toggle-menu"){S.menuOpen=!S.menuOpen;renderUIOnly()}
   else if(a==="tab"){S.tab=d.v;S.menuOpen=false;renderUIOnly();if(S.tab==="play")requestAnimationFrame(cacheBoardRect)}
   else if(a==="go-me"){S.tab="me";S.menuOpen=false;renderUIOnly()}
-  else if(a==="mode-basic"){S.menuOpen=false;S.mateModalOpen=false;S.p2Pick=S.basicP2||"same";S.p2ModalOpen=true;renderUIOnly()}
+  else if(a==="mode-basic"){S.menuOpen=false;S.mateModalOpen=false;S.p2Target="basic";S.p2Pick=S.basicP2||"face";S.p2ModalOpen=true;renderUIOnly()}
   else if(a==="p2-pick"){S.p2Pick=d.p2;renderUIOnly()}
-  else if(a==="p2-start"){startBasic(S.p2Pick||S.basicP2||"same")}
+  else if(a==="p2-start"){
+    const pick=S.p2Pick||(S.p2Target==="basic"?S.basicP2:S.sbCfg.opp)||"face";
+    if(S.p2Target==="sandbox-pick"){S.sbCfg.opp=pick;S.sbOppPicked=true;S.p2ModalOpen=false;renderUIOnly()}
+    else if(S.p2Target==="sandbox-start"){S.sbCfg.opp=pick;S.sbOppPicked=true;S.p2ModalOpen=false;startSandbox()}
+    else startBasic(pick);
+  }
   else if(a==="start-basic"){startBasic(d.p2)}
   else if(a==="close-p2"){S.p2ModalOpen=false;renderUIOnly()}
   else if(a==="mode-bot"){S.menuOpen=false;S.mateModalOpen=false;S.botColPick=S.botColPick||"w";S.colorModalOpen=true;renderUIOnly()}
   else if(a==="mode-coach"){S.menuOpen=false;S.mateModalOpen=false;startCoach()}
-  else if(a==="mode-sandbox"){S.menuOpen=false;S.mateModalOpen=false;S.sbSetupOpen=true;S.sbCfg.err="";renderUIOnly()}
+  else if(a==="mode-sandbox"){S.menuOpen=false;S.mateModalOpen=false;S.sbOppPicked=false;S.sbSetupOpen=true;S.sbCfg.err="";renderUIOnly()}
   else if(a==="close-sb"){S.sbSetupOpen=false;renderUIOnly()}
   else if(a==="sb-pre"){applySandboxPreset(d.v)}
   else if(a==="sb-brush"){S.sbCfg.brush=(d.c&&d.t)?{color:d.c,type:d.t}:null;renderUIOnly()}
@@ -6861,9 +7029,13 @@ document.addEventListener("click",e=>{
   else if(a==="sb-grule"){S.sbCfg.rules[d.k]=!S.sbCfg.rules[d.k];renderUIOnly()}
   else if(a==="sb-opp"){
     if(d.v==="bot"){showToast(t("sbBotUnavailable"));return}
-    S.sbCfg.opp="same";renderUIOnly();
+    S.p2Target="sandbox-pick";S.p2Pick=(S.sbCfg.opp==="face"?"face":"same");S.p2ModalOpen=true;renderUIOnly();
   }
-  else if(a==="sb-start"){startSandbox()}
+  else if(a==="sb-start"){
+    if(!hasBothColors(S.sbCfg.board)){S.sbCfg.err=t("sbNeedPiece");renderUIOnly();return}
+    if(!S.sbOppPicked){S.p2Target="sandbox-start";S.p2Pick=(S.sbCfg.opp==="face"?"face":"same");S.p2ModalOpen=true;renderUIOnly();return}
+    startSandbox();
+  }
   else if(a==="rename-player"){
     const curN=P.name||t("defaultPlayerName");
     const nv=window.prompt(t("enterPlayerName"),curN);
@@ -6926,7 +7098,10 @@ document.addEventListener("click",e=>{
   else if(a==="set"){if(d.k==="spd")P.fx.spd=+d.v;else P.fx[d.k]=!P.fx[d.k];save();renderUIOnly()}
   else if(a==="theme"){P.theme=d.v;save();applyTheme();renderUIOnly()}
   else if(a==="cpfen")copyText(S.g.fen(),"FEN");
-  else if(a==="cppgn")copyText(S.g.pgn(),"PGN");
+  else if(a==="cppgn"){S.pgnFormat=S.pgnFormat||"classic";S.pgnModalOpen=true;renderUIOnly()}
+  else if(a==="pgn-pick"){S.pgnFormat=(d.fmt==="modern")?"modern":"classic";renderUIOnly()}
+  else if(a==="pgn-copy"){const txt=formatPgnExport(S.pgnFormat);S.pgnModalOpen=false;copyText(txt,"PGN")}
+  else if(a==="close-pgn"){S.pgnModalOpen=false;renderUIOnly()}
   else if(a==="cppng")copyBoardPng();
   else if(a==="start-replay")enterReplayMode();
   else if(a==="replay-first"){if(S.replay){stopReplayAuto();stepReplay(0,false)}}
@@ -6942,6 +7117,7 @@ $("#menu-backdrop").addEventListener("click",()=>{S.menuOpen=false;renderUIOnly(
 $("#drawer-bg").addEventListener("click",()=>{S.drawerOpen=false;renderUIOnly()});
 $("#color-bg").addEventListener("click",e=>{if(e.target.id==="color-bg"){S.colorModalOpen=false;renderUIOnly()}});
 $("#p2-bg").addEventListener("click",e=>{if(e.target.id==="p2-bg"){S.p2ModalOpen=false;renderUIOnly()}});
+$("#pgn-bg").addEventListener("click",e=>{if(e.target.id==="pgn-bg"){S.pgnModalOpen=false;renderUIOnly()}});
 $("#sb-bg").addEventListener("click",e=>{if(e.target.id==="sb-bg"){S.sbSetupOpen=false;renderUIOnly()}});
 $("#promo-bg").addEventListener("click",e=>{
   if(e.target.id==="promo-bg"){
@@ -6979,7 +7155,7 @@ bdEl.addEventListener("pointerdown",e=>{
     rc={s:sqAtClient(e.clientX,e.clientY),c:e.shiftKey?"red":e.ctrlKey?"yellow":e.altKey?"blue":"green"};
     return;
   }
-  if(e.button!==0||S.pp||S.menuOpen||S.drawerOpen||S.colorModalOpen||S.p2ModalOpen||S.sbSetupOpen||S.mateModalOpen)return;
+  if(e.button!==0||S.pp||S.menuOpen||S.drawerOpen||S.colorModalOpen||S.p2ModalOpen||S.pgnModalOpen||S.sbSetupOpen||S.mateModalOpen)return;
   if(S.flipBusy)return;
   cacheBoardRect();
   const sq=sqAtClient(e.clientX,e.clientY);if(!sq)return;
@@ -7105,8 +7281,9 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Escape"){
     if(S.mateModalOpen){S.mateModalOpen=false;renderUIOnly()}
     else if(S.pp){S.pp=null;renderUIOnly()}
-    else if(S.sbSetupOpen){S.sbSetupOpen=false;renderUIOnly()}
+    else if(S.pgnModalOpen){S.pgnModalOpen=false;renderUIOnly()}
     else if(S.p2ModalOpen){S.p2ModalOpen=false;renderUIOnly()}
+    else if(S.sbSetupOpen){S.sbSetupOpen=false;renderUIOnly()}
     else if(S.colorModalOpen){S.colorModalOpen=false;renderUIOnly()}
     else if(S.menuOpen){S.menuOpen=false;renderUIOnly()}
     else if(S.drawerOpen){S.drawerOpen=false;renderUIOnly()}
