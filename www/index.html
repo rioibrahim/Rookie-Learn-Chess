@@ -1876,6 +1876,8 @@ code{
 </div>
 
 <div id="toast" role="status" aria-live="polite" hidden></div>
+<audio id="aud-sfx" preload="auto" playsinline></audio>
+<audio id="aud-voice" preload="auto" playsinline></audio>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 <script>
@@ -1977,8 +1979,8 @@ const COLOR_NAMES={
 const I18N={
   en:{
     options:"Options",mute:"Mute sound",unmute:"Unmute sound",
-    ttsOn:"Turn off voice announcements",ttsOff:"Turn on voice announcements",
-    ttsVoiceOn:"Voice TTS ON",ttsVoiceOff:"Voice TTS OFF",
+    ttsOn:"Turn off move & replay audio",ttsOff:"Turn on move & replay audio",
+    ttsVoiceOn:"Audio Cues ON",ttsVoiceOff:"Audio Cues OFF",
     capYou:"Player",capOpp:"Opponent",capWhite:"White",capBlack:"Black",capNone:"—",
     menuAria:"Game modes and options",drawerAria:"Move List",navAria:"Primary navigation",
     play:"Play",me:"Me",
@@ -2275,8 +2277,8 @@ const I18N={
   },
   id:{
     options:"Opsi",mute:"Matikan suara",unmute:"Nyalakan suara",
-    ttsOn:"Matikan suara langkah TTS",ttsOff:"Nyalakan suara langkah TTS",
-    ttsVoiceOn:"Suara TTS AKTIF",ttsVoiceOff:"Suara TTS MATI",
+    ttsOn:"Matikan audio langkah & analisis",ttsOff:"Nyalakan audio langkah & analisis",
+    ttsVoiceOn:"Audio Cues AKTIF",ttsVoiceOff:"Audio Cues MATI",
     capYou:"Pemain",capOpp:"Lawan",capWhite:"Putih",capBlack:"Hitam",capNone:"—",
     menuAria:"Mode permainan dan opsi",drawerAria:"Daftar Langkah",navAria:"Navigasi utama",
     play:"Main",me:"Saya",
@@ -2625,85 +2627,208 @@ const PIECE_VB={
 };
 const pieceUse=(t,c)=>`<svg viewBox="${PIECE_VB[t]||"4.5 4.5 36 36"}" shape-rendering="geometricPrecision" aria-hidden="true"><use href="#sp-${c}${t}"/></svg>`;
 
-/* ---------- Web Audio SFX ---------- */
-let AC=null;
-function unlockAudio(){
-  try{
-    const Ctx=window.AudioContext||window.webkitAudioContext;
-    if(!Ctx)return;
-    if(!AC)AC=new Ctx();
-    if(AC.state==="suspended")AC.resume().catch(()=>{});
-  }catch(e){}
-}
-document.addEventListener("pointerdown",unlockAudio,{passive:true});
-function tone(f,d=.08,ty="sine",v=.18,t0=0){
-  if(P.mute||P.vol<=.01)return;
-  try{
-    unlockAudio();
-    if(!AC)return;
-    const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+t0;
-    o.type=ty;o.frequency.setValueAtTime(f,t);
-    g.gain.setValueAtTime(Math.max(.001,v*P.vol),t);
-    g.gain.exponentialRampToValueAtTime(.001,t+d);
-    o.connect(g);g.connect(AC.destination);
-    o.start(t);o.stop(t+d);
-  }catch(e){}
-}
-const SND={
-  move:()=>tone(300,.07,"triangle"),
-  cap:()=>{tone(180,.1,"square",.12);tone(110,.14,"triangle")},
-  chk:()=>{tone(660,.1);tone(880,.14,"sine",.18,.1)},
-  mate:()=>{tone(440,.15);tone(330,.15,"sine",.18,.15);tone(220,.3,"sine",.18,.3)},
-  castle:()=>{tone(260,.06,"triangle");tone(340,.08,"triangle",.18,.09)},
-  promo:()=>{tone(523,.08);tone(784,.14,"sine",.18,.08)},
-  err:()=>tone(130,.18,"sawtooth",.08),
-  ok:()=>{tone(523,.1);tone(659,.1,"sine",.18,.1);tone(784,.22,"sine",.18,.2)},
-  click:()=>tone(500,.03,"sine",.08)
-};
-
-/* ---------- Multi-Language Offline TTS (en-US & id-ID) ---------- */
-const TTS_PIECES={
+/* ---------- Embedded Local HTML5 Audio & Base64 Sound Engine ---------- */
+const AUDIO_B64=(()=>{
+  const SR=11025,TAU=Math.PI*2,B64C="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  function toB64(bytes){
+    if(typeof btoa==="function"){
+      let bin="";
+      for(let i=0;i<bytes.length;i+=4096){
+        bin+=String.fromCharCode.apply(null,bytes.subarray(i,Math.min(i+4096,bytes.length)));
+      }
+      return btoa(bin);
+    }
+    let out="";
+    for(let i=0;i<bytes.length;i+=3){
+      const a=bytes[i],b=i+1<bytes.length?bytes[i+1]:0,c=i+2<bytes.length?bytes[i+2]:0;
+      const n=(a<<16)|(b<<8)|c;
+      out+=B64C[(n>>18)&63]+B64C[(n>>12)&63]+(i+1<bytes.length?B64C[(n>>6)&63]:"=")+(i+2<bytes.length?B64C[n&63]:"=");
+    }
+    return out;
+  }
+  function u32(b,o,v){b[o]=v&255;b[o+1]=(v>>>8)&255;b[o+2]=(v>>>16)&255;b[o+3]=(v>>>24)&255}
+  function u16(b,o,v){b[o]=v&255;b[o+1]=(v>>>8)&255}
+  function makeWav(sec,fn){
+    const n=Math.max(1,Math.round(SR*sec)),buf=new Uint8Array(44+n);
+    buf[0]=82;buf[1]=73;buf[2]=70;buf[3]=70;u32(buf,4,36+n);
+    buf[8]=87;buf[9]=65;buf[10]=86;buf[11]=69;
+    buf[12]=102;buf[13]=109;buf[14]=116;buf[15]=32;u32(buf,16,16);
+    u16(buf,20,1);u16(buf,22,1);u32(buf,24,SR);u32(buf,28,SR);u16(buf,32,1);u16(buf,34,8);
+    buf[36]=100;buf[37]=97;buf[38]=116;buf[39]=97;u32(buf,40,n);
+    for(let i=0;i<n;i++){
+      const t=i/SR,s=fn?fn(t,sec):0;
+      buf[44+i]=Math.max(0,Math.min(255,Math.round(128+s*110)));
+    }
+    return "data:audio/wav;base64,"+toB64(buf);
+  }
+  function seq(notes,wave,gain){
+    let total=0;for(const x of notes)total+=x[1];
+    return makeWav(total,(t)=>{
+      let acc=0;
+      for(const x of notes){
+        const dur=x[1];
+        if(t>=acc&&t<acc+dur){
+          const lt=t-acc,f=x[0];
+          if(f<=0)return 0;
+          const env=Math.min(1,lt/.008)*Math.exp(-lt*(x[2]||11))*Math.min(1,(dur-lt)/.01);
+          const p=TAU*f*lt;
+          const v=wave==="tri"?(2/Math.PI)*Math.asin(Math.sin(p)):wave==="bell"?(Math.sin(p)*.72+Math.sin(p*2)*.22+Math.sin(p*3)*.06):wave==="saw"?((2*((f*lt)%1)-1)*.5+Math.sin(p)*.5):Math.sin(p);
+          return v*env*(gain||.65);
+        }
+        acc+=dur;
+      }
+      return 0;
+    });
+  }
+  const bank={
+    silence:makeWav(.02,null),
+    click:makeWav(.018,(t,d)=>Math.sin(TAU*1250*t)*Math.exp(-t*180)*Math.min(1,(d-t)/.004)*.45),
+    move:makeWav(.075,(t,d)=>(Math.sin(TAU*(180-t*700)*t)*.75+Math.sin(TAU*360*t)*.2)*Math.exp(-t*48)*Math.min(1,t/.004)*Math.min(1,(d-t)/.008)*.75),
+    cap:makeWav(.11,(t,d)=>(Math.sin(TAU*(240-t*900)*t)*.6+Math.sin(TAU*680*t)*Math.exp(-t*85)*.45)*Math.exp(-t*34)*Math.min(1,t/.003)*Math.min(1,(d-t)/.01)*.82),
+    castle:seq([[190,.08,35],[0,.035],[150,.1,32]],"sine",.75),
+    promo:seq([[523.25,.07,16],[659.25,.07,16],[783.99,.12,12]],"bell",.68),
+    chk:seq([[880,.085,18],[1318.51,.125,14]],"tri",.65),
+    mate:seq([[523.25,.085,14],[659.25,.085,14],[783.99,.085,14],[1046.5,.165,9]],"bell",.72),
+    err:seq([[175,.075,18],[135,.085,16]],"saw",.55),
+    ok:seq([[783.99,.07,18],[987.77,.09,15]],"bell",.62),
+    pc_p:seq([[440,.095,18]],"tri",.52),
+    pc_n:seq([[493.88,.048,20],[659.25,.062,16]],"tri",.55),
+    pc_b:seq([[587.33,.05,18],[740,.065,15]],"bell",.55),
+    pc_r:seq([[329.63,.055,16],[493.88,.065,14]],"tri",.58),
+    pc_q:seq([[659.25,.045,16],[880,.045,16],[1046.5,.04,15]],"bell",.58),
+    pc_k:seq([[392,.06,14],[523.25,.07,12]],"bell",.6),
+    rp_genius:seq([[659.25,.065,16],[783.99,.065,16],[987.77,.07,14],[1318.51,.14,10]],"bell",.68),
+    rp_brilliant:seq([[587.33,.07,16],[739.99,.07,16],[880,.13,11]],"bell",.64),
+    rp_fairTrade:seq([[659.25,.08,16],[523.25,.11,14]],"tri",.54),
+    rp_badTrade:seq([[349.23,.09,15],[261.63,.13,13]],"saw",.48),
+    rp_blunder:seq([[293.66,.085,14],[233.08,.09,13],[196,.125,11]],"saw",.52)
+  };
+  const files=["a","b","c","d","e","f","g","h"],fHz=[523.25,587.33,659.25,698.46,783.99,880,987.77,1046.5];
+  for(let i=0;i<8;i++)bank["sq_"+files[i]]=seq([[fHz[i],.08,20]],"tri",.52);
+  const rHz=[261.63,293.66,329.63,349.23,392,440,493.88,523.25];
+  for(let i=0;i<8;i++)bank["rk_"+(i+1)]=seq([[rHz[i],.085,18]],"bell",.52);
+  return bank;
+})();
+const PIECE_LABELS={
   en:{k:"King",q:"Queen",r:"Rook",b:"Bishop",n:"Knight",p:"Pawn"},
   id:{k:"Raja",q:"Menteri",r:"Benteng",b:"Gajah",n:"Kuda",p:"Pion"}
 };
-function ttsPieceWord(type){
+function pieceLabelWord(type){
   const prefix=P.lang==="id"?"id":"en";
-  return (TTS_PIECES[prefix]&&TTS_PIECES[prefix][type])||TTS_PIECES.en[type]||"";
+  return (PIECE_LABELS[prefix]&&PIECE_LABELS[prefix][type])||PIECE_LABELS.en[type]||"";
 }
-function cancelSpeech(){
-  try{if(window.speechSynthesis&&typeof window.speechSynthesis.cancel==="function")window.speechSynthesis.cancel()}catch(e){}
-}
-function speakText(text,opts={}){
-  if(!P.tts||!text)return;
-  try{
-    const synth=window.speechSynthesis;
-    const Utter=window.SpeechSynthesisUtterance;
-    if(!synth||typeof Utter!=="function")return;
-    const isId=P.lang==="id";
-    const prefix=isId?"id":"en";
-    const targetLang=isId?"id-ID":"en-US";
-    const u=new Utter(String(text));
-    u.lang=targetLang;
-    u.rate=opts.rate||1.0;
-    u.pitch=opts.pitch||1.0;
-    u.volume=Math.max(.2,Math.min(1,Number(P.vol)||.85));
-    if(typeof synth.getVoices==="function"){
-      const vs=synth.getVoices()||[];
-      const exact=vs.find(v=>v&&v.lang&&v.lang.toLowerCase()===targetLang.toLowerCase()&&v.localService)||
-        vs.find(v=>v&&v.lang&&v.lang.toLowerCase()===targetLang.toLowerCase())||
-        vs.find(v=>v&&v.lang&&v.lang.toLowerCase().startsWith(prefix)&&v.localService)||
-        vs.find(v=>v&&v.lang&&v.lang.toLowerCase().startsWith(prefix));
-      if(exact)u.voice=exact;
+const LocalAudioEngine=(()=>{
+  let unlocked=false,voiceGen=0,voiceTimer=0;
+  const getEl=ch=>document.getElementById(ch==="voice"?"aud-voice":"aud-sfx");
+  const curVol=()=>P.mute?0:Math.max(0,Math.min(1,Number(P.vol)||0));
+  function syncVolumes(){
+    const v=curVol();
+    for(const ch of["sfx","voice"]){
+      const el=getEl(ch);
+      if(!el)continue;
+      try{el.muted=!!P.mute;el.volume=v}catch(e){}
     }
-    synth.cancel();
-    synth.speak(u);
-  }catch(e){}
-}
+  }
+  function unlock(){
+    if(unlocked)return;
+    unlocked=true;
+    for(const ch of["sfx","voice"]){
+      const el=getEl(ch);
+      if(!el)continue;
+      try{
+        el.muted=true;
+        if(!el.dataset||!el.dataset.k){
+          if(el.dataset)el.dataset.k="silence";
+          el.src=AUDIO_B64.silence;
+        }
+        const pr=el.play();
+        if(pr&&typeof pr.then==="function"){
+          pr.then(()=>{try{el.pause();el.currentTime=0}catch(e){}syncVolumes()}).catch(()=>syncVolumes());
+        }else{
+          try{el.pause();el.currentTime=0}catch(e){}
+          syncVolumes();
+        }
+      }catch(e){syncVolumes()}
+    }
+  }
+  function stopVoice(){
+    voiceGen++;
+    if(voiceTimer){clearTimeout(voiceTimer);voiceTimer=0}
+    const el=getEl("voice");
+    if(!el)return;
+    try{el.onended=null;el.pause();el.currentTime=0}catch(e){}
+  }
+  function stopAll(){
+    stopVoice();
+    const el=getEl("sfx");
+    if(!el)return;
+    try{el.onended=null;el.pause();el.currentTime=0}catch(e){}
+  }
+  function playClip(ch,key,onDone){
+    const uri=AUDIO_B64[key];
+    if(!uri||P.mute||P.vol<=.01){if(onDone)onDone();return}
+    const el=getEl(ch);
+    if(!el){if(onDone)onDone();return}
+    try{
+      el.muted=false;
+      el.volume=curVol();
+      el.onended=null;
+      if(!el.dataset||el.dataset.k!==key){
+        if(el.dataset)el.dataset.k=key;
+        el.src=uri;
+      }else{
+        try{el.pause()}catch(e){}
+      }
+      try{el.currentTime=0}catch(e){}
+      if(onDone)el.onended=()=>{el.onended=null;onDone()};
+      const pr=el.play();
+      if(pr&&typeof pr.catch==="function")pr.catch(()=>{});
+    }catch(e){if(onDone)onDone()}
+  }
+  function playVoiceSeq(keys){
+    stopVoice();
+    if(!P.tts||P.mute||P.vol<=.01||!keys||!keys.length)return;
+    const valid=keys.filter(k=>!!AUDIO_B64[k]);
+    if(!valid.length)return;
+    const gen=voiceGen;
+    let i=0;
+    const next=()=>{
+      if(gen!==voiceGen||!P.tts||P.mute)return;
+      if(i>=valid.length)return;
+      const key=valid[i++];
+      let advanced=false;
+      const advance=()=>{
+        if(advanced||gen!==voiceGen)return;
+        advanced=true;
+        if(voiceTimer){clearTimeout(voiceTimer);voiceTimer=0}
+        if(i<valid.length)voiceTimer=setTimeout(next,45);
+      };
+      voiceTimer=setTimeout(advance,1200);
+      playClip("voice",key,advance);
+    };
+    next();
+  }
+  return {unlock,syncVolumes,stopVoice,stopAll,playClip,playVoiceSeq};
+})();
+function unlockAudio(){LocalAudioEngine.unlock()}
+document.addEventListener("pointerdown",unlockAudio,{passive:true});
+document.addEventListener("keydown",unlockAudio,{passive:true});
+const SND={
+  move:()=>LocalAudioEngine.playClip("sfx","move"),
+  cap:()=>LocalAudioEngine.playClip("sfx","cap"),
+  chk:()=>LocalAudioEngine.playClip("sfx","chk"),
+  mate:()=>LocalAudioEngine.playClip("sfx","mate"),
+  castle:()=>LocalAudioEngine.playClip("sfx","castle"),
+  promo:()=>LocalAudioEngine.playClip("sfx","promo"),
+  err:()=>LocalAudioEngine.playClip("sfx","err"),
+  ok:()=>LocalAudioEngine.playClip("sfx","ok"),
+  click:()=>LocalAudioEngine.playClip("sfx","click")
+};
+function cancelSpeech(){LocalAudioEngine.stopVoice()}
 function speakMove(m){
-  if(!P.tts||!m||!m.piece||!m.to)return;
-  const pieceWord=ttsPieceWord(m.piece);
-  if(!pieceWord)return;
-  speakText(`${pieceWord} ${m.to}`);
+  if(!P.tts||P.mute||!m||!m.piece||!m.to)return;
+  const seq=["pc_"+m.piece,"sq_"+m.to[0],"rk_"+m.to[1]];
+  LocalAudioEngine.playVoiceSeq(seq);
 }
 
 /* ---------- In-Depth Multi-Module Learning Hub (10 Lessons, 23 Interactive Steps) ---------- */
@@ -4749,7 +4874,7 @@ function restartCurrent(){
   else startBasic();
 }
 
-/* ---------- Post-Game Replay & Smart Match Analyzer (Bilingual TTS) ---------- */
+/* ---------- Post-Game Replay & Smart Match Analyzer (Local Audio Engine) ---------- */
 const RP_CP={p:100,n:320,b:330,r:500,q:900,k:5000};
 const RP_PT={p:1,n:3,b:3,r:5,q:9,k:0};
 function evalBoardCpW(bd){
@@ -5004,10 +5129,10 @@ function formatReplayEvent(ev){
   if(!ev)return null;
   const isId=P.lang==="id";
   if(ev.kind==="genius"){
-    const sac=ttsPieceWord(ev.sacPiece);
+    const sac=pieceLabelWord(ev.sacPiece);
     const hasTwo=Array.isArray(ev.wonPieces)&&ev.wonPieces.length>=2;
     if(hasTwo){
-      const w1=ttsPieceWord(ev.wonPieces[0]),w2=ttsPieceWord(ev.wonPieces[1]);
+      const w1=pieceLabelWord(ev.wonPieces[0]),w2=pieceLabelWord(ev.wonPieces[1]);
       return{
         cls:"genius",
         badge:t("replayGeniusBadge"),
@@ -5034,7 +5159,7 @@ function formatReplayEvent(ev){
     };
   }
   if(ev.kind==="blunder"){
-    const pc=ttsPieceWord(ev.piece);
+    const pc=pieceLabelWord(ev.piece);
     return{
       cls:"blunder",
       badge:t("replayBlunderBadge"),
@@ -5044,7 +5169,7 @@ function formatReplayEvent(ev){
     };
   }
   if(ev.kind==="fairTrade"){
-    const p1=ttsPieceWord(ev.p1),p2=ttsPieceWord(ev.p2);
+    const p1=pieceLabelWord(ev.p1),p2=pieceLabelWord(ev.p2);
     return{
       cls:"fairTrade",
       badge:t("replayFairTradeBadge"),
@@ -5054,7 +5179,7 @@ function formatReplayEvent(ev){
     };
   }
   if(ev.kind==="brilliant"){
-    const pc=ttsPieceWord(ev.piece),sq=ev.to;
+    const pc=pieceLabelWord(ev.piece),sq=ev.to;
     const reason=isId
       ?(ev.reasonKey==="fork"?"mengancam dua perwira lawan sekaligus":(ev.reasonKey==="mateThreat"?"membuka ancaman skakmat yang mematikan":"menciptakan tekanan strategis yang sangat kuat"))
       :(ev.reasonKey==="fork"?"forks two enemy pieces simultaneously":(ev.reasonKey==="mateThreat"?"creates a deadly checkmate threat":"sets up powerful strategic pressure"));
@@ -5073,10 +5198,20 @@ function stopReplayAuto(){
   if(S.replay)S.replay.playing=false;
 }
 function speakReplayEvent(ev){
-  if(!ev){cancelSpeech();return}
-  const fmt=formatReplayEvent(ev);
-  if(fmt&&fmt.text)speakText(fmt.text);
-  else cancelSpeech();
+  if(!ev||!P.tts||P.mute){LocalAudioEngine.stopVoice();return}
+  if(ev.kind==="genius"){
+    LocalAudioEngine.playVoiceSeq(["pc_"+(ev.sacPiece||"n"),"rp_genius"]);
+  }else if(ev.kind==="blunder"){
+    LocalAudioEngine.playVoiceSeq(["pc_"+(ev.piece||"p"),"rp_blunder"]);
+  }else if(ev.kind==="badTrade"){
+    LocalAudioEngine.playVoiceSeq(["rp_badTrade"]);
+  }else if(ev.kind==="fairTrade"){
+    LocalAudioEngine.playVoiceSeq(["rp_fairTrade"]);
+  }else if(ev.kind==="brilliant"){
+    LocalAudioEngine.playVoiceSeq(["pc_"+(ev.piece||"n"),"rp_brilliant"]);
+  }else{
+    LocalAudioEngine.stopVoice();
+  }
 }
 function enterReplayMode(){
   if(!S.g)return;
@@ -6769,8 +6904,8 @@ document.addEventListener("click",e=>{
     save();applyUIScale();renderUIOnly();
   }
   else if(a==="beg"){P.beg=d.v==="1";save();refreshTranslatedState();renderUIOnly()}
-  else if(a==="tts"){P.tts=!P.tts;if(!P.tts)try{window.speechSynthesis?.cancel()}catch(err){}save();renderUIOnly()}
-  else if(a==="mute"){P.mute=!P.mute;save();renderUIOnly()}
+  else if(a==="tts"){P.tts=!P.tts;if(!P.tts)LocalAudioEngine.stopVoice();save();renderUIOnly()}
+  else if(a==="mute"){P.mute=!P.mute;if(P.mute)LocalAudioEngine.stopAll();else LocalAudioEngine.syncVolumes();save();renderUIOnly()}
   else if(a==="flip"){cancelFlipTimer();triggerBoardRotateAnim(!S.flip)}
   else if(a==="undo")undo();
   else if(a==="redo")redo();
@@ -6992,7 +7127,8 @@ document.addEventListener("input",e=>{
         const vv=$("#volv");if(vv)vv.textContent=Math.round(P.vol*100)+"%";
       });
     }
-    tone(440,.05);
+    LocalAudioEngine.syncVolumes();
+    SND.click();
   }else if(a==="psz"){
     P.pieceBoost=+e.target.value;scheduleSave();
     applyUIScale();
