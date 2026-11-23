@@ -411,6 +411,13 @@ main{
   flex-direction:column;
   gap:8px;
 }
+#play-view.face-layout #cap-top{order:1}
+#play-view.face-layout #banner{order:2}
+#play-view.face-layout #bwrap{order:3}
+#play-view.face-layout #status-bar{order:4}
+#play-view.face-layout #cap-tray{order:5}
+#play-view.face-layout #draw-bar{order:6}
+#play-view.face-layout #bctl{order:7}
 #status-bar{
   flex:0 0 auto;
   display:flex;
@@ -422,6 +429,17 @@ main{
   background:var(--pn);
   border:1px solid var(--bd);
   border-radius:12px;
+  transition:border-color .22s ease,box-shadow .22s ease,background .22s ease;
+}
+#status-bar.turn-live{
+  border-color:rgba(34,197,94,.78);
+  background:linear-gradient(135deg,rgba(34,197,94,.18),rgba(16,185,129,.08));
+  box-shadow:0 0 18px rgba(34,197,94,.32),inset 0 0 0 1px rgba(34,197,94,.26);
+}
+#status-bar.turn-live.in-check{
+  border-color:rgba(249,115,22,.82);
+  background:linear-gradient(135deg,rgba(34,197,94,.16),rgba(239,68,68,.16));
+  box-shadow:0 0 18px rgba(34,197,94,.24),0 0 12px rgba(239,68,68,.26);
 }
 .status-main{
   display:flex;
@@ -439,6 +457,10 @@ main{
 }
 .turn-dot.w{background:#fcfbf7;border-color:#9e9a92}
 .turn-dot.b{background:#232220;border-color:#777268}
+#status-bar.turn-live .turn-dot{
+  box-shadow:0 0 0 2.5px rgba(34,197,94,.42),0 0 10px rgba(34,197,94,.9);
+  border-color:#22c55e;
+}
 .turn-dot.thinking{animation:thinkPulse 1s ease-in-out infinite}
 @keyframes thinkPulse{
   0%,100%{transform:scale(.9);opacity:.6}
@@ -451,11 +473,24 @@ main{
   overflow:hidden;
   text-overflow:ellipsis;
 }
+#status-bar.turn-live .status-txt{
+  color:#22c55e;
+  font-weight:800;
+  text-shadow:0 0 10px rgba(34,197,94,.28);
+}
+:root[data-theme="light"] #status-bar.turn-live .status-txt{
+  color:#15803d;
+  text-shadow:none;
+}
 .status-sub{
   font-size:12px;
   color:var(--mu);
   white-space:nowrap;
   flex:0 0 auto;
+}
+#status-bar.turn-live .status-sub{
+  color:var(--tx);
+  font-weight:700;
 }
 
 /* Contextual Banner for Lessons / Puzzles / Hints / Warnings / Checkmate */
@@ -1303,6 +1338,18 @@ code{
   border-left-color:var(--err);
   background:rgba(239,68,68,.12);
 }
+#coach-box.pure-idiot{
+  border-color:#ff1e3c;
+  border-left:5px solid #ff1e3c;
+  background:linear-gradient(135deg,rgba(255,30,60,.26),rgba(255,82,0,.18));
+  box-shadow:0 0 18px rgba(255,30,60,.45),inset 0 0 12px rgba(255,30,60,.22);
+}
+#coach-box.genius{
+  border-color:rgba(245,158,11,.7);
+  border-left:5px solid #f59e0b;
+  background:linear-gradient(135deg,rgba(245,158,11,.22),rgba(251,191,36,.1));
+  box-shadow:0 0 14px rgba(245,158,11,.28);
+}
 #coach-box.good{
   border-left-color:var(--ac);
 }
@@ -1327,9 +1374,46 @@ code{
   margin-top:1px;
 }
 #coach-box.warn .coach-ava{background:var(--err)}
+#coach-box.pure-idiot .coach-ava{
+  background:#ff1e3c;
+  box-shadow:0 0 12px rgba(255,30,60,.9);
+}
+#coach-box.genius .coach-ava{background:#f59e0b;box-shadow:0 0 10px rgba(245,158,11,.6)}
 #coach-box.good .coach-ava{background:var(--ac)}
 .coach-txt{min-width:0;font-weight:600}
+#coach-box.pure-idiot .coach-txt{
+  color:#ff2e4c;
+  font-weight:800;
+  text-shadow:0 0 12px rgba(255,30,60,.62),0 0 3px rgba(255,110,90,.45);
+}
+:root[data-theme="light"] #coach-box.pure-idiot .coach-txt{
+  color:#d90429;
+  text-shadow:0 0 10px rgba(255,30,60,.38);
+}
+.coach-tier-pill{
+  display:inline-block;
+  margin-right:6px;
+  padding:1px 7px;
+  border-radius:999px;
+  font-size:10.5px;
+  font-weight:900;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  vertical-align:1px;
+}
+.coach-tier-pill.idiot{
+  background:#ff1e3c;
+  color:#fff;
+  box-shadow:0 0 10px rgba(255,30,60,.85);
+}
+.coach-tier-pill.genius{
+  background:#f59e0b;
+  color:#1c1917;
+  box-shadow:0 0 8px rgba(245,158,11,.65);
+}
 .coach-txt small{display:block;color:var(--mu);font-weight:500;font-size:11.5px;margin-top:1px}
+#coach-box.pure-idiot .coach-txt small{color:#ff8fa3;text-shadow:none}
+:root[data-theme="light"] #coach-box.pure-idiot .coach-txt small{color:#9f1239}
 #coach-box button{
   min-height:34px;
   padding:0 10px;
@@ -1681,6 +1765,7 @@ code.pgn-preview{
 }
 .rp-badge.genius{background:rgba(245,158,11,.18);color:#f59e0b;border:1px solid rgba(245,158,11,.45)}
 .rp-badge.brilliant{background:rgba(20,184,166,.18);color:#14b8a6;border:1px solid rgba(20,184,166,.45)}
+.rp-badge.pureIdiot{background:rgba(255,30,60,.24);color:#ff2442;border:1.5px solid #ff1e3c;box-shadow:0 0 12px rgba(255,30,60,.6);text-shadow:0 0 8px rgba(255,36,66,.7)}
 .rp-badge.blunder{background:rgba(239,68,68,.18);color:#ef4444;border:1px solid rgba(239,68,68,.45)}
 .rp-badge.badTrade{background:rgba(249,115,22,.18);color:#f97316;border:1px solid rgba(249,115,22,.45)}
 .rp-badge.fairTrade{background:rgba(34,197,94,.16);color:#22c55e;border:1px solid rgba(34,197,94,.4)}
@@ -1696,6 +1781,8 @@ code.pgn-preview{
 }
 .rp-msg.genius{border-left-color:#f59e0b;background:rgba(245,158,11,.11)}
 .rp-msg.brilliant{border-left-color:#14b8a6;background:rgba(20,184,166,.11)}
+.rp-msg.pureIdiot{border-left:4px solid #ff1e3c;background:linear-gradient(135deg,rgba(255,30,60,.24),rgba(255,80,0,.15));color:#ff2e4c;font-weight:800;box-shadow:0 0 16px rgba(255,30,60,.34);text-shadow:0 0 10px rgba(255,30,60,.52)}
+:root[data-theme="light"] .rp-msg.pureIdiot{color:#d90429;text-shadow:0 0 8px rgba(255,30,60,.32)}
 .rp-msg.blunder{border-left-color:#ef4444;background:rgba(239,68,68,.12)}
 .rp-msg.badTrade{border-left-color:#f97316;background:rgba(249,115,22,.11)}
 .rp-msg.fairTrade{border-left-color:#22c55e;background:rgba(34,197,94,.1)}
@@ -1749,6 +1836,7 @@ code.pgn-preview{
     grid-template-areas:"board status" "board captop" "board caps" "board banner" "board actions";
     gap:6px 12px;
   }
+  #play-view.face-layout > *{order:unset!important}
   #bwrap{grid-area:board}
   #status-bar{grid-area:status}
   #cap-top{grid-area:captop}
@@ -1791,14 +1879,15 @@ code.pgn-preview{
       <rect x="11" y="33.4" width="24.4" height="4.8" rx="2.3" fill="#e9e3d7" stroke="#1b1a18" stroke-width="1.75"/>
     </g>
     <g id="sp-wq">
-      <path d="M10 29L7.4 14.4l7.1 8.6L17.4 11.2 22.5 21.6 27.6 11.2 30.5 23l7.1-8.6L35 29z" fill="#fcfaf5" stroke="#1b1a18" stroke-width="1.75" stroke-linejoin="round"/>
-      <circle cx="7.1" cy="12.7" r="2" fill="#fcfaf5" stroke="#1b1a18" stroke-width="1.45"/>
-      <circle cx="14.4" cy="9.6" r="2" fill="#fcfaf5" stroke="#1b1a18" stroke-width="1.45"/>
-      <circle cx="22.5" cy="7.9" r="2.2" fill="#fcfaf5" stroke="#1b1a18" stroke-width="1.45"/>
-      <circle cx="30.6" cy="9.6" r="2" fill="#fcfaf5" stroke="#1b1a18" stroke-width="1.45"/>
-      <circle cx="37.9" cy="12.7" r="2" fill="#fcfaf5" stroke="#1b1a18" stroke-width="1.45"/>
-      <rect x="10.2" y="28.8" width="24.6" height="4.1" rx="2" fill="#fcfaf5" stroke="#1b1a18" stroke-width="1.65"/>
-      <rect x="9.4" y="33.5" width="26.2" height="4.8" rx="2.3" fill="#e9e3d7" stroke="#1b1a18" stroke-width="1.7"/>
+      <path d="M10.5 29L7.5 14l4.9 8.8L14.5 10.6l4.1 11.2L22.5 8.8l3.9 13 4.1-11.2 2.1 12.2L37.5 14l-3 15z" fill="#fcfaf5" stroke="#1b1a18" stroke-width="1.75" stroke-linejoin="round"/>
+      <circle cx="7.1" cy="12.4" r="2" fill="#fcfaf5" stroke="#1b1a18" stroke-width="1.45"/>
+      <circle cx="14.3" cy="8.9" r="2" fill="#fcfaf5" stroke="#1b1a18" stroke-width="1.45"/>
+      <circle cx="22.5" cy="7.0" r="2.2" fill="#fcfaf5" stroke="#1b1a18" stroke-width="1.45"/>
+      <circle cx="30.7" cy="8.9" r="2" fill="#fcfaf5" stroke="#1b1a18" stroke-width="1.45"/>
+      <circle cx="37.9" cy="12.4" r="2" fill="#fcfaf5" stroke="#1b1a18" stroke-width="1.45"/>
+      <rect x="10.5" y="29" width="24" height="3.8" rx="1.9" fill="#fcfaf5" stroke="#1b1a18" stroke-width="1.65"/>
+      <rect x="9.3" y="33.4" width="26.4" height="4.8" rx="2.3" fill="#e9e3d7" stroke="#1b1a18" stroke-width="1.7"/>
+      <path d="M13.5 30.9h18" stroke="#1b1a18" stroke-width="1.15" stroke-linecap="round" opacity=".28"/>
     </g>
     <g id="sp-wk">
       <path d="M22.5 5.4v6.6M19.2 8.3h6.6" stroke="#1b1a18" stroke-width="2.2" stroke-linecap="round"/>
@@ -1839,15 +1928,15 @@ code.pgn-preview{
       <path d="M13.8 35.8h18.8" stroke="#ece8de" stroke-width="1.2" stroke-linecap="round" opacity=".76"/>
     </g>
     <g id="sp-bq">
-      <path d="M10 29L7.4 14.4l7.1 8.6L17.4 11.2 22.5 21.6 27.6 11.2 30.5 23l7.1-8.6L35 29z" fill="#262522" stroke="#0d0c0b" stroke-width="1.7" stroke-linejoin="round"/>
-      <circle cx="7.1" cy="12.7" r="2" fill="#262522" stroke="#0d0c0b" stroke-width="1.45"/>
-      <circle cx="14.4" cy="9.6" r="2" fill="#262522" stroke="#0d0c0b" stroke-width="1.45"/>
-      <circle cx="22.5" cy="7.9" r="2.2" fill="#262522" stroke="#0d0c0b" stroke-width="1.45"/>
-      <circle cx="30.6" cy="9.6" r="2" fill="#262522" stroke="#0d0c0b" stroke-width="1.45"/>
-      <circle cx="37.9" cy="12.7" r="2" fill="#262522" stroke="#0d0c0b" stroke-width="1.45"/>
-      <rect x="10.2" y="28.8" width="24.6" height="4.1" rx="2" fill="#262522" stroke="#0d0c0b" stroke-width="1.65"/>
-      <rect x="9.4" y="33.5" width="26.2" height="4.8" rx="2.3" fill="#1b1a18" stroke="#0d0c0b" stroke-width="1.7"/>
-      <path d="M12.6 30.9h19.8M12.4 35.8h20.2" stroke="#ece8de" stroke-width="1.2" stroke-linecap="round" opacity=".76"/>
+      <path d="M10.5 29L7.5 14l4.9 8.8L14.5 10.6l4.1 11.2L22.5 8.8l3.9 13 4.1-11.2 2.1 12.2L37.5 14l-3 15z" fill="#262522" stroke="#0d0c0b" stroke-width="1.7" stroke-linejoin="round"/>
+      <circle cx="7.1" cy="12.4" r="2" fill="#262522" stroke="#0d0c0b" stroke-width="1.45"/>
+      <circle cx="14.3" cy="8.9" r="2" fill="#262522" stroke="#0d0c0b" stroke-width="1.45"/>
+      <circle cx="22.5" cy="7.0" r="2.2" fill="#262522" stroke="#0d0c0b" stroke-width="1.45"/>
+      <circle cx="30.7" cy="8.9" r="2" fill="#262522" stroke="#0d0c0b" stroke-width="1.45"/>
+      <circle cx="37.9" cy="12.4" r="2" fill="#262522" stroke="#0d0c0b" stroke-width="1.45"/>
+      <rect x="10.5" y="29" width="24" height="3.8" rx="1.9" fill="#262522" stroke="#0d0c0b" stroke-width="1.65"/>
+      <rect x="9.3" y="33.4" width="26.4" height="4.8" rx="2.3" fill="#1b1a18" stroke="#0d0c0b" stroke-width="1.7"/>
+      <path d="M12.7 30.9h19.6M12.1 35.8h20.8" stroke="#ece8de" stroke-width="1.2" stroke-linecap="round" opacity=".76"/>
     </g>
     <g id="sp-bk">
       <path d="M22.5 5.4v6.6M19.2 8.3h6.6" stroke="#0d0c0b" stroke-width="2.2" stroke-linecap="round"/>
@@ -2071,15 +2160,15 @@ const I18N={
     replayQuiet:"Quiet Move",replayQuietNote:"Quiet development move — skipped by Smart Analyzer.",
     replayNoNotable:"No sharp blunders or sacrifices detected — solid game!",
     replayNotableCount:"{count} key moments",
-    replayGeniusBadge:"Genius Gambit",replayBrilliantBadge:"Brilliant",
+    replayGeniusBadge:"Genius Gambit",replayBrilliantBadge:"Brilliant",replayPureIdiotBadge:"PURE IDIOT",
     replayBlunderBadge:"Blunder",replayBadTradeBadge:"Bad Trade (-1)",replayFairTradeBadge:"Fair Trade",
     moveHistoryTitle:"Move History & Coaching",lastMove:"Last Move",
     noMovesYet:"No moves played yet. Tap or drag a piece to start.",
-    copyFen:"Copy FEN",copyPgn:"Copy PGN",copyPng:"Copy PNG",copied:"{label} copied",pngShareReady:"PNG ready to copy or share",
-    copyPngUnsupported:"Image clipboard not supported on this device.",copyPngFailed:"Could not copy PNG to clipboard.",copyFailed:"Could not copy to clipboard.",
+    copyFen:"Copy FEN",copyPgn:"Copy PGN",copied:"{label} copied",
+    copyFailed:"Could not copy to clipboard.",
     pgnModalTitle:"Export PGN Format",pgnModalSub:"Choose your preferred notation style before copying to clipboard.",
     pgnClassicTitle:"Classic",pgnClassicSub:"Standard algebraic (e.g., Rg1, Nf3)",
-    pgnModernTitle:"Modern (Beginner)",pgnModernSub:"Square + piece name (e.g., g1(Rook), f3(Knight))",
+    pgnModernTitle:"Modern",pgnModernSub:"Destination-first (e.g., g1(Rook), f3(Knight))",
     pgnCopyBtn:"Copy PGN",pgnPreviewLbl:"Preview",
     heroSub:"{dn} of {tot} lesson steps · {sc}/3 Today’s Dailies · Rating {r}",
     yourStats:"Your Statistics",puzzleRating:"Puzzle Rating",dailyStreak:"Daily Streak",accuracy:"Accuracy",botWdl:"Bot W / D / L",
@@ -2313,6 +2402,40 @@ const I18N={
       "Hint: Check out the {piece} I highlighted — moving it helps activate your position.",
       "Hint: Look at the highlighted {piece} — bringing it into a better square boosts your control!",
       "Hint: Try finding a stronger home for the {piece} I marked!"
+    ],
+    coachTierIdiot:"PURE IDIOT",
+    coachTierGenius:"PURE GENIUS",
+    coachPureIdiot:[
+      "Whoa — PURE IDIOT alert! Moving your {piece} to {to} literally gifts their {atk} a free feast from {punFrom}!",
+      "What on earth was that?! Putting your {piece} on {to} hands the game straight over to their {atk}!",
+      "Catastrophic brain-fart! That {piece} to {to} walks right into disaster — hit Undo before I cry!",
+      "Zero survival instincts! You just hung everything on a silver platter for their {atk}!",
+      "Hold everything!! Moving {piece} to {to} is an absolute disaster — opponent wins on the spot!"
+    ],
+    coachBlunderSpecific:[
+      "Careful! Moving your {piece} to {to} means their {atk} can snatch it cleanly {dir} from {punFrom}!",
+      "Wait! Putting your {piece} on {to} leaves it wide open for their {atk} attacking {dir} ({punFrom}).",
+      "Heads up — that {piece} on {to} is right in the crosshairs of their {atk} {dir} from {punFrom}!",
+      "Hold on! Check that line {dir}: their {atk} on {punFrom} is salivating over your {tgt} on {punTo}!"
+    ],
+    coachDelayedTrap:[
+      "Pure Genius! You intentionally placed your {piece} on {sq} as a bait sacrifice, then sprung a brutal counter-trap!",
+      "Grandmaster vision! Dropping your {piece} on {sq} lured their pieces right into your hidden counter-strike!",
+      "Pure Genius!! That calculated {piece} sacrifice on {sq} shattered their defense completely!"
+    ],
+    coachGoodBrilliant:[
+      "FILTHY tactic!! Putting your {piece} on {to} creates unstoppable double threats — pure chess artistry!",
+      "Brilliant find! That sneaky {piece} move to {to} bends the whole board in your favor!",
+      "Cold-blooded brilliance! Your {piece} jumps into {to} with lethal tactical energy!"
+    ],
+    coachMissedWin:[
+      "Ouch — you just walked past a knockout blow! There was a devastating winning shot right on the board.",
+      "Missed opportunity! Check again — you had a crushing tactical strike ready instead of that quiet move.",
+      "So close! You had a forced winning sequence staring you in the face — want to rewind and find it?"
+    ],
+    coachGambit:[
+      "Spicy gambit! Trading a little material for blazing initiative — I love the fearless spirit!",
+      "Bold gambit! Giving up material for open lines and rapid development — now keep attacking!"
     ]
   },
   id:{
@@ -2372,15 +2495,15 @@ const I18N={
     replayQuiet:"Langkah Biasa",replayQuietNote:"Langkah biasa tanpa tangkapan atau taktik — dilewati Smart Analyzer.",
     replayNoNotable:"Permainan rapi tanpa blunder besar atau pengorbanan!",
     replayNotableCount:"{count} momen penting",
-    replayGeniusBadge:"Jenius / Gambit",replayBrilliantBadge:"Brilian",
+    replayGeniusBadge:"Jenius / Gambit",replayBrilliantBadge:"Brilian",replayPureIdiotBadge:"PURE IDIOT",
     replayBlunderBadge:"Blunder",replayBadTradeBadge:"Tukar Rugi (-1)",replayFairTradeBadge:"Tukar Adil",
     moveHistoryTitle:"Riwayat Langkah & Pelatih",lastMove:"Langkah Terakhir",
     noMovesYet:"Belum ada langkah. Ketuk atau geser bidak untuk mulai.",
-    copyFen:"Salin FEN",copyPgn:"Salin PGN",copyPng:"Copy PNG",copied:"{label} disalin",pngShareReady:"PNG siap disalin atau dibagikan",
-    copyPngUnsupported:"Salin gambar tidak didukung di perangkat ini.",copyPngFailed:"Gagal menyalin PNG ke clipboard.",copyFailed:"Gagal menyalin ke clipboard.",
+    copyFen:"Salin FEN",copyPgn:"Salin PGN",copied:"{label} disalin",
+    copyFailed:"Gagal menyalin ke clipboard.",
     pgnModalTitle:"Ekspor Format PGN",pgnModalSub:"Pilih gaya notasi yang diinginkan sebelum disalin ke clipboard.",
     pgnClassicTitle:"Klasik",pgnClassicSub:"Aljabar standar (mis. Rg1, Nf3)",
-    pgnModernTitle:"Modern (Pemula)",pgnModernSub:"Kotak + nama bidak (mis. g1(Rook), f3(Knight))",
+    pgnModernTitle:"Modern",pgnModernSub:"Kotak tujuan + nama bidak (mis. g1(Rook), f3(Knight))",
     pgnCopyBtn:"Salin PGN",pgnPreviewLbl:"Pratinjau",
     heroSub:"{dn} dari {tot} langkah belajar · {sc}/3 Harian · Rating {r}",
     yourStats:"Statistik Kamu",puzzleRating:"Rating Teka-teki",dailyStreak:"Streak Harian",accuracy:"Akurasi",botWdl:"Bot M / S / K",
@@ -2614,6 +2737,40 @@ const I18N={
       "Petunjuk: Coba lirik {piece} yang kutandai—menggerakkannya bisa bikin posisimu makin aktif.",
       "Petunjuk: Perhatiin {piece} yang kutandai—pindah ke kotak lebih baik bikin kontrolmu naik!",
       "Petunjuk: Coba cari posisi yang lebih oke buat {piece} yang udah kutandai ini!"
+    ],
+    coachTierIdiot:"PURE IDIOT",
+    coachTierGenius:"PURE JENIUS",
+    coachPureIdiot:[
+      "Buset, PURE IDIOT nih!! {piece} kamu pindah ke {to} sama aja nyodorin nyawa ke {atk} lawan dari {punFrom}!",
+      "Waduh parah banget?! Ngasih {piece} ke {to} itu ngasih kemenangan cuma-cuma ke lawan — cepet tekan Undo!!",
+      "Blunder tingkat dewa! Langkah {piece} ke {to} barusan ancur total — jangan sampai kejadian di turnamen beneran!",
+      "Ya ampun, otaknya lagi AFK ya?! {tgt} kamu langsung disantap habis tanpa kompromi sama {atk} lawan!",
+      "STOP! Langkah tadi bencana fatal — lawan bisa langsung ngehukum habis-habisan mulai dari {punFrom}!"
+    ],
+    coachBlunderSpecific:[
+      "Awas! {piece} kamu pindah ke {to}, maka bisa langsung dilahap {atk} musuh {dir} dari {punFrom}!",
+      "Eh tunggu dulu — {piece} kamu di {to} itu kebuka banget buat disikat {atk} lawan {dir} ({punFrom}).",
+      "Hati-hati! {tgt} kamu di {punTo} langsung masuk jalur tembak {atk} musuh {dir} dari {punFrom}!",
+      "Coba cek jalur {dir} itu deh: {atk} lawan di {punFrom} udah ancang-ancang nyomot {tgt} kamu!"
+    ],
+    coachDelayedTrap:[
+      "Pure Jenius! Kamu sengaja menaruh {piece} di {sq} untuk dikorbankan, lalu menjebak balik musuh!",
+      "Otak Grandmaster!! Pengorbanan {piece} di {sq} tadi sukses besar mancing lawan masuk perangkap balik!",
+      "Pure Jenius!! Umpan {piece} di {sq} barusan bikin pertahanan musuh langsung rontok seketika!"
+    ],
+    coachGoodBrilliant:[
+      "SADIS!! Langkah {piece} ke {to} itu penuh jebakan taktis — mainmu lagi tajam banget!",
+      "Langkah brilian! Geser {piece} ke {to} langsung bikin tekanan berlipat ganda di papan!",
+      "Gila, keren banget! {piece} ke {to} mengunci ruang gerak lawan dengan elegan!"
+    ],
+    coachMissedWin:[
+      "Yah kelewat! Barusan ada pukulan kemenangan telak di papan tapi malah terlewat nih.",
+      "Sayang banget! Cek lagi deh — kamu tadi punya langkah taktis mematikan yang langsung menang!",
+      "Nyaris! Ada skak atau tangkapan menang gratis di langkah tadi, mau tarik ulang buat nyari?"
+    ],
+    coachGambit:[
+      "Gambit berani! Rela lepas sedikit materi demi serangan kilat dan jalur terbuka!",
+      "Main agresif lewat gambit! Sekarang manfaatin tempo yang ada buat terus nekan raja lawan!"
     ]
   }
 };
@@ -2638,7 +2795,7 @@ const botName=b=>(b&&b.name&&(b.name[P.lang]||b.name.en))||"";
 const botSub=b=>(b&&b.sub&&(b.sub[P.lang]||b.sub.en))||"";
 
 /* ---------- Crisp Inline SVG Assets & Tight ~90% Piece ViewBoxes ---------- */
-const QUEEN_SVG=`<svg viewBox="0 0 48 48" fill="#ffffff" shape-rendering="geometricPrecision" aria-hidden="true"><circle cx="9.5" cy="13.5" r="2.3"/><circle cx="16.8" cy="9.5" r="2.3"/><circle cx="24" cy="7.8" r="2.5"/><circle cx="31.2" cy="9.5" r="2.3"/><circle cx="38.5" cy="13.5" r="2.3"/><path d="M12.2 29.5h23.6l2.6-13.5-7.4 9.9-1.7-13.6-5.3 12.6-5.3-12.6-1.7 13.6-7.4-9.9 2.6 13.5z"/><rect x="11.5" y="31.5" width="25" height="3.7" rx="1.85"/><rect x="9.2" y="37.2" width="29.6" height="5.2" rx="2.4"/></svg>`;
+const QUEEN_SVG=`<svg viewBox="0 0 48 48" fill="#ffffff" shape-rendering="geometricPrecision" aria-hidden="true"><circle cx="8.2" cy="13.4" r="2.3"/><circle cx="15.8" cy="9.4" r="2.3"/><circle cx="24" cy="7.2" r="2.5"/><circle cx="32.2" cy="9.4" r="2.3"/><circle cx="39.8" cy="13.4" r="2.3"/><path d="M11.6 29.8L8.6 15.2l5.2 8.4L16 11.4l4.2 11L24 9.4l3.8 13 4.2-11 2.2 12.2 5.2-8.4-3 14.6z"/><rect x="11.5" y="31.6" width="25" height="3.8" rx="1.9"/><rect x="9.5" y="37.2" width="29" height="5.2" rx="2.5"/></svg>`;
 const IC={
   queenLogo:QUEEN_SVG,
   play:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>`,
@@ -2663,7 +2820,7 @@ const PIECE_VB={
   r:"8.5 6.8 28 33",
   b:"8 3.6 29 36.2",
   n:"6.8 5 31 35",
-  q:"3.8 4.4 37.4 35.8",
+  q:"3.6 3.5 37.8 37",
   k:"7.5 3.8 30 36"
 };
 const pieceUse=(t,c)=>`<svg viewBox="${PIECE_VB[t]||"4.5 4.5 36 36"}" shape-rendering="geometricPrecision" aria-hidden="true"><use href="#sp-${c}${t}"/></svg>`;
@@ -2731,7 +2888,18 @@ const AUDIO_B64=(()=>{
     chk:seq([[880,.085,18],[1318.51,.125,14]],"tri",.65),
     mate:seq([[523.25,.085,14],[659.25,.085,14],[783.99,.085,14],[1046.5,.165,9]],"bell",.72),
     err:seq([[175,.075,18],[135,.085,16]],"saw",.55),
-    ok:seq([[783.99,.07,18],[987.77,.09,15]],"bell",.62)
+    ok:seq([[783.99,.07,18],[987.77,.09,15]],"bell",.62),
+    rp_fairTrade:seq([[440,.065,18],[523.25,.085,14]],"tri",.58),
+    rp_badTrade:seq([[311.13,.07,18],[261.63,.085,15],[207.65,.11,12]],"saw",.54),
+    rp_blunder:seq([[233.08,.075,16],[174.61,.085,14],[130.81,.15,9]],"saw",.64),
+    rp_pureIdiot:makeWav(.42,(t,d)=>{
+      const env=Math.min(1,t/.012)*Math.min(1,(d-t)/.03);
+      const f1=t<.14?(520-t*1600):t<.28?(310-(t-.14)*900):125;
+      const buzz=(2*((f1*t)%1)-1)*.52+Math.sin(TAU*f1*1.414*t)*.28+Math.sin(TAU*92*t)*.25;
+      return buzz*env*.78;
+    }),
+    rp_brilliant:seq([[523.25,.055,18],[659.25,.055,18],[783.99,.06,16],[1046.5,.14,10]],"bell",.7),
+    rp_genius:seq([[587.33,.055,18],[739.99,.055,18],[880,.06,16],[1174.66,.11,11],[1479.98,.17,8]],"bell",.76)
   };
 })();
 const PIECE_LABELS={
@@ -2811,7 +2979,13 @@ const SND={
   promo:()=>LocalAudioEngine.playClip("sfx","promo"),
   err:()=>LocalAudioEngine.playClip("sfx","err"),
   ok:()=>LocalAudioEngine.playClip("sfx","ok"),
-  click:()=>LocalAudioEngine.playClip("sfx","click")
+  click:()=>LocalAudioEngine.playClip("sfx","click"),
+  rpFairTrade:()=>LocalAudioEngine.playClip("sfx","rp_fairTrade"),
+  rpBadTrade:()=>LocalAudioEngine.playClip("sfx","rp_badTrade"),
+  rpBlunder:()=>LocalAudioEngine.playClip("sfx","rp_blunder"),
+  rpPureIdiot:()=>LocalAudioEngine.playClip("sfx","rp_pureIdiot"),
+  rpBrilliant:()=>LocalAudioEngine.playClip("sfx","rp_brilliant"),
+  rpGenius:()=>LocalAudioEngine.playClip("sfx","rp_genius")
 };
 
 /* ---------- In-Depth Multi-Module Learning Hub (10 Lessons, 23 Interactive Steps) ---------- */
@@ -3478,24 +3652,36 @@ function bestAtDepth(st,d,budget){
   return{m:bestM,sc:bestSc,uci:sqToStr(bestM.f)+sqToStr(bestM.t)+PCHAR[bestM.pr]};
 }
 const PNAME_KEY=["","p","n","b","r","q","k"];
+function atkDirCode(fromSq,toSq,atkType){
+  if(atkType==="n")return "knight";
+  if(!fromSq||!toSq)return "diag";
+  const df=toSq.charCodeAt(0)-fromSq.charCodeAt(0),dr=+toSq[1]-+fromSq[1];
+  if(df===0)return "file";
+  if(dr===0)return "rank";
+  return "diag";
+}
 function coachEval(fenBefore,fenAfter){
   const stB=parseFen(fenBefore),best=bestAtDepth(stB,2,90);
   const stA=parseFen(fenAfter),opp=bestAtDepth(stA,2,90);
+  const bestSc=best?best.sc:0;
   const playedSc=opp?-opp.sc:(attacked(stA.b,stA.turn===1?stA.wk:stA.bk,-stA.turn)?100000:0);
-  const loss=best?(best.sc-playedSc):0;
-  let punFrom="",punTo="",atkType="",tgtType="",isCheck=false;
+  const loss=best?(bestSc-playedSc):0;
+  let punFrom="",punTo="",atkType="",tgtType="",isCheck=false,isMateBlunder=false,punDir="diag";
   if(opp&&opp.m){
     punFrom=sqToStr(opp.m.f);
     punTo=sqToStr(opp.m.t);
     const ap=stA.b[opp.m.f],tp=stA.b[opp.m.t];
     atkType=ap?PNAME_KEY[ap<0?-ap:ap]:"";
     tgtType=tp?PNAME_KEY[tp<0?-tp:tp]:"";
+    punDir=atkDirCode(punFrom,punTo,atkType);
     const u=makeMove(stA,opp.m);
     const pk=stA.turn===1?stA.wk:stA.bk;
     isCheck=attacked(stA.b,pk,-stA.turn);
     unmake(stA,u);
+    if(opp.sc>=90000)isMateBlunder=true;
   }
-  return{loss,punishUci:opp?opp.uci.slice(0,4):"",punFrom,punTo,atkType,tgtType,isCheck};
+  const missedWin=!isMateBlunder&&((bestSc>=9000&&playedSc<8000)||(loss>=260&&best&&best.m&&best.m.cap>=300));
+  return{loss,bestSc,playedSc,punishUci:opp?opp.uci.slice(0,4):"",punFrom,punTo,atkType,tgtType,punDir,isCheck,isMateBlunder,missedWin};
 }
 
 self.onmessage=e=>{
@@ -3569,16 +3755,21 @@ function runCoachEvalFallback(fenBefore,fenAfter,cb){
   let opp=om[0],oppSc=-1e9;
   for(const m of om){gA.move(m);const sc=gA.in_checkmate()?1e5:-evalShallow(gA);gA.undo();if(sc>oppSc){oppSc=sc;opp=m}}
   const playedSc=om.length?-oppSc:(gA.in_checkmate()?1e5:0);
-  let isCheck=false;
-  if(opp){gA.move(opp);isCheck=gA.in_check();gA.undo();}
+  let isCheck=false,isMateBlunder=false;
+  if(opp){gA.move(opp);isCheck=gA.in_check();isMateBlunder=gA.in_checkmate();gA.undo();}
+  const atkType=opp?opp.piece:"";
+  const punFrom=opp?opp.from:"",punTo=opp?opp.to:"";
+  const df=punFrom&&punTo?punTo.charCodeAt(0)-punFrom.charCodeAt(0):0;
+  const dr=punFrom&&punTo?+punTo[1]-+punFrom[1]:0;
+  const punDir=atkType==="n"?"knight":(df===0?"file":(dr===0?"rank":"diag"));
+  const loss=bestSc-playedSc;
+  const missedWin=!isMateBlunder&&((bestSc>=9000&&playedSc<8000)||(loss>=260&&best&&best.captured&&(V_FALLBACK[best.captured]||0)>=300));
   setTimeout(()=>cb({
-    loss:bestSc-playedSc,
+    loss,bestSc,playedSc,
     punishUci:opp?opp.from+opp.to:"",
-    punFrom:opp?opp.from:"",
-    punTo:opp?opp.to:"",
-    atkType:opp?opp.piece:"",
+    punFrom,punTo,atkType,
     tgtType:opp&&opp.captured?opp.captured:"",
-    isCheck
+    punDir,isCheck,isMateBlunder,missedWin
   }),0);
 }
 
@@ -4028,11 +4219,13 @@ const S={
   coachArgs:null,
   coachVariant:0,
   lastCoachVar:{},
-  coachTone:"",    // "" | "good" | "warn"
+  coachTone:"",    // "" | "good" | "warn" | "pure-idiot" | "genius"
   coachHintUsed:false,
   coachArrows:[],  // [{a,b,c}]
   coachPending:null,// {punishUci}
   coachPreFen:"",
+  coachTrapPending:null,
+  coachTrapArmed:null,
   copied:"",
   copiedLabel:"",
   restoredCaps:null,
@@ -4625,6 +4818,7 @@ function resetBoardState(){
   S.bad=false;S.msgSpec=null;S.ex="";S.exSpec=null;S.tried=false;S.over="";S.overSpec=null;
   S.mateWin="";S.mateReason="";S.mateModalOpen=false;
   S.coachArrows=[];S.coachPending=null;S.coachPreFen="";
+  S.coachTrapPending=null;S.coachTrapArmed=null;
 }
 function computeCapturedState(){
   if(S.replay&&S.replay.frames[S.replay.idx]){
@@ -5005,16 +5199,35 @@ function analyzeReplayFrames(frames){
   const consumed=new Set();
   if(N<=0)return events;
 
-  // Pass 1: Genius Sacrifices / Gambits / Multi-Piece Exchanges (e.g. Alien Gambit or Rook sac for Queen+Knight)
+  // Pass 1: Genius Sacrifices / Gambits / Delayed Rook-Bait Trap / Multi-Piece Exchanges
   for(let i=1;i<=N;i++){
     if(consumed.has(i))continue;
     const m=frames[i].move,side=m.color;
     const sacCp=RP_CP[m.piece]||0,capCp=m.captured?(RP_CP[m.captured]||0):0;
     const isAlienF7=(m.piece==="n"&&(m.to==="f7"||m.to==="f2")&&i<=14);
     const nextM=(i+1<=N)?frames[i+1].move:null;
+    const replyM=(i+2<=N)?frames[i+2].move:null;
     const nextRecaptured=!!(nextM&&nextM.captured&&nextM.to===m.to);
     const sacrificedIntoAttack=(sacCp>=300&&(nextRecaptured||isAlienF7)&&capCp<sacCp);
     const sacrificedOnSquare=(sacCp>=300&&nextRecaptured&&capCp<sacCp);
+
+    // Delayed Sacrifice Trap: e.g. places Rook onto sq -> opponent takes -> immediate counter-check/mate/winning strike!
+    if(sacCp>=300&&nextRecaptured&&nextM.captured===m.piece&&replyM&&replyM.color===side){
+      const counterF=frames[i+2];
+      const counterNet=(counterF.evalCpW-frames[i-1].evalCpW)*(side==="w"?1:-1);
+      const isCounterTrap=counterF.inMate||counterF.inCheck||(replyM.captured&&(RP_CP[replyM.captured]||0)>=300&&counterNet>=-50);
+      if(isCounterTrap){
+        events[i]={
+          kind:"genius",
+          delayedTrap:true,
+          sacPiece:m.piece,
+          sq:m.to,
+          arrow:{a:m.from,b:m.to,c:"#f59e0b",replay:1}
+        };
+        for(let k=i;k<=Math.min(N,i+2);k++)consumed.add(k);
+        continue;
+      }
+    }
 
     if(sacrificedIntoAttack||sacrificedOnSquare){
       const won=[],lost=[];
@@ -5039,10 +5252,14 @@ function analyzeReplayFrames(frames){
       const wonMajor=won.filter(t=>(RP_PT[t]||0)>=3).sort((a,b)=>(RP_PT[b]||0)-(RP_PT[a]||0));
       const finalPtsNet=won.reduce((a,t)=>a+(RP_PT[t]||0),0)-lost.reduce((a,t)=>a+(RP_PT[t]||0),0);
       if(bestPayoffIdx>i&&(mateWon||(finalPtsNet>=0&&payoffNet>=-20&&(wonMajor.length>=2||payoffNet>=250))||(isAlienF7&&payoffNet>=80))){
+        let gambitName="Alien Gambit";
+        if(!isAlienF7&&m.piece==="b"&&(m.to==="h7"||m.to==="h2"))gambitName="Greek Gift";
+        else if(!isAlienF7&&i<=10)gambitName=(m.piece==="n"?"Stafford Gambit":"Tactical Gambit");
         events[i]={
           kind:"genius",
           sacPiece:m.piece,
           wonPieces:wonMajor.slice(0,2),
+          gambitName,
           alien:true,
           arrow:{a:m.from,b:m.to,c:"#f59e0b",replay:1}
         };
@@ -5051,18 +5268,17 @@ function analyzeReplayFrames(frames){
     }
   }
 
-  // Pass 2: Fair Trades, Bad Trades (-1 pt), & Blunders
+  // Pass 2: Fair Trades, Bad Trades (-1 pt), Blunders & Pure Idiot Catastrophes
   for(let i=1;i<=N;i++){
     if(events[i]||consumed.has(i))continue;
     const m=frames[i].move,side=m.color;
     const nextM=(i+1<=N)?frames[i+1].move:null;
 
-    // Multi-ply / reciprocal capture exchange (2..4 consecutive captures, e.g. same square or immediate tactical trade)
+    // Multi-ply / reciprocal capture exchange (2..4 consecutive captures)
     if(m.captured&&nextM&&nextM.captured&&!consumed.has(i+1)&&(nextM.to===m.to||nextM.color!==side)){
       let endJ=i+1;
       let wonPts=(RP_PT[m.captured]||0),lostPts=(RP_PT[nextM.captured]||0);
       let firstWon=m.captured,firstLost=nextM.captured;
-      // Extend exchange if captures continue immediately on the same tactical square/sequence
       for(let k=i+2;k<=Math.min(N,i+3);k++){
         if(consumed.has(k))break;
         const mk=frames[k].move;
@@ -5084,6 +5300,11 @@ function analyzeReplayFrames(frames){
         for(let k=i;k<=endJ;k++)consumed.add(k);
         continue;
       }
+      if(netPts<=-5){
+        events[i]={kind:"pureIdiot",piece:m.piece,sub:"loss",arrow:{a:m.from,b:m.to,c:"#ff1e3c",replay:1}};
+        for(let k=i;k<=endJ;k++)consumed.add(k);
+        continue;
+      }
       if(netPts<=-2){
         events[i]={kind:"blunder",piece:m.piece,sub:"loss",arrow:{a:m.from,b:m.to,c:"#ef4444",replay:1}};
         for(let k=i;k<=endJ;k++)consumed.add(k);
@@ -5097,9 +5318,18 @@ function analyzeReplayFrames(frames){
       const afterHang=maxHangingLossAfter(frames[i],side);
       const capPts=m.captured?(RP_CP[m.captured]||0):0;
       const netGainCp=capPts-afterHang;
+      // Blundered straight into mate-in-1 -> Pure Idiot!
+      if(nextM&&i+1<=N&&frames[i+1].inMate){
+        events[i]={kind:"pureIdiot",piece:m.piece,sub:"mate",arrow:{a:m.from,b:m.to,c:"#ff1e3c",replay:1}};
+        consumed.add(i);continue;
+      }
       if(m.captured&&afterHang>0){
         if(netGainCp<=-75&&netGainCp>=-170){
           events[i]={kind:"badTrade",piece:m.piece,arrow:{a:m.from,b:m.to,c:"#f97316",replay:1}};
+          consumed.add(i);continue;
+        }
+        if(netGainCp<=-450){
+          events[i]={kind:"pureIdiot",piece:m.piece,sub:"loss",arrow:{a:m.from,b:m.to,c:"#ff1e3c",replay:1}};
           consumed.add(i);continue;
         }
         if(netGainCp<=-175){
@@ -5107,13 +5337,12 @@ function analyzeReplayFrames(frames){
           consumed.add(i);continue;
         }
       }
-      if(!m.captured&&(afterHang>=260&&afterHang>prevHang+150)){
-        events[i]={kind:"blunder",piece:m.piece,sub:"hang",arrow:{a:m.from,b:m.to,c:"#ef4444",replay:1}};
+      if(!m.captured&&(afterHang>=450&&afterHang>prevHang+220)){
+        events[i]={kind:"pureIdiot",piece:m.piece,sub:"hang",arrow:{a:m.from,b:m.to,c:"#ff1e3c",replay:1}};
         consumed.add(i);continue;
       }
-      // Opponent escaped checkmate next move because mover blundered into mate-in-1
-      if(nextM&&i+1<=N&&frames[i+1].inMate){
-        events[i]={kind:"blunder",piece:m.piece,sub:"mate",arrow:{a:m.from,b:m.to,c:"#ef4444",replay:1}};
+      if(!m.captured&&(afterHang>=260&&afterHang>prevHang+150)){
+        events[i]={kind:"blunder",piece:m.piece,sub:"hang",arrow:{a:m.from,b:m.to,c:"#ef4444",replay:1}};
         consumed.add(i);continue;
       }
     }
@@ -5132,6 +5361,16 @@ function formatReplayEvent(ev){
   const isId=P.lang==="id";
   if(ev.kind==="genius"){
     const sac=pieceLabelWord(ev.sacPiece);
+    if(ev.delayedTrap){
+      return{
+        cls:"genius",
+        badge:t("replayGeniusBadge"),
+        text:isId
+          ?`Pure Jenius! Kamu sengaja menaruh ${sac} di ${ev.sq} untuk dikorbankan, lalu menjebak balik musuh!`
+          :`Pure Genius! You intentionally baited your ${sac} onto ${ev.sq} as a sacrifice, then sprung a brutal counter-trap!`
+      };
+    }
+    const gName=ev.gambitName||"Alien Gambit";
     const hasTwo=Array.isArray(ev.wonPieces)&&ev.wonPieces.length>=2;
     if(hasTwo){
       const w1=pieceLabelWord(ev.wonPieces[0]),w2=pieceLabelWord(ev.wonPieces[1]);
@@ -5139,16 +5378,27 @@ function formatReplayEvent(ev){
         cls:"genius",
         badge:t("replayGeniusBadge"),
         text:isId
-          ?`Sungguh jenius! Kamu baru saja melakukan Alien Gambit dengan mengorbankan ${sac} untuk merebut ${w1} dan ${w2} lawan!`
-          :`Pure genius! You just pulled off the Alien Gambit — sacrificing your ${sac} to capture the opponent's ${w1} and ${w2}!`
+          ?`Sungguh jenius! Kamu baru saja melakukan ${gName} dengan mengorbankan ${sac} untuk merebut ${w1} dan ${w2} lawan!`
+          :`Pure genius! You just pulled off the ${gName} — sacrificing your ${sac} to capture the opponent's ${w1} and ${w2}!`
       };
     }
     return{
       cls:"genius",
       badge:t("replayGeniusBadge"),
       text:isId
-        ?`Sungguh jenius! Kamu baru saja melakukan Alien Gambit dengan mengorbankan ${sac} untuk serangan mematikan!`
-        :`Pure genius! You just unleashed the Alien Gambit by sacrificing your ${sac} for a decisive attack!`
+        ?`Sungguh jenius! Kamu baru saja melakukan ${gName} dengan mengorbankan ${sac} untuk serangan mematikan!`
+        :`Pure genius! You just unleashed the ${gName} by sacrificing your ${sac} for a decisive attack!`
+    };
+  }
+  if(ev.kind==="pureIdiot"){
+    const pc=pieceLabelWord(ev.piece);
+    const subTxt=ev.sub==="mate"
+      ?(isId?`Blunder PURE IDIOT!! Langkah ${pc} ini langsung nyerahin skakmat gratis ke lawan!`:`PURE IDIOT disaster!! Moving that ${pc} hands opponent an instant checkmate!`)
+      :(isId?`PURE IDIOT alert!! ${pc} ini blunder fatal dan membuang perwira besar secara cuma-cuma!`:`PURE IDIOT alert!! Moving that ${pc} throws away massive material on a silver platter!`);
+    return{
+      cls:"pureIdiot",
+      badge:t("replayPureIdiotBadge"),
+      text:subTxt
     };
   }
   if(ev.kind==="badTrade"){
@@ -5255,7 +5505,7 @@ function enterReplayMode(){
   S.replay={orig,frames,idx:0,playing:false,notableIndices};
   stepReplay(0,false);
 }
-function stepReplay(targetIdx,playMateSfx=true){
+function stepReplay(targetIdx,playEventSfx=true){
   if(!S.replay)return;
   const rp=S.replay;
   const prevIdx=rp.idx;
@@ -5270,7 +5520,18 @@ function stepReplay(targetIdx,playMateSfx=true){
   if(nextIdx===prevIdx+1&&f.move)anim={m:f.move,rev:false};
   else if(nextIdx===prevIdx-1&&rp.frames[prevIdx]&&rp.frames[prevIdx].move)anim={m:rp.frames[prevIdx].move,rev:true};
   render(anim);
-  if(playMateSfx&&f&&f.isWin)SND.mate();
+  if(playEventSfx&&f){
+    if(f.isWin)SND.mate();
+    else if(f.event){
+      const k=f.event.kind;
+      if(k==="genius")SND.rpGenius();
+      else if(k==="pureIdiot")SND.rpPureIdiot();
+      else if(k==="blunder")SND.rpBlunder();
+      else if(k==="badTrade")SND.rpBadTrade();
+      else if(k==="fairTrade")SND.rpFairTrade();
+      else if(k==="brilliant")SND.rpBrilliant();
+    }
+  }
 }
 function jumpNextNotable(){
   if(!S.replay)return;
@@ -5446,6 +5707,13 @@ function triggerBotMove(){
       setMsg("");
       setExplain(m,S.g,isCoach?"Coach: ":"Bot: ");
       if(isCoach){
+        const tp=S.coachTrapPending;
+        if(tp&&m.to===tp.toSq&&m.captured===tp.piece&&S.g.history().length===tp.ply+1){
+          S.coachTrapArmed={piece:tp.piece,toSq:tp.toSq,ply:S.g.history().length};
+        }else{
+          S.coachTrapArmed=null;
+        }
+        S.coachTrapPending=null;
         const thr=findCoachThreat();
         if(S.g.in_check()){
           S.coachTone="warn";
@@ -5474,12 +5742,23 @@ function triggerBotMove(){
   runWorkerOp({id:tk,fen,diff},()=>runFallbackAsync(fen,diff,uci=>finishWithMove(uci)),d=>finishWithMove(d.uci));
 }
 
+function formatCoachDir(dirCode){
+  const isId=P.lang==="id";
+  if(dirCode==="knight")return isId?"lewat lompatan kuda":"via a knight leap";
+  if(dirCode==="file")return isId?"dari lajur vertikal":"down the file";
+  if(dirCode==="rank")return isId?"dari baris mendatar":"along the rank";
+  return isId?"dari arah diagonal":"down the diagonal";
+}
+
 function evaluateCoachMove(fenBefore,m){
   const tk=++S.tok,fenAfter=S.g.fen(),startedAt=performance.now();
   S.busy=true;
   S.coachTone="";
   setCoach("coachChecking");
   renderUIOnly();
+  const armedTrap=S.coachTrapArmed;
+  S.coachTrapArmed=null;
+  S.coachTrapPending=null;
   const apply=res=>{
     if(tk!==S.tok||S.mode!=="coach"||S.g.fen()!==fenAfter)return;
     const wait=Math.max(0,3000-(performance.now()-startedAt));
@@ -5488,14 +5767,55 @@ function evaluateCoachMove(fenBefore,m){
       if(tk!==S.tok||S.mode!=="coach"||S.g.fen()!==fenAfter)return;
       S.busy=false;
       const loss=res?res.loss:0;
-      if(loss>=120&&!S.over){
-        S.coachTone="warn";
+      const ply=S.g.history().length;
+      const isTrapPayoff=!!(armedTrap&&ply===armedTrap.ply+1&&(S.g.in_check()||S.g.in_checkmate()||(m.captured&&loss<120)));
+
+      if(isTrapPayoff){
+        S.coachTone="genius";
+        S.coachArrows=[];
+        setCoach("coachDelayedTrap",{piece:pieceLabelWord(armedTrap.piece),sq:armedTrap.toSq});
+        renderUIOnly();
+        if(!S.over)triggerBotMove();
+        return;
+      }
+
+      if((loss>=120||res?.isMateBlunder)&&!S.over){
         const pun=res.punishUci||"";
         const pf=res.punFrom||(pun?pun.slice(0,2):"");
         const pt=res.punTo||(pun?pun.slice(2,4):"");
-        S.coachArrows=(pf&&pt)?[{a:pf,b:pt,c:"#ef4444",coach:1}]:[];
-        if(res.tgtType&&res.atkType){
-          setCoach("coachBlunderCap",{tgtType:res.tgtType,atkType:res.atkType});
+        const isPureIdiot=!!(res.isMateBlunder||loss>=450||(res.tgtType&&"qr".includes(res.tgtType)&&loss>=360));
+        S.coachTone=isPureIdiot?"pure-idiot":"warn";
+        S.coachArrows=(pf&&pt)?[{a:pf,b:pt,c:isPureIdiot?"#ff1e3c":"#ef4444",coach:1}]:[];
+        if(res.tgtType===m.piece&&pt===m.to&&"qrbn".includes(m.piece)){
+          S.coachTrapPending={piece:m.piece,toSq:m.to,color:m.color,ply};
+        }
+        const dirText=formatCoachDir(res.punDir||"diag");
+        if(isPureIdiot){
+          setCoach("coachPureIdiot",{
+            pieceType:m.piece,
+            to:m.to,
+            tgtType:res.tgtType||m.piece,
+            atkType:res.atkType||"q",
+            punFrom:pf||"?",
+            punTo:pt||m.to,
+            dir:dirText
+          });
+        }else if(res.missedWin){
+          setCoach("coachMissedWin",{pieceType:m.piece,to:m.to});
+        }else if(res.tgtType&&res.atkType){
+          if(pt===m.to&&pf){
+            setCoach("coachBlunderSpecific",{
+              pieceType:m.piece,
+              to:m.to,
+              tgtType:res.tgtType,
+              atkType:res.atkType,
+              punFrom:pf,
+              punTo:pt,
+              dir:dirText
+            });
+          }else{
+            setCoach("coachBlunderCap",{tgtType:res.tgtType,atkType:res.atkType});
+          }
         }else if(res.isCheck){
           setCoach("coachBlunderCheck");
         }else{
@@ -5506,13 +5826,17 @@ function evaluateCoachMove(fenBefore,m){
       }else{
         S.coachTone="good";
         S.coachArrows=[];
-        const ply=S.g.history().length;
         if(m.promotion){
           setCoach("coachGoodPromo");
+        }else if(S.g.in_check()&&(res?.playedSc||0)>=220){
+          S.coachTone="genius";
+          setCoach("coachGoodBrilliant",{pieceType:m.piece,to:m.to});
         }else if(S.g.in_check()){
           setCoach("coachGoodCheck");
         }else if(m.captured){
           setCoach("coachGoodCap");
+        }else if(ply<=8&&loss>=45&&loss<120&&"pn".includes(m.piece)){
+          setCoach("coachGambit");
         }else if(ply<=12&&m.piece==="k"&&/[kq]/.test(m.flags)){
           setCoach("coachOpenCastle");
         }else if(ply<=6&&m.piece==="q"){
@@ -5521,6 +5845,8 @@ function evaluateCoachMove(fenBefore,m){
           setCoach("coachOpenCenter");
         }else if(ply<=10&&"nb".includes(m.piece)&&m.from[1]===(m.color==="w"?"1":"8")){
           setCoach("coachOpenDev");
+        }else if(loss<=12&&ply>=8){
+          setCoach("coachGoodBrilliant",{pieceType:m.piece,to:m.to});
         }else if(loss<35){
           setCoach("coachGoodBest");
         }else{
@@ -6054,10 +6380,13 @@ function renderCoachBox(){
   box.hidden=false;
   box.className=S.coachTone||"";
   const showHintBtn=!S.over&&!S.busy&&!S.coachPending&&S.g.turn()===S.col;
+  const tierBadge=S.coachTone==="pure-idiot"
+    ?`<span class="coach-tier-pill idiot">${t("coachTierIdiot")}</span>`
+    :(S.coachTone==="genius"?`<span class="coach-tier-pill genius">${t("coachTierGenius")}</span>`:"");
   box.innerHTML=
     `<div class="coach-lead">`+
-      `<span class="coach-ava" aria-hidden="true">G</span>`+
-      `<div class="coach-txt">${S.coachMsg||t("coachReady")}`+
+      `<span class="coach-ava" aria-hidden="true">${S.coachTone==="pure-idiot"?"!":"G"}</span>`+
+      `<div class="coach-txt">${tierBadge}${S.coachMsg||t("coachReady")}`+
       `${S.coachArrows.length?`<small>${t("coachArrowHint")}</small>`:""}</div>`+
     `</div>`+
     `${showHintBtn?`<button data-a="coach-hint">${t("hint")}</button>`:""}`;
@@ -6100,7 +6429,16 @@ function renderStatusAndBanner(){
     stText=`${t("levelLabel",{lvl:S.pi+1,diff:pDiff(p),cat:pCat(p)})}`;
     stSub=S.solved?t("solved"):(turnW?t("white"):t("black"));
   }
-  setHtmlIfChanged($("#status-bar"),
+  const sbEl=$("#status-bar");
+  if(sbEl){
+    sbEl.classList.toggle("turn-live",!S.over&&!S.replay);
+    sbEl.classList.toggle("in-check",!S.over&&g.in_check());
+  }
+  const pvEl=$("#play-view");
+  if(pvEl){
+    pvEl.classList.toggle("face-layout",isAutoFlipTurn()&&!S.replay);
+  }
+  setHtmlIfChanged(sbEl,
     `<div class="status-main"><span class="turn-dot ${turnW?"w":"b"} ${S.busy?"thinking":""}"></span><span class="status-txt">${stText}</span></div>`+
     `${stSub?`<span class="status-sub">${stSub}</span>`:""}`
   );
@@ -6327,7 +6665,7 @@ function renderDrawer(){
       `${S.ex?`<div class="card" style="padding:12px"><div class="mu" style="font-weight:700;margin-bottom:4px">${t("lastMove")}</div><div>${S.ex}</div></div>`:""}`+
       `${mv.length?`<div class="moves-grid">${rows}</div>`:`<div class="mu">${t("noMovesYet")}</div>`}`+
       `${(S.over&&mv.length&&!S.replay&&(S.mode==="basic"||S.mode==="bot"||S.mode==="coach"||S.mode==="sandbox"))?`<button data-a="start-replay" class="pri" style="width:100%">${t("replayMatch")}</button>`:""}`+
-      `<div style="display:flex;gap:8px;flex-wrap:wrap"><button data-a="cpfen">${t("copyFen")}</button><button data-a="cppgn" ${mv.length?"":"disabled"}>${t("copyPgn")}</button><button data-a="cppng">${t("copyPng")}</button>${S.copied?`<span class="mu" style="align-self:center;color:var(--ac);font-weight:700">${S.copied}</span>`:""}</div>`+
+      `<div style="display:flex;gap:8px;flex-wrap:wrap"><button data-a="cpfen">${t("copyFen")}</button><button data-a="cppgn" ${mv.length?"":"disabled"}>${t("copyPgn")}</button>${S.copied?`<span class="mu" style="align-self:center;color:var(--ac);font-weight:700">${S.copied}</span>`:""}</div>`+
       `<code>${S.g.fen()}</code>`+
     `</div>`;
 }
@@ -6684,261 +7022,6 @@ function copyText(txt,label){
   }catch(e){showToast(t("copyFailed"))}
 }
 
-async function copyBoardToClipboard(opts = {}) {
-  const {
-    pieces     = {},
-    highlights = [],
-    arrows     = [],
-    size       = 720,
-    orientation = 'white',
-    watermark  = 'Rookie: Learn Chess',
-  } = opts;
-
-  if (typeof window === 'undefined' || typeof document === 'undefined') {
-    throw new Error('Canvas/DOM environment is unavailable.');
-  }
-
-  let canvas = document.createElement('canvas');
-  canvas.width  = size;
-  canvas.height = size;
-  let ctx = canvas.getContext('2d');
-  if (!ctx) {
-    canvas.width = 0; canvas.height = 0; canvas = null;
-    throw new Error('Failed to create 2D canvas context.');
-  }
-
-  let blob = null, pngBlob = null, shareFile = null;
-  try {
-    const sq    = size / 8;
-    const files = 'abcdefgh';
-    const squareToPixel = (square) => {
-      if (typeof square !== 'string' || square.length < 2) return null;
-      const fileIdx = files.indexOf(square[0].toLowerCase());
-      const rank    = parseInt(square[1], 10);
-      if (fileIdx < 0 || !Number.isFinite(rank) || rank < 1 || rank > 8) return null;
-      let col = fileIdx, row = 8 - rank;
-      if (orientation === 'black') { col = 7 - col; row = 7 - row; }
-      return { x: col * sq, y: row * sq, cx: col * sq + sq / 2, cy: row * sq + sq / 2 };
-    };
-
-    const LIGHT = '#f0d9b5', DARK = '#b58863';
-    for (let r = 0; r < 8; r++) {
-      for (let c = 0; c < 8; c++) {
-        ctx.fillStyle = ((r + c) & 1) ? DARK : LIGHT;
-        ctx.fillRect(c * sq, r * sq, sq, sq);
-      }
-    }
-
-    ctx.fillStyle = 'rgba(255, 235, 59, 0.45)';
-    for (const h of highlights) {
-      const p = squareToPixel(h);
-      if (p) ctx.fillRect(p.x, p.y, sq, sq);
-    }
-
-    const rRect=(x,y,w,h,r)=>{
-      ctx.beginPath();
-      if(typeof ctx.roundRect==="function"){ctx.roundRect(x,y,w,h,r);return;}
-      const rr=Math.min(r,w/2,h/2);
-      ctx.moveTo(x+rr,y);ctx.lineTo(x+w-rr,y);ctx.quadraticCurveTo(x+w,y,x+w,y+rr);
-      ctx.lineTo(x+w,y+h-rr);ctx.quadraticCurveTo(x+w,y+h,x+w-rr,y+h);
-      ctx.lineTo(x+rr,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-rr);
-      ctx.lineTo(x,y+rr);ctx.quadraticCurveTo(x,y,x+rr,y);ctx.closePath();
-    };
-    const drawVectorPiece=(code,cx,cy)=>{
-      const isW=code[0]==="w",type=code[1];
-      const fill=isW?"#fcfaf5":"#262522";
-      const baseFill=isW?"#e9e3d7":"#1b1a18";
-      const stroke=isW?"#1b1a18":"#0d0c0b";
-      const accent=isW?"#1b1a18":"#ece8de";
-      ctx.save();
-      ctx.translate(cx,cy);
-      const sc=sq/45;
-      ctx.scale(sc,sc);
-      ctx.translate(-22.5,-22.5);
-      ctx.lineJoin="round";
-      ctx.lineCap="round";
-      ctx.lineWidth=1.75;
-      ctx.strokeStyle=stroke;
-      ctx.fillStyle=fill;
-      if(type==="P"){
-        ctx.beginPath();ctx.arc(22.5,12.6,4.5,0,Math.PI*2);ctx.fill();ctx.stroke();
-        ctx.beginPath();ctx.moveTo(18.1,20.8);ctx.quadraticCurveTo(17.4,25.2,12.8,32.2);ctx.lineTo(32.2,32.2);ctx.quadraticCurveTo(27.6,25.2,26.9,20.8);ctx.closePath();ctx.fill();ctx.stroke();
-        rRect(16.4,18.2,12.2,2.6,1.3);ctx.fill();ctx.stroke();
-        ctx.fillStyle=baseFill;rRect(11.4,32.2,22.2,5.2,2.5);ctx.fill();ctx.stroke();
-      }else if(type==="R"){
-        ctx.beginPath();ctx.moveTo(12.2,8.8);ctx.lineTo(16,8.8);ctx.lineTo(16,11.9);ctx.lineTo(20.1,11.9);ctx.lineTo(20.1,8.8);ctx.lineTo(24.9,8.8);ctx.lineTo(24.9,11.9);ctx.lineTo(29,11.9);ctx.lineTo(29,8.8);ctx.lineTo(32.8,8.8);ctx.lineTo(32.8,14.9);ctx.lineTo(30.2,17.4);ctx.lineTo(30.2,29.2);ctx.lineTo(32.7,32.3);ctx.lineTo(32.7,37.4);ctx.lineTo(12.3,37.4);ctx.lineTo(12.3,32.3);ctx.lineTo(14.8,29.2);ctx.lineTo(14.8,17.4);ctx.lineTo(12.2,14.9);ctx.closePath();ctx.fill();ctx.stroke();
-        ctx.fillStyle=baseFill;rRect(11.2,32.6,22.6,4.8,2.2);ctx.fill();ctx.stroke();
-        ctx.strokeStyle=accent;ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(15,17.4);ctx.lineTo(30,17.4);ctx.moveTo(15,29.2);ctx.lineTo(30,29.2);ctx.stroke();
-      }else if(type==="B"){
-        ctx.beginPath();ctx.arc(22.5,7.4,2.3,0,Math.PI*2);ctx.fill();ctx.stroke();
-        ctx.beginPath();ctx.moveTo(22.5,10);ctx.quadraticCurveTo(14.5,15.5,17.4,25.6);ctx.lineTo(15.1,29.4);ctx.lineTo(29.9,29.4);ctx.lineTo(27.6,25.6);ctx.quadraticCurveTo(30.5,15.5,22.5,10);ctx.closePath();ctx.fill();ctx.stroke();
-        ctx.strokeStyle=accent;ctx.beginPath();ctx.moveTo(25.7,14.7);ctx.lineTo(19.3,21.1);ctx.stroke();
-        ctx.strokeStyle=stroke;ctx.fillStyle=baseFill;rRect(14.2,29.4,16.6,3.2,1.6);ctx.fill();ctx.stroke();
-        rRect(10.8,34,23.4,4,2);ctx.fill();ctx.stroke();
-      }else if(type==="N"){
-        ctx.beginPath();
-        ctx.moveTo(13.2,33.4);
-        ctx.bezierCurveTo(13.8,27.6,17.6,24.4,20.6,20.6);
-        ctx.lineTo(16.2,22.8);ctx.lineTo(11.4,23.6);
-        ctx.bezierCurveTo(9.2,23.8,7.8,22.1,8.5,20.2);
-        ctx.lineTo(10.2,16.5);ctx.lineTo(15.4,11.8);ctx.lineTo(14.5,7.4);
-        ctx.lineTo(18.7,9.8);ctx.lineTo(20.9,6.6);ctx.lineTo(23.5,10);
-        ctx.lineTo(27.8,11.4);ctx.lineTo(26.2,13.2);ctx.lineTo(31.2,15.8);
-        ctx.lineTo(29.1,17.5);ctx.lineTo(33.6,21.4);ctx.lineTo(31.4,23.1);
-        ctx.lineTo(34.8,27.8);ctx.lineTo(34.4,33.4);ctx.closePath();
-        ctx.fill();ctx.stroke();
-        ctx.fillStyle=isW?"#1b1a18":"#f5f1e8";
-        ctx.beginPath();ctx.moveTo(14.4,15.2);ctx.lineTo(17.7,13.8);ctx.lineTo(16.8,16);ctx.closePath();ctx.fill();
-        ctx.strokeStyle=isW?"#c7bfb2":"#ece8de";ctx.lineWidth=1.45;
-        ctx.beginPath();ctx.moveTo(24.2,12.6);ctx.quadraticCurveTo(29.6,17.2,30.3,30);ctx.stroke();
-        ctx.strokeStyle=stroke;ctx.lineWidth=1.75;
-        ctx.fillStyle=baseFill;rRect(11,33.4,24.4,4.8,2.3);ctx.fill();ctx.stroke();
-      }else if(type==="Q"){
-        ctx.beginPath();ctx.moveTo(10,29);ctx.lineTo(7.4,14.4);ctx.lineTo(14.5,23);ctx.lineTo(17.4,11.2);ctx.lineTo(22.5,21.6);ctx.lineTo(27.6,11.2);ctx.lineTo(30.5,23);ctx.lineTo(37.6,14.4);ctx.lineTo(35,29);ctx.closePath();ctx.fill();ctx.stroke();
-        for(const[px,py,pr] of [[7.1,12.7,2],[14.4,9.6,2],[22.5,7.9,2.2],[30.6,9.6,2],[37.9,12.7,2]]){ctx.beginPath();ctx.arc(px,py,pr,0,Math.PI*2);ctx.fill();ctx.stroke()}
-        rRect(10.2,28.8,24.6,4.1,2);ctx.fill();ctx.stroke();
-        ctx.fillStyle=baseFill;rRect(9.4,33.5,26.2,4.8,2.3);ctx.fill();ctx.stroke();
-      }else if(type==="K"){
-        ctx.beginPath();ctx.moveTo(22.5,5.4);ctx.lineTo(22.5,12);ctx.moveTo(19.2,8.3);ctx.lineTo(25.8,8.3);ctx.lineWidth=2.2;ctx.stroke();ctx.lineWidth=1.75;
-        ctx.beginPath();ctx.moveTo(22.5,13.8);ctx.bezierCurveTo(18,10.5,9.5,12.5,11.4,18);ctx.quadraticCurveTo(12,24,14.5,27.2);ctx.lineTo(14.5,32.8);ctx.lineTo(30.5,32.8);ctx.lineTo(30.5,27.2);ctx.quadraticCurveTo(33,24,33.6,18);ctx.bezierCurveTo(35.5,12.5,27,10.5,22.5,13.8);ctx.closePath();ctx.fill();ctx.stroke();
-        rRect(11.6,29,21.8,3.8,1.9);ctx.fill();ctx.stroke();
-        ctx.fillStyle=baseFill;rRect(10.5,33.4,24,4.8,2.3);ctx.fill();ctx.stroke();
-      }
-      ctx.restore();
-    };
-    for(const[square,code]of Object.entries(pieces)){
-      const p=squareToPixel(square);
-      if(p)drawVectorPiece(code,p.cx,p.cy);
-    }
-
-    const drawArrow = (from, to, color) => {
-      const a = squareToPixel(from), b = squareToPixel(to);
-      if (!a || !b) return;
-      const angle = Math.atan2(b.cy - a.cy, b.cx - a.cx);
-      const headLen = sq * 0.32, headWidth = sq * 0.34, lineW = Math.max(3, sq * 0.13);
-      const tipX = b.cx, tipY = b.cy;
-      const baseX = tipX - Math.cos(angle) * headLen, baseY = tipY - Math.sin(angle) * headLen;
-      ctx.save();
-      ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-      ctx.lineWidth = lineW;
-      ctx.beginPath(); ctx.moveTo(a.cx, a.cy); ctx.lineTo(baseX, baseY); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(tipX, tipY);
-      ctx.lineTo(baseX + Math.cos(angle + Math.PI / 2) * headWidth / 2, baseY + Math.sin(angle + Math.PI / 2) * headWidth / 2);
-      ctx.lineTo(baseX + Math.cos(angle - Math.PI / 2) * headWidth / 2, baseY + Math.sin(angle - Math.PI / 2) * headWidth / 2);
-      ctx.closePath(); ctx.fill();
-      ctx.restore();
-    };
-
-    for (const arr of arrows) {
-      if (!arr || !arr.from || !arr.to) continue;
-      drawArrow(arr.from, arr.to, arr.color || 'rgba(0, 150, 255, 0.8)');
-    }
-
-    const wmFont = Math.max(12, Math.floor(size * 0.028)), pad = Math.max(8, size * 0.015);
-    ctx.save();
-    ctx.font = `600 ${wmFont}px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif`;
-    ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
-    ctx.lineWidth = Math.max(2, wmFont * 0.18);
-    ctx.strokeStyle = 'rgba(0,0,0,0.55)'; ctx.strokeText(watermark, size - pad, size - pad);
-    ctx.fillStyle = 'rgba(255,255,255,0.95)'; ctx.fillText(watermark, size - pad, size - pad);
-    ctx.restore();
-
-    blob = await new Promise((resolve, reject) => {
-      canvas.toBlob((b) => b ? resolve(b) : reject(new Error('Canvas blob failed.')), 'image/png');
-    });
-
-    // Release canvas bitmap memory immediately after encoding PNG blob
-    canvas.width = 0; canvas.height = 0;
-    ctx = null; canvas = null;
-
-    pngBlob = blob.type === 'image/png' ? blob : new Blob([blob], { type: 'image/png' });
-    blob = null;
-
-    // Primary: Direct Clipboard API image write
-    if (navigator.clipboard && typeof navigator.clipboard.write === 'function' && typeof window.ClipboardItem === 'function') {
-      try {
-        await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
-        return { method: 'clipboard', blob: pngBlob };
-      } catch (_clipErr) {
-        // Fall through to Web Share API fallback on Android WebView restrictions
-      }
-    }
-
-    // Fallback: Native Web Share API (Android Share Sheet)
-    if (typeof navigator.share === 'function' && typeof File === 'function') {
-      shareFile = new File([pngBlob], 'rookie-chess.png', { type: 'image/png' });
-      const canShareFiles = typeof navigator.canShare !== 'function' || navigator.canShare({ files: [shareFile] });
-      if (canShareFiles) {
-        try {
-          await navigator.share({ files: [shareFile], title: watermark || 'Rookie: Learn Chess' });
-          return { method: 'share', blob: pngBlob };
-        } catch (shareErr) {
-          if (shareErr && shareErr.name === 'AbortError') {
-            return { method: 'cancelled', blob: pngBlob };
-          }
-          throw shareErr;
-        }
-      }
-    }
-
-    throw new Error(t('copyPngUnsupported'));
-  } finally {
-    if (canvas) { canvas.width = 0; canvas.height = 0; }
-    ctx = null; canvas = null; blob = null; shareFile = null; pngBlob = null;
-  }
-}
-
-let pngStatusTimer=0,_pngBusy=false;
-function markPngStatus(msgText){
-  S.copiedLabel="PNG";
-  S.copied=msgText;
-  renderUIOnly();
-  showToast(S.copied);
-  if(pngStatusTimer)clearTimeout(pngStatusTimer);
-  pngStatusTimer=setTimeout(()=>{pngStatusTimer=0;if(S.copiedLabel==="PNG"){S.copied="";S.copiedLabel="";renderUIOnly()}},1600);
-}
-
-async function copyBoardPng(){
-  if(_pngBusy)return;
-  _pngBusy=true;
-  try{
-    const g=S.g,bd=g.board();
-    const pieces={};
-    for(let r=0;r<8;r++)for(let c=0;c<8;c++){
-      const p=bd[r][c];
-      if(p)pieces["abcdefgh"[c]+(8-r)]=p.color+p.type.toUpperCase();
-    }
-    const hlSet=new Set();
-    if(P.fx.hl&&S.last){hlSet.add(S.last[0]);hlSet.add(S.last[1])}
-    if(P.fx.hl&&S.sel)hlSet.add(S.sel);
-    if(S.hint)for(const sq of S.hint)hlSet.add(sq);
-    if(P.fx.hl&&S.dr.h)for(const sq of Object.keys(S.dr.h))hlSet.add(sq);
-    if(g.in_check()||S.chkWarn){
-      const ck=findKingSq(g,g.turn());
-      if(ck)hlSet.add(ck);
-    }
-    const arrows=[];
-    if(P.fx.arr)for(const r of S.dr.a)arrows.push({from:r.a,to:r.b,color:DC[r.c]||r.c});
-    if(P.fx.arr&&S.pv&&S.pv[0]!==S.pv[1])arrows.push({from:S.pv[0],to:S.pv[1],color:DC[S.pv[2]]||S.pv[2]});
-    if(S.mode==="coach"&&S.coachArrows.length)for(const r of S.coachArrows)arrows.push({from:r.a,to:r.b,color:DC[r.c]||r.c});
-    if(S.hintArrow&&(S.mode==="basic"||S.mode==="bot"||S.mode==="sandbox"))arrows.push({from:S.hintArrow.a,to:S.hintArrow.b,color:DC[S.hintArrow.c]||S.hintArrow.c});
-
-    const res=await copyBoardToClipboard({
-      pieces,
-      highlights:[...hlSet],
-      arrows,
-      orientation:S.flip?"black":"white",
-      watermark:"Rookie: Learn Chess"
-    });
-    if(res&&res.method==="clipboard")markPngStatus(t("copied",{label:"PNG"}));
-    else if(res&&res.method==="share")markPngStatus(t("pngShareReady"));
-  }catch(err){
-    showToast((err&&err.message)||t("copyPngFailed"));
-  }finally{
-    _pngBusy=false;
-  }
-}
-
 document.addEventListener("click",e=>{
   const b=e.target.closest("[data-a]");if(!b)return;
   const a=b.dataset.a,d=b.dataset;
@@ -7048,7 +7131,6 @@ document.addEventListener("click",e=>{
   else if(a==="pgn-pick"){S.pgnFormat=(d.fmt==="modern")?"modern":"classic";renderUIOnly()}
   else if(a==="pgn-copy"){const txt=formatPgnExport(S.pgnFormat);S.pgnModalOpen=false;copyText(txt,"PGN")}
   else if(a==="close-pgn"){S.pgnModalOpen=false;renderUIOnly()}
-  else if(a==="cppng")copyBoardPng();
   else if(a==="start-replay")enterReplayMode();
   else if(a==="replay-first"){if(S.replay){stopReplayAuto();stepReplay(0,false)}}
   else if(a==="replay-prev"){if(S.replay){stopReplayAuto();stepReplay(S.replay.idx-1,true)}}
