@@ -411,13 +411,14 @@ main{
   flex-direction:column;
   gap:8px;
 }
-#play-view.face-layout #cap-top{order:1}
-#play-view.face-layout #banner{order:2}
+#play-view.face-layout #cap-top{order:2}
 #play-view.face-layout #bwrap{order:3}
-#play-view.face-layout #status-bar{order:4}
+#play-view.face-layout #banner{order:4}
 #play-view.face-layout #cap-tray{order:5}
-#play-view.face-layout #draw-bar{order:6}
-#play-view.face-layout #bctl{order:7}
+#play-view.face-layout #status-bar{order:6;transform:rotate(0deg)}
+#play-view.face-layout #status-bar.face-top{order:1;transform:rotate(180deg)}
+#play-view.face-layout #draw-bar{order:7}
+#play-view.face-layout #bctl{order:8}
 #status-bar{
   flex:0 0 auto;
   display:flex;
@@ -6493,10 +6494,12 @@ function renderStatusAndBanner(){
     stSub=S.solved?t("solved"):(turnW?t("white"):t("black"));
   }
   const isFaceTurn=isFaceToFaceMode()&&!S.replay;
+  const isFaceTopTurn=isFaceTurn&&!S.over&&(turnW===S.flip);
   const sbEl=$("#status-bar");
   if(sbEl){
     sbEl.classList.toggle("turn-live",!S.over&&!S.replay);
     sbEl.classList.toggle("turn-face",!S.over&&isFaceTurn);
+    sbEl.classList.toggle("face-top",isFaceTopTurn);
     sbEl.classList.toggle("in-check",!S.over&&g.in_check());
   }
   const pvEl=$("#play-view");
