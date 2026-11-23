@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Rookie: Learn Chess</string>
-    <string name="title_activity_main">Rookie: Learn Chess</string>
+    <string name="app_name">Rookie</string>
+    <string name="title_activity_main">Rookie</string>
     <string name="package_name">com.rookie.learnchess</string>
     <string name="nav_dashboard">Dashboard</string>
     <string name="nav_learn">Learn</string>
