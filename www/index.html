@@ -671,32 +671,23 @@ main{
 }
 .sq.h1{box-shadow:inset 0 0 0 100px rgba(75,155,255,.52)}
 .sq.h2{box-shadow:inset 0 0 0 100px rgba(45,204,120,.56)}
-.sq[data-r]::before{
-  content:attr(data-r);
+.sq .coord{
   position:absolute;
-  left:4px;
-  top:3px;
-  font-size:clamp(10px,2.4vw,12px);
+  font-size:clamp(9.5px,2.2vw,11.5px);
   font-weight:800;
-  color:rgba(28,32,22,.74);
+  color:rgba(28,32,22,.76);
   line-height:1;
   pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
   z-index:2;
 }
-.sq[data-f]::after{
-  content:attr(data-f);
-  position:absolute;
-  right:4px;
-  bottom:3px;
-  font-size:clamp(10px,2.4vw,12px);
-  font-weight:800;
-  color:rgba(28,32,22,.74);
-  line-height:1;
-  pointer-events:none;
-  z-index:2;
-}
-.sq.d[data-r]::before,.sq.d[data-f]::after{
-  color:rgba(255,255,255,.82);
+.sq .coord-r{left:4px;top:3px}
+.sq .coord-f{left:4px;bottom:3px}
+.sq .coord-ro{right:4px;bottom:3px;transform:rotate(180deg);opacity:.88}
+.sq .coord-fo{right:4px;top:3px;transform:rotate(180deg);opacity:.88}
+.sq.d .coord{
+  color:rgba(255,255,255,.84);
 }
 .sq .ind{
   position:absolute;
@@ -2188,8 +2179,8 @@ const I18N={
     clear:"Clear",done:"Done",
     playVsBot:"Play vs Bot",pickSideSub:"Select Bot difficulty and your side, then tap Start Game.",startGame:"Start Game",cancel:"Cancel",
     p2Title:"2-Player Mode",p2Sub:"Choose how the board and captured graveyards behave for both players.",
-    p2FaceTitle:"Face-to-Face",p2FaceSub:"Rotates board 180° per turn · dual top/bottom graveyards",
-    p2SameTitle:"Same Direction",p2SameSub:"Fixed board view · single shifting graveyard box",
+    p2FaceTitle:"Face-to-Face",p2FaceSub:"Static board · opponent pieces face across · dual graveyards",
+    p2SameTitle:"Same Direction",p2SameSub:"Board rotates 180° per turn · single shifting graveyard",
     p2SelectBtn:"Confirm Orientation",
     change2pMode:"Change 2P Mode",
     sandboxRulesBtn:"Rules & Setup",editSandboxRules:"Edit Sandbox Rules",
@@ -2523,8 +2514,8 @@ const I18N={
     clear:"Hapus",done:"Selesai",
     playVsBot:"Lawan Bot",pickSideSub:"Pilih level Bot dan warna bidakmu, lalu ketuk Mulai Main.",startGame:"Mulai Main",cancel:"Batal",
     p2Title:"Mode 2 Pemain",p2Sub:"Pilih perilaku papan dan kotak bidak termakan untuk kedua pemain.",
-    p2FaceTitle:"Berhadapan",p2FaceSub:"Papan berputar 180° tiap giliran · kotak atas & bawah",
-    p2SameTitle:"Searah",p2SameSub:"Papan diam · 1 kotak bidak aktif berganti tiap giliran",
+    p2FaceTitle:"Berhadapan",p2FaceSub:"Papan diam · bidak lawan menghadap berlawanan · kotak atas & bawah",
+    p2SameTitle:"Searah",p2SameSub:"Papan berputar 180° tiap giliran · 1 kotak bidak aktif",
     p2SelectBtn:"Pilih Orientasi",
     change2pMode:"Ganti Mode 2P",
     sandboxRulesBtn:"Atur Papan",editSandboxRules:"Edit Aturan Sandbox",
@@ -4475,13 +4466,13 @@ function isDualFaceGraveyard(){
   return S.mode==="basic"&&S.basicP2==="face";
 }
 function isFaceToFaceMode(){
-  return false;
-}
-function isAutoFlipTurn(){
   return S.mode==="basic"&&S.basicP2==="face";
 }
-function isFaceOppPiece(){
-  return false;
+function isAutoFlipTurn(){
+  return S.mode==="basic"&&S.basicP2==="same";
+}
+function isFaceOppPiece(color){
+  return isFaceToFaceMode()&&color===(S.flip?"w":"b");
 }
 
 function pxCoord(sq){
@@ -4544,13 +4535,23 @@ function buildGridIfNeeded(){
   gridBuiltFlip=S.flip;
   const frag=document.createDocumentFragment();
   for(const k in sqMap)delete sqMap[k];
+  const mkCoord=(cls,txt)=>{
+    const sp=document.createElement("span");
+    sp.className="coord "+cls;
+    sp.textContent=txt;
+    sp.setAttribute("aria-hidden","true");
+    return sp;
+  };
   for(let r=0;r<8;r++)for(let c=0;c<8;c++){
     const rr=S.flip?7-r:r,cc=S.flip?7-c:c,sq="abcdefgh"[cc]+(8-rr);
     const el=document.createElement("div");
     el.className=((rr+cc)%2?"sq d":"sq l");
     el.dataset.sq=sq;
-    if(c===0)el.dataset.r=String(8-rr);
-    if(r===7)el.dataset.f="abcdefgh"[cc];
+    const rankTxt=String(8-rr),fileTxt="abcdefgh"[cc];
+    if(c===0)el.appendChild(mkCoord("coord-r",rankTxt));
+    if(r===7)el.appendChild(mkCoord("coord-f",fileTxt));
+    if(c===7)el.appendChild(mkCoord("coord-ro",rankTxt));
+    if(r===0)el.appendChild(mkCoord("coord-fo",fileTxt));
     const ind=document.createElement("span");
     ind.className="ind";
     ind.setAttribute("aria-hidden","true");
@@ -5563,6 +5564,7 @@ function enterReplayMode(){
     frames[i].event=events[i];
     if(events[i])notableIndices.push(i);
   }
+  if(S.mode==="basic"&&S.basicP2==="same")S.flip=false;
   S.replay={orig,frames,idx:0,playing:false,notableIndices};
   stepReplay(0,false);
 }
@@ -6490,7 +6492,7 @@ function renderStatusAndBanner(){
     stText=`${t("levelLabel",{lvl:S.pi+1,diff:pDiff(p),cat:pCat(p)})}`;
     stSub=S.solved?t("solved"):(turnW?t("white"):t("black"));
   }
-  const isFaceTurn=isAutoFlipTurn()&&!S.replay;
+  const isFaceTurn=isFaceToFaceMode()&&!S.replay;
   const sbEl=$("#status-bar");
   if(sbEl){
     sbEl.classList.toggle("turn-live",!S.over&&!S.replay);
