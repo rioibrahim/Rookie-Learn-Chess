@@ -432,11 +432,35 @@ main{
   transition:border-color .22s ease,box-shadow .22s ease,background .22s ease;
 }
 #status-bar.turn-live{
+  border-color:rgba(255,255,255,.58);
+  background:linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.04));
+  box-shadow:0 0 18px rgba(255,255,255,.26),inset 0 0 0 1px rgba(255,255,255,.18);
+}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]) #status-bar.turn-live{
+    border-color:rgba(255,255,255,.96);
+    background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(248,247,243,.88));
+    box-shadow:0 0 18px rgba(255,255,255,.95),0 2px 10px rgba(30,28,25,.1),inset 0 0 0 1px rgba(255,255,255,.9);
+  }
+}
+:root[data-theme="light"] #status-bar.turn-live{
+  border-color:rgba(255,255,255,.96);
+  background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(248,247,243,.88));
+  box-shadow:0 0 18px rgba(255,255,255,.95),0 2px 10px rgba(30,28,25,.1),inset 0 0 0 1px rgba(255,255,255,.9);
+}
+#status-bar.turn-live.in-check{
+  border-color:rgba(239,68,68,.78);
+  background:linear-gradient(135deg,rgba(255,255,255,.1),rgba(239,68,68,.16));
+  box-shadow:0 0 16px rgba(255,255,255,.2),0 0 12px rgba(239,68,68,.26);
+}
+#play-view.face-layout #status-bar.turn-live,
+#status-bar.turn-live.turn-face{
   border-color:rgba(34,197,94,.78);
   background:linear-gradient(135deg,rgba(34,197,94,.18),rgba(16,185,129,.08));
   box-shadow:0 0 18px rgba(34,197,94,.32),inset 0 0 0 1px rgba(34,197,94,.26);
 }
-#status-bar.turn-live.in-check{
+#play-view.face-layout #status-bar.turn-live.in-check,
+#status-bar.turn-live.turn-face.in-check{
   border-color:rgba(249,115,22,.82);
   background:linear-gradient(135deg,rgba(34,197,94,.16),rgba(239,68,68,.16));
   box-shadow:0 0 18px rgba(34,197,94,.24),0 0 12px rgba(239,68,68,.26);
@@ -458,6 +482,11 @@ main{
 .turn-dot.w{background:#fcfbf7;border-color:#9e9a92}
 .turn-dot.b{background:#232220;border-color:#777268}
 #status-bar.turn-live .turn-dot{
+  box-shadow:0 0 0 2.5px rgba(255,255,255,.34),0 0 10px rgba(255,255,255,.86);
+  border-color:rgba(255,255,255,.94);
+}
+#play-view.face-layout #status-bar.turn-live .turn-dot,
+#status-bar.turn-live.turn-face .turn-dot{
   box-shadow:0 0 0 2.5px rgba(34,197,94,.42),0 0 10px rgba(34,197,94,.9);
   border-color:#22c55e;
 }
@@ -474,11 +503,35 @@ main{
   text-overflow:ellipsis;
 }
 #status-bar.turn-live .status-txt{
+  color:#ffffff;
+  font-weight:800;
+  text-shadow:0 0 12px rgba(255,255,255,.36);
+}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]) #status-bar.turn-live .status-txt{
+    color:var(--tx);
+    text-shadow:0 0 8px rgba(255,255,255,.95);
+  }
+}
+:root[data-theme="light"] #status-bar.turn-live .status-txt{
+  color:var(--tx);
+  text-shadow:0 0 8px rgba(255,255,255,.95);
+}
+#play-view.face-layout #status-bar.turn-live .status-txt,
+#status-bar.turn-live.turn-face .status-txt{
   color:#22c55e;
   font-weight:800;
   text-shadow:0 0 10px rgba(34,197,94,.28);
 }
-:root[data-theme="light"] #status-bar.turn-live .status-txt{
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]) #play-view.face-layout #status-bar.turn-live .status-txt,
+  :root:not([data-theme="dark"]) #status-bar.turn-live.turn-face .status-txt{
+    color:#15803d;
+    text-shadow:none;
+  }
+}
+:root[data-theme="light"] #play-view.face-layout #status-bar.turn-live .status-txt,
+:root[data-theme="light"] #status-bar.turn-live.turn-face .status-txt{
   color:#15803d;
   text-shadow:none;
 }
@@ -4361,6 +4414,14 @@ function finishBoardRotateSnap(){
   }
 }
 function triggerBoardRotateAnim(targetFlip,tk){
+  if(S.mode==="sandbox"){
+    finishBoardRotateSnap();
+    bwEl&&bwEl.classList.remove("board-rot-snap");
+    S.flip=false;
+    S.flipBusy=false;
+    render();
+    return;
+  }
   const nextFlip=targetFlip!==undefined?targetFlip:!S.flip;
   if(nextFlip===S.flip){
     S.flipBusy=false;
@@ -4411,13 +4472,13 @@ function stopBoardRotateAnim(){
 }
 
 function isDualFaceGraveyard(){
-  return (S.mode==="basic"&&S.basicP2==="face")||(S.mode==="sandbox"&&S.sbCfg.opp==="face");
+  return S.mode==="basic"&&S.basicP2==="face";
 }
 function isFaceToFaceMode(){
   return false;
 }
 function isAutoFlipTurn(){
-  return (S.mode==="basic"&&S.basicP2==="face")||(S.mode==="sandbox"&&S.sbCfg.opp==="face");
+  return S.mode==="basic"&&S.basicP2==="face";
 }
 function isFaceOppPiece(){
   return false;
@@ -4878,7 +4939,7 @@ function saveMatchState(){
     if(S.mode==="sandbox"){
       payload.sbBoard=S.g.board().map(row=>row.map(p=>p?{type:p.type,color:p.color}:null));
       payload.sbRules=cloneSbRules(S.sbCfg.rules);
-      payload.sbOpp=S.sbCfg.opp==="bot"?"same":S.sbCfg.opp;
+      payload.sbOpp="same";
     }
     localStorage.setItem(MATCH_KEY,JSON.stringify(payload));
   }catch(e){}
@@ -4893,11 +4954,11 @@ function restoreMatchState(){
     if(d.mode==="sandbox"&&Array.isArray(d.sbBoard)&&d.sbBoard.length===8){
       S.mode="sandbox";
       S.sbCfg.rules=cloneSbRules(d.sbRules||defaultSbRules());
-      S.sbCfg.opp=(d.sbOpp==="face")?"face":"same";
+      S.sbCfg.opp="same";
       S.col="w";
       const fp=String(d.fen).split(" ");
       S.g=createSandboxGame(d.sbBoard,S.sbCfg.rules,{turn:d.turn||fp[1],ep:fp[3],half:fp[4],full:fp[5]});
-      S.flip=isAutoFlipTurn()?(S.g.turn()==="b"):false;
+      S.flip=false;
     }else if(d.mode==="basic"||d.mode==="bot"||d.mode==="coach"){
       const g=new Chess();
       let loaded=false;
@@ -4995,7 +5056,7 @@ function startSandbox(){
     renderUIOnly();
     return;
   }
-  if(S.sbCfg.opp==="bot")S.sbCfg.opp="same";
+  S.sbCfg.opp="same";
   S.sbCfg.err="";
   S.mode="sandbox";S.tab="play";S.col="w";S.flip=false;
   S.sbSetupOpen=false;S.menuOpen=false;S.p2ModalOpen=false;S.colorModalOpen=false;S.pgnModalOpen=false;
@@ -6429,14 +6490,16 @@ function renderStatusAndBanner(){
     stText=`${t("levelLabel",{lvl:S.pi+1,diff:pDiff(p),cat:pCat(p)})}`;
     stSub=S.solved?t("solved"):(turnW?t("white"):t("black"));
   }
+  const isFaceTurn=isAutoFlipTurn()&&!S.replay;
   const sbEl=$("#status-bar");
   if(sbEl){
     sbEl.classList.toggle("turn-live",!S.over&&!S.replay);
+    sbEl.classList.toggle("turn-face",!S.over&&isFaceTurn);
     sbEl.classList.toggle("in-check",!S.over&&g.in_check());
   }
   const pvEl=$("#play-view");
   if(pvEl){
-    pvEl.classList.toggle("face-layout",isAutoFlipTurn()&&!S.replay);
+    pvEl.classList.toggle("face-layout",isFaceTurn);
   }
   setHtmlIfChanged(sbEl,
     `<div class="status-main"><span class="turn-dot ${turnW?"w":"b"} ${S.busy?"thinking":""}"></span><span class="status-txt">${stText}</span></div>`+
@@ -6541,7 +6604,7 @@ function renderActionBar(){
     `<button data-a="undo" aria-label="${t("undo")}" ${mv.length&&!disRep?"":"disabled"}>${IC.undo}<span>${t("undo")}</span></button>`+
     `<button data-a="redo" aria-label="${t("redo")}" ${S.redo.length&&!disRep?"":"disabled"}>${IC.redo}<span>${t("redo")}</span></button>`+
     `<button data-a="dm" class="${S.dm?"on":""}" aria-label="${t("draw")}">${IC.draw}<span>${t("draw")}</span></button>`+
-    `<button data-a="flip" aria-label="${t("flip")}">${IC.flip}<span>${t("flip")}</span></button>`+
+    `<button data-a="flip" aria-label="${t("flip")}" ${S.mode==="sandbox"?"disabled":""}>${IC.flip}<span>${t("flip")}</span></button>`+
     `<button data-a="hint" aria-label="${t("hint")}" ${S.over||disRep?"disabled":""}>${IC.hint}<span>${t("hint")}</span></button>`+
     `<button data-a="drawer" class="${S.drawerOpen?"on":""}" aria-label="${t("moves")}">${IC.list}<span>${t("moves")}${mv.length?` (${mv.length})`:""}</span></button>`
   );
@@ -6843,7 +6906,7 @@ function renderSandboxModal(){
     const pc=cfg.board[row][col];
     boardHtml+=`<button data-a="sb-sq" data-r="${row}" data-c="${col}" class="sb-sq ${(row+col)%2?"d":"l"}" aria-label="${rcToSq(row,col)}">${pc?pieceUse(pc.type,pc.color):""}</button>`;
   }
-  if(cfg.opp==="bot")cfg.opp="same";
+  cfg.opp="same";
   $("#sb-modal").innerHTML=
     `<div class="sb-hdr"><h3>${t("sbTitle")}</h3><button data-a="close-sb" class="icon-btn" aria-label="${t("cancel")}">${IC.close}</button></div>`+
     `<div class="mu" style="margin-top:-6px">${t("sbSub")}</div>`+
@@ -6899,7 +6962,7 @@ function renderSandboxModal(){
         `<button data-a="sb-grule" data-k="friendlyFire" class="${r.friendlyFire?"on":""}">${t("sbFriendlyFire")}</button>`+
       `</div>`+
       `<div class="sb-opp-grid">`+
-        `<button data-a="sb-opp" data-v="2p" class="${cfg.opp!=="bot"?"on":""}">${t("play2p")} · ${cfg.opp==="face"?t("p2FaceTitle"):t("p2SameTitle")}</button>`+
+        `<button data-a="sb-opp" data-v="same" class="on">${t("play2p")} · ${t("p2SameTitle")}</button>`+
         `<button data-a="sb-opp" data-v="bot" class="sb-opp-disabled" aria-disabled="true">${t("sbOppBot")}</button>`+
       `</div>`+
       `<div class="sb-unavail-note">${t("sbBotUnavailable")}</div>`+
@@ -7033,16 +7096,14 @@ document.addEventListener("click",e=>{
   else if(a==="mode-basic"){S.menuOpen=false;S.mateModalOpen=false;S.p2Target="basic";S.p2Pick=S.basicP2||"face";S.p2ModalOpen=true;renderUIOnly()}
   else if(a==="p2-pick"){S.p2Pick=d.p2;renderUIOnly()}
   else if(a==="p2-start"){
-    const pick=S.p2Pick||(S.p2Target==="basic"?S.basicP2:S.sbCfg.opp)||"face";
-    if(S.p2Target==="sandbox-pick"){S.sbCfg.opp=pick;S.sbOppPicked=true;S.p2ModalOpen=false;renderUIOnly()}
-    else if(S.p2Target==="sandbox-start"){S.sbCfg.opp=pick;S.sbOppPicked=true;S.p2ModalOpen=false;startSandbox()}
-    else startBasic(pick);
+    const pick=S.p2Pick||S.basicP2||"face";
+    startBasic(pick);
   }
   else if(a==="start-basic"){startBasic(d.p2)}
   else if(a==="close-p2"){S.p2ModalOpen=false;renderUIOnly()}
   else if(a==="mode-bot"){S.menuOpen=false;S.mateModalOpen=false;S.botColPick=S.botColPick||"w";S.colorModalOpen=true;renderUIOnly()}
   else if(a==="mode-coach"){S.menuOpen=false;S.mateModalOpen=false;startCoach()}
-  else if(a==="mode-sandbox"){S.menuOpen=false;S.mateModalOpen=false;S.sbOppPicked=false;S.sbSetupOpen=true;S.sbCfg.err="";renderUIOnly()}
+  else if(a==="mode-sandbox"){S.menuOpen=false;S.mateModalOpen=false;S.sbCfg.opp="same";S.sbOppPicked=true;S.sbSetupOpen=true;S.sbCfg.err="";renderUIOnly()}
   else if(a==="close-sb"){S.sbSetupOpen=false;renderUIOnly()}
   else if(a==="sb-pre"){applySandboxPreset(d.v)}
   else if(a==="sb-brush"){S.sbCfg.brush=(d.c&&d.t)?{color:d.c,type:d.t}:null;renderUIOnly()}
@@ -7059,11 +7120,13 @@ document.addEventListener("click",e=>{
   else if(a==="sb-grule"){S.sbCfg.rules[d.k]=!S.sbCfg.rules[d.k];renderUIOnly()}
   else if(a==="sb-opp"){
     if(d.v==="bot"){showToast(t("sbBotUnavailable"));return}
-    S.p2Target="sandbox-pick";S.p2Pick=(S.sbCfg.opp==="face"?"face":"same");S.p2ModalOpen=true;renderUIOnly();
+    S.sbCfg.opp="same";
+    showToast(`${t("play2p")} · ${t("p2SameTitle")}`);
+    renderUIOnly();
   }
   else if(a==="sb-start"){
     if(!hasBothColors(S.sbCfg.board)){S.sbCfg.err=t("sbNeedPiece");renderUIOnly();return}
-    if(!S.sbOppPicked){S.p2Target="sandbox-start";S.p2Pick=(S.sbCfg.opp==="face"?"face":"same");S.p2ModalOpen=true;renderUIOnly();return}
+    S.sbCfg.opp="same";
     startSandbox();
   }
   else if(a==="rename-player"){
@@ -7107,7 +7170,7 @@ document.addEventListener("click",e=>{
   }
   else if(a==="beg"){P.beg=d.v==="1";save();refreshTranslatedState();renderUIOnly()}
   else if(a==="mute"){P.mute=!P.mute;if(P.mute)LocalAudioEngine.stopAll();else LocalAudioEngine.syncVolumes();save();renderUIOnly()}
-  else if(a==="flip"){cancelFlipTimer();triggerBoardRotateAnim(!S.flip)}
+  else if(a==="flip"){if(S.mode!=="sandbox"){cancelFlipTimer();triggerBoardRotateAnim(!S.flip)}}
   else if(a==="undo")undo();
   else if(a==="redo")redo();
   else if(a==="hint")hint();
@@ -7316,7 +7379,7 @@ document.addEventListener("keydown",e=>{
     else if(S.menuOpen){S.menuOpen=false;renderUIOnly()}
     else if(S.drawerOpen){S.drawerOpen=false;renderUIOnly()}
     else{S.dr={a:[],h:{}};S.ds=null;ov();renderDrawBar()}
-  }else if(e.key==="f"||e.key==="F"){cancelFlipTimer();triggerBoardRotateAnim(!S.flip)}
+  }else if(e.key==="f"||e.key==="F"){if(S.mode!=="sandbox"){cancelFlipTimer();triggerBoardRotateAnim(!S.flip)}}
   else if(e.key==="ArrowLeft"){if(S.replay){stopReplayAuto();stepReplay(S.replay.idx-1,true)}else undo()}
   else if(e.key==="ArrowRight"){if(S.replay){stopReplayAuto();stepReplay(S.replay.idx+1,true)}else redo()}
 });
