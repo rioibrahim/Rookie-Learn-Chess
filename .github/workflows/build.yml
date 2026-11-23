@@ -25,12 +25,37 @@ jobs:
 
       - name: Setup Capacitor 6 & Sync Android Project
         run: |
-          rm -rf android capacitor.config.ts capacitor.config.json package.json package-lock.json
+          rm -rf android package.json package-lock.json
           npm init -y
           npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
-          npx cap init "Rookie Chess" "com.rookie.chess" --web-dir www
           npx cap add android
           npx cap sync android
+
+      - name: Enforce App Name & Custom Knight Launcher Icon
+        run: |
+          cat <<'EOF' > android/app/src/main/res/values/strings.xml
+          <?xml version='1.0' encoding='utf-8'?>
+          <resources>
+              <string name="app_name">Rookie</string>
+              <string name="title_activity_main">Rookie</string>
+              <string name="package_name">com.rookie.learnchess</string>
+              <string name="custom_url_scheme">com.rookie.learnchess</string>
+          </resources>
+          EOF
+          rm -rf android/app/src/main/res/mipmap-* \
+                 android/app/src/main/res/drawable/ic_launcher_* \
+                 android/app/src/main/res/drawable-*/ic_launcher_*
+          mkdir -p android/app/src/main/res/drawable android/app/src/main/res/mipmap-anydpi-v26
+          cp app/src/main/res/drawable/ic_launcher_knight.xml android/app/src/main/res/drawable/
+          cp app/src/main/res/drawable/ic_launcher_foreground.xml android/app/src/main/res/drawable/
+          cp app/src/main/res/drawable/ic_launcher_background.xml android/app/src/main/res/drawable/
+          cp app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml android/app/src/main/res/mipmap-anydpi-v26/
+          cp app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml android/app/src/main/res/mipmap-anydpi-v26/
+          for dir in mipmap-mdpi mipmap-hdpi mipmap-xhdpi mipmap-xxhdpi mipmap-xxxhdpi; do
+            mkdir -p "android/app/src/main/res/$dir"
+            cp "app/src/main/res/$dir/ic_launcher.png" "android/app/src/main/res/$dir/"
+            cp "app/src/main/res/$dir/ic_launcher_round.png" "android/app/src/main/res/$dir/"
+          done
 
       - name: Increment Android Version Code & Version Name
         run: |
